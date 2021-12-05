@@ -4,8 +4,8 @@ import { Layout } from './components/Layout';
 import { Home } from './components/Home';
 
 export const App = () =>
-  <Layout>
-    <Routes>
-      <Route path='/' element={<Home />} />
-    </Routes>
-  </Layout>;
+    <Layout>
+        <Routes>
+            <Route path="/" element={<Home />} />
+        </Routes>
+    </Layout>;

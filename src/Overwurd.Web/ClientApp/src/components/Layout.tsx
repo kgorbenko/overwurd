@@ -8,7 +8,7 @@ type LayoutProps = {
 export const Layout: React.FunctionComponent = ({
     children
 }: LayoutProps) =>
-  <div>
-    <NavMenu />
-    {children}
-  </div>;
+    <div>
+        <NavMenu />
+        {children}
+    </div>;
