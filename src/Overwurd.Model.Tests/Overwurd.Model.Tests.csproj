@@ -18,4 +18,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Overwurd.Model\Overwurd.Model.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.tests.json" CopyToOutputDirectory="Always" />
+  </ItemGroup>
 </Project>
