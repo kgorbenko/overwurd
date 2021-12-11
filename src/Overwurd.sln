@@ -2,6 +2,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Overwurd.Web", "Overwurd.Web\Overwurd.Web.csproj", "{440363AD-FC69-4000-B3E4-E82769E01C33}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Overwurd.Model", "Overwurd.Model\Overwurd.Model.csproj", "{887573A5-2FCA-4B83-ADCF-CF6A208ABA32}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Overwurd.Model.Tests", "Overwurd.Model.Tests\Overwurd.Model.Tests.csproj", "{153730E0-B89C-4AAB-9C88-6A937B8A6B63}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +16,13 @@ Global
 		{440363AD-FC69-4000-B3E4-E82769E01C33}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{440363AD-FC69-4000-B3E4-E82769E01C33}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{440363AD-FC69-4000-B3E4-E82769E01C33}.Release|Any CPU.Build.0 = Release|Any CPU
+		{887573A5-2FCA-4B83-ADCF-CF6A208ABA32}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{887573A5-2FCA-4B83-ADCF-CF6A208ABA32}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{887573A5-2FCA-4B83-ADCF-CF6A208ABA32}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{887573A5-2FCA-4B83-ADCF-CF6A208ABA32}.Release|Any CPU.Build.0 = Release|Any CPU
+		{153730E0-B89C-4AAB-9C88-6A937B8A6B63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{153730E0-B89C-4AAB-9C88-6A937B8A6B63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{153730E0-B89C-4AAB-9C88-6A937B8A6B63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{153730E0-B89C-4AAB-9C88-6A937B8A6B63}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
