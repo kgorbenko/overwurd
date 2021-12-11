@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Overwurd.Model;
+using Overwurd.Model.Models;
+using Overwurd.Model.Repositories;
 
 namespace Overwurd.Web
 {
@@ -27,6 +29,9 @@ namespace Overwurd.Web
 
             services.AddDbContext<OverwurdDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("OverwurdDatabase")));
+
+            services.AddTransient<IOverwurdRepository<Vocabulary>, OverwurdRepository<Vocabulary, OverwurdDbContext>>();
+            services.AddTransient<IReadOnlyOverwurdRepository<Vocabulary>, ReadOnlyOverwurdRepository<Vocabulary, OverwurdDbContext>>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
