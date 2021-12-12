@@ -20,7 +20,7 @@ namespace Overwurd.Model.Tests
 
             var connectionString = config.GetConnectionString("TestOverwurdDatabase");
             ContextOptions = new DbContextOptionsBuilder<OverwurdDbContext>()
-                .UseSqlServer(connectionString)
+                .UseNpgsql(connectionString)
                 .Options;
         }
 
@@ -28,8 +28,7 @@ namespace Overwurd.Model.Tests
         protected async Task PrepareDatabase()
         {
             await using var context = new OverwurdDbContext(ContextOptions);
-            await context.Database.EnsureDeletedAsync();
-            await context.Database.EnsureCreatedAsync();
+            await context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE \"Vocabularies\" RESTART IDENTITY");
         }
     }
 }

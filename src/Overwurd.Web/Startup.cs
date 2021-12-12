@@ -28,7 +28,7 @@ namespace Overwurd.Web
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
 
             services.AddDbContext<OverwurdDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("OverwurdDatabase")));
+                options.UseNpgsql(Configuration.GetConnectionString("OverwurdDatabase")));
 
             services.AddTransient<IOverwurdRepository<Vocabulary>, OverwurdRepository<Vocabulary, OverwurdDbContext>>();
             services.AddTransient<IReadOnlyOverwurdRepository<Vocabulary>, ReadOnlyOverwurdRepository<Vocabulary, OverwurdDbContext>>();
