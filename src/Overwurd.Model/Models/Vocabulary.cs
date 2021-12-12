@@ -27,7 +27,9 @@ namespace Overwurd.Model.Models {
 
         public Vocabulary(string name) {
             Name = name;
-            CreatedAt = DateTimeOffset.Now;
+
+            var now = DateTimeOffset.Now;
+            CreatedAt = new DateTimeOffset(year: now.Year, month: now.Month, day: now.Day, hour: now.Hour, minute: now.Minute, second: now.Second, offset: now.Offset);
         }
     }
 }
