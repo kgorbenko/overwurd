@@ -20,4 +20,4 @@ jobs:
           docker_build_args: |
             connectionString
         env:
-          connectionString: ${{secrets.OVERWURD_POSTGRESQL_TEST_CONNECTION_STRING}}
+          connectionString: ${{secrets.POSTGRESQL_TEST_CONNECTION_STRING}}
