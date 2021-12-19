@@ -20,7 +20,7 @@ namespace Overwurd.Model.Tests
 
             var connectionString = config.GetConnectionString("TestOverwurdDatabase");
             ContextOptions = new DbContextOptionsBuilder<OverwurdDbContext>()
-                .UseNpgsql(connectionString)
+                .UseNpgsql(connectionString, options => options.RemoteCertificateValidationCallback((_, _, _, _) => true))
                 .Options;
         }
 
