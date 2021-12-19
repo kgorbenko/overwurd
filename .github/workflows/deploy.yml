@@ -17,4 +17,5 @@ jobs:
           branch: main
           usedocker: true
           docker_heroku_process_type: web
-          docker_build_args: connectionString=${{secrets.OVERWURD_POSTGRESQL_TEST_CONNECTION_STRING}}
+          docker_build_args: |
+            connectionString=${{secrets.OVERWURD_POSTGRESQL_TEST_CONNECTION_STRING}}
