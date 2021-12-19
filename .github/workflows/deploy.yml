@@ -11,10 +11,12 @@ jobs:
       - name: Deploy to Heroku
         uses: AkhileshNS/heroku-deploy@v3.12.12
         with:
-          heroku_api_key: ${{ secrets.DEPLOY_API_KEY }}
+          heroku_api_key: ${{secrets.DEPLOY_API_KEY}}
           heroku_app_name: overwurd
-          heroku_email: ${{ secrets.DEPLOY_EMAIL }}
+          heroku_email: ${{secrets.DEPLOY_EMAIL}}
           branch: main
           usedocker: true
           docker_heroku_process_type: web
-          docker_build_args: connectionString=${{ secrets.OVERWURD_POSTGRESQL_TEST_CONNECTION_STRING }}
+          docker_build_args: connectionString
+        env:
+          connectionString: ${{secrets.OVERWURD_POSTGRESQL_TEST_CONNECTION_STRING}}
