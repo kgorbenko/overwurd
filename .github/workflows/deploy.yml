@@ -6,20 +6,18 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./src
     steps:
       - uses: actions/checkout@v2
       - name: Deploy to Heroku
         uses: AkhileshNS/heroku-deploy@v3.12.12
         with:
           heroku_api_key: ${{secrets.DEPLOY_API_KEY}}
-          heroku_app_name: overwurd
           heroku_email: ${{secrets.DEPLOY_EMAIL}}
+          heroku_app_name: overwurd
+          docker_heroku_process_type: web
           branch: main
           usedocker: true
-          docker_heroku_process_type: web
+          appdir: src
           docker_build_args: |
             connectionString
         env:
