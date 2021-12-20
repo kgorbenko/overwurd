@@ -19,6 +19,8 @@ jobs:
           usedocker: true
           appdir: src
           docker_build_args: |
-            connectionString
+            CONNECTION_STRING
+            BUILD_NUMBER
         env:
-          connectionString: ${{secrets.POSTGRESQL_TEST_CONNECTION_STRING}}
+          CONNECTION_STRING: ${{secrets.POSTGRESQL_TEST_CONNECTION_STRING}}
+          BUILD_NUMBER: ${{github.run_number}}
