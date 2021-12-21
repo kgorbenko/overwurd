@@ -1,0 +1,26 @@
+name: Build & Test client-side
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/Overwurd.Web/ClientApp
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node
+      - uses: actions/setup-node@v2
+
+      - name: Install dependencies
+      - run: npm ci
+
+      - name: Build bundles
+      - run: npm run build
+
+      - name: Run tests
+      - run: npm run test
