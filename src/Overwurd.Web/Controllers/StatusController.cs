@@ -28,7 +28,7 @@ namespace Overwurd.Web.Controllers
         [HttpGet]
         public async Task<StatusViewModel> Get()
         {
-            return new StatusViewModel(Version: EnvironmentHelper.GetApplicationVersion()?.ToString() ?? "0.0.0.0",
+            return new StatusViewModel(Version: EnvironmentHelper.GetApplicationVersion()?.ToString(),
                                        Environment: webHostEnvironment.EnvironmentName,
                                        LastMigration: await EnvironmentHelper.GetLastDatabaseMigrationAsync(dbContext));
         }
