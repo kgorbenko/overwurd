@@ -8,6 +8,7 @@ using Overwurd.Web.Helpers;
 
 namespace Overwurd.Web.Controllers
 {
+    [UsedImplicitly]
     public record StatusViewModel(string Version, string Environment, string LastMigration);
 
     [ApiController]
