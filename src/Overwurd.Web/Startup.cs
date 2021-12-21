@@ -15,20 +15,20 @@ namespace Overwurd.Web
 {
     public class Startup
     {
+        private readonly IConfiguration configuration;
+
         public Startup([NotNull] IConfiguration configuration)
         {
-            Configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
-
-        public IConfiguration Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-            services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
+            services.AddSpaStaticFiles(staticFilesOptions => { staticFilesOptions.RootPath = "ClientApp/build"; });
 
             services.AddDbContext<OverwurdDbContext>(options =>
-                options.UseNpgsql(Configuration.GetConnectionString("OverwurdDatabase")));
+                options.UseNpgsql(configuration.GetConnectionString("OverwurdDatabase")));
 
             services.AddTransient<IOverwurdRepository<Vocabulary>, OverwurdRepository<Vocabulary, OverwurdDbContext>>();
             services.AddTransient<IReadOnlyOverwurdRepository<Vocabulary>, ReadOnlyOverwurdRepository<Vocabulary, OverwurdDbContext>>();
