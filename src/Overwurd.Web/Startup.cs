@@ -41,7 +41,7 @@ namespace Overwurd.Web
 
         private static string GetConnectionStringFromEnvironment()
         {
-            const string environmentVariableName = "DATABASE";
+            const string environmentVariableName = "DATABASE_URL";
             var databaseUriValue = Environment.GetEnvironmentVariable(environmentVariableName)
                                    ?? throw new ArgumentException($"Environment variable '{environmentVariableName}' should be set in 'Production' environment.");
             var databaseUri = new Uri(databaseUriValue);
