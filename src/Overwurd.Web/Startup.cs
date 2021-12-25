@@ -16,10 +16,13 @@ namespace Overwurd.Web
     public class Startup
     {
         private readonly IConfiguration configuration;
+        private readonly IWebHostEnvironment webHostEnvironment;
 
-        public Startup([NotNull] IConfiguration configuration)
+        public Startup([NotNull] IConfiguration configuration,
+                       [NotNull] IWebHostEnvironment webHostEnvironment)
         {
             this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            this.webHostEnvironment = webHostEnvironment ?? throw new ArgumentNullException(nameof(webHostEnvironment));
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -27,11 +30,32 @@ namespace Overwurd.Web
             services.AddControllersWithViews();
             services.AddSpaStaticFiles(staticFilesOptions => { staticFilesOptions.RootPath = "ClientApp/build"; });
 
-            services.AddDbContext<OverwurdDbContext>(options =>
-                options.UseNpgsql(configuration.GetConnectionString("OverwurdDatabase")));
+            var connectionString = webHostEnvironment.IsProduction()
+                ? GetConnectionStringFromEnvironment()
+                : configuration.GetConnectionString("OverwurdDatabase");
 
+            services.AddDbContext<OverwurdDbContext>(options => options.UseNpgsql(connectionString));
             services.AddTransient<IOverwurdRepository<Vocabulary>, OverwurdRepository<Vocabulary, OverwurdDbContext>>();
             services.AddTransient<IReadOnlyOverwurdRepository<Vocabulary>, ReadOnlyOverwurdRepository<Vocabulary, OverwurdDbContext>>();
+        }
+
+        private static string GetConnectionStringFromEnvironment()
+        {
+            const string environmentVariableName = "DATABASE";
+            var databaseUriValue = Environment.GetEnvironmentVariable(environmentVariableName)
+                                   ?? throw new ArgumentException($"Environment variable '{environmentVariableName}' should be set in 'Production' environment.");
+            var databaseUri = new Uri(databaseUriValue);
+
+            var database = databaseUri.LocalPath.TrimStart(trimChar: '/');
+            var userInfo = databaseUri.UserInfo.Split(separator: ':', StringSplitOptions.RemoveEmptyEntries);
+
+            return $"Host={databaseUri.Host};" +
+                   $"Port={databaseUri.Port};" +
+                   $"Database={database};" +
+                   $"Username={userInfo[0]};" +
+                   $"Password={userInfo[1]};" +
+                   "SSL Mode=Require;" +
+                   "Trust Server Certificate=True;";
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
