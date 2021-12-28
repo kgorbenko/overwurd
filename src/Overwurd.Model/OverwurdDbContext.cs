@@ -7,6 +7,8 @@ namespace Overwurd.Model
     {
         public OverwurdDbContext(DbContextOptions<OverwurdDbContext> options) : base(options) { }
 
+        public DbSet<User> Users { get; set; }
+
         public DbSet<Vocabulary> Vocabularies { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
