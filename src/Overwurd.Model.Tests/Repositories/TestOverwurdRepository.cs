@@ -9,7 +9,7 @@ using Overwurd.Model.Tests.EqualityComparers;
 
 namespace Overwurd.Model.Tests.Repositories
 {
-    public class TestOverwurdRepository : OverwurdBaseDatabaseDependentTestFixture
+    public class TestOverwurdRepository : BaseModelDatabaseDependentTestFixture
     {
         private readonly IEqualityComparer<Vocabulary> vocabulariesComparer = new VocabulariesComparerForTests();
 
@@ -19,7 +19,7 @@ namespace Overwurd.Model.Tests.Repositories
             var vocabulary1 = new Vocabulary("Vocabulary 1");
             var vocabulary2 = new Vocabulary("Vocabulary 2");
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 var repository = new OverwurdRepository<Vocabulary, ModelDbContext>(context);
 
@@ -27,7 +27,7 @@ namespace Overwurd.Model.Tests.Repositories
                 await repository.AddAsync(vocabulary2);
             }
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 var expected = new[] { vocabulary1, vocabulary2 };
                 var actual = await context.Vocabularies.ToArrayAsync();
@@ -43,14 +43,14 @@ namespace Overwurd.Model.Tests.Repositories
             var vocabulary2 = new Vocabulary("Vocabulary 2");
             var vocabulary3 = new Vocabulary("Vocabulary 3");
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 var repository = new OverwurdRepository<Vocabulary, ModelDbContext>(context);
 
                 await repository.AddRangeAsync(new[] { vocabulary1, vocabulary2, vocabulary3 }.ToImmutableArray());
             }
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 var actual = await context.Vocabularies.ToArrayAsync();
 
@@ -65,13 +65,13 @@ namespace Overwurd.Model.Tests.Repositories
             var vocabulary2 = new Vocabulary("Vocabulary 2");
             var vocabulary3 = new Vocabulary("Vocabulary 3");
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 await context.Vocabularies.AddRangeAsync(vocabulary1, vocabulary2, vocabulary3);
                 await context.SaveChangesAsync();
             }
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 var repository = new OverwurdRepository<Vocabulary, ModelDbContext>(context);
                 var actual = await repository.GetAllAsync();
@@ -87,13 +87,13 @@ namespace Overwurd.Model.Tests.Repositories
             var vocabulary2 = new Vocabulary("Vocabulary 2");
             var vocabulary3 = new Vocabulary("Vocabulary 3");
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 await context.Vocabularies.AddRangeAsync(vocabulary1, vocabulary2, vocabulary3);
                 await context.SaveChangesAsync();
             }
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 var repository = new OverwurdRepository<Vocabulary, ModelDbContext>(context);
 
@@ -111,13 +111,13 @@ namespace Overwurd.Model.Tests.Repositories
             var vocabulary2 = new Vocabulary("Vocabulary 2");
             var vocabulary3 = new Vocabulary("Vocabulary 3");
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 await context.Vocabularies.AddRangeAsync(vocabulary1, vocabulary2, vocabulary3);
                 await context.SaveChangesAsync();
             }
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 var repository = new OverwurdRepository<Vocabulary, ModelDbContext>(context);
 
@@ -132,13 +132,13 @@ namespace Overwurd.Model.Tests.Repositories
             var vocabulary1 = new Vocabulary("Vocabulary 1");
             var vocabulary2 = new Vocabulary("Vocabulary 2");
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 await context.Vocabularies.AddRangeAsync(vocabulary1, vocabulary2);
                 await context.SaveChangesAsync();
             }
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 var repository = new OverwurdRepository<Vocabulary, ModelDbContext>(context);
 
@@ -149,7 +149,7 @@ namespace Overwurd.Model.Tests.Repositories
                 await repository.UpdateAsync(vocabulary2);
             }
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 var vocabulary1Updated = await context.Vocabularies.FindAsync(vocabulary1.Id);
                 Assert.That(vocabulary1Updated, Is.EqualTo(vocabulary1).Using(vocabulariesComparer));
@@ -165,7 +165,7 @@ namespace Overwurd.Model.Tests.Repositories
             var vocabulary1 = new Vocabulary("Vocabulary 1");
             var vocabulary2 = new Vocabulary("Vocabulary 2");
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 await context.Vocabularies.AddRangeAsync(vocabulary1, vocabulary2);
                 await context.SaveChangesAsync();
@@ -173,7 +173,7 @@ namespace Overwurd.Model.Tests.Repositories
 
             Vocabulary vocabulary1Found, vocabulary2Found;
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 var repository = new OverwurdRepository<Vocabulary, ModelDbContext>(context);
 
@@ -187,7 +187,7 @@ namespace Overwurd.Model.Tests.Repositories
                 await repository.UpdateAsync(vocabulary2Found);
             }
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 var vocabulary1Updated = await context.Vocabularies.FindAsync(vocabulary1.Id);
                 Assert.That(vocabulary1Updated, Is.EqualTo(vocabulary1Found).Using(vocabulariesComparer));
@@ -204,20 +204,20 @@ namespace Overwurd.Model.Tests.Repositories
             var vocabulary2 = new Vocabulary("Vocabulary 2");
             var vocabulary3 = new Vocabulary("Vocabulary 3");
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 await context.Vocabularies.AddRangeAsync(vocabulary1, vocabulary2, vocabulary3);
                 await context.SaveChangesAsync();
             }
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 var repository = new OverwurdRepository<Vocabulary, ModelDbContext>(context);
 
                 await repository.RemoveAsync(vocabulary1);
             }
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 Assert.That(await context.Vocabularies.ToArrayAsync(), Is.EqualTo(new[] { vocabulary2, vocabulary3 }).Using(vocabulariesComparer));
             }
@@ -226,7 +226,7 @@ namespace Overwurd.Model.Tests.Repositories
         [Test]
         public async Task RemoveNonExistingEntityThrowsException()
         {
-            await using var context = new ModelDbContext(ContextOptionsBuilder);
+            await using var context = new ModelDbContext(ContextOptions);
             var repository = new OverwurdRepository<Vocabulary, ModelDbContext>(context);
 
             var vocabulary1 = new Vocabulary("Vocabulary 1");
@@ -243,13 +243,13 @@ namespace Overwurd.Model.Tests.Repositories
             var vocabulary3 = new Vocabulary("Vocabulary 3");
             var vocabulary4 = new Vocabulary("Vocabulary 4");
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 await context.Vocabularies.AddRangeAsync(vocabulary1, vocabulary2, vocabulary3, vocabulary4);
                 await context.SaveChangesAsync();
             }
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 var repository = new OverwurdRepository<Vocabulary, ModelDbContext>(context);
 
@@ -272,13 +272,13 @@ namespace Overwurd.Model.Tests.Repositories
             var vocabulary7 = new Vocabulary("Vocabulary 7");
             var vocabulary8 = new Vocabulary("Vocabulary 8");
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 await context.Vocabularies.AddRangeAsync(vocabulary1, vocabulary2, vocabulary3, vocabulary4, vocabulary5, vocabulary6, vocabulary7, vocabulary8);
                 await context.SaveChangesAsync();
             }
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 var repository = new OverwurdRepository<Vocabulary, ModelDbContext>(context);
 

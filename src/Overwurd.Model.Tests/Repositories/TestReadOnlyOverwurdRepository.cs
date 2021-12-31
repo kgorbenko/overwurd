@@ -9,7 +9,7 @@ using Overwurd.Model.Repositories;
 using Overwurd.Model.Tests.EqualityComparers;
 
 namespace Overwurd.Model.Tests.Repositories {
-    public class TestReadOnlyOverwurdRepository : OverwurdBaseDatabaseDependentTestFixture {
+    public class TestReadOnlyOverwurdRepository : BaseModelDatabaseDependentTestFixture {
         private static readonly IEqualityComparer<Vocabulary> vocabulariesComparer = new VocabulariesComparerForTests();
 
         private static readonly IEqualityComparer<OverwurdPaginationResult<Vocabulary>> vocabulariesPaginationResultComparer =
@@ -21,13 +21,13 @@ namespace Overwurd.Model.Tests.Repositories {
             var vocabulary1 = new Vocabulary("Vocabulary 1");
             var vocabulary2 = new Vocabulary("Vocabulary 2");
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 await context.AddRangeAsync(vocabulary1, vocabulary2);
                 await context.SaveChangesAsync();
             }
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 var repository = new ReadOnlyOverwurdRepository<Vocabulary, ModelDbContext>(context);
 
@@ -44,13 +44,13 @@ namespace Overwurd.Model.Tests.Repositories {
             var vocabulary1 = new Vocabulary("Vocabulary 1");
             var vocabulary2 = new Vocabulary("Vocabulary 2");
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 await context.AddRangeAsync(vocabulary1, vocabulary2);
                 await context.SaveChangesAsync();
             }
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 var repository = new ReadOnlyOverwurdRepository<Vocabulary, ModelDbContext>(context);
 
@@ -68,13 +68,13 @@ namespace Overwurd.Model.Tests.Repositories {
             var vocabulary2 = new Vocabulary("Vocabulary 2");
             var vocabulary3 = new Vocabulary("Vocabulary 3");
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 await context.AddRangeAsync(vocabulary1, vocabulary2, vocabulary3);
                 await context.SaveChangesAsync();
             }
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 var repository = new ReadOnlyOverwurdRepository<Vocabulary, ModelDbContext>(context);
 
@@ -99,13 +99,13 @@ namespace Overwurd.Model.Tests.Repositories {
             var vocabulary7 = new Vocabulary("Vocabulary 7");
             var vocabulary8 = new Vocabulary("Vocabulary 8");
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 await context.Vocabularies.AddRangeAsync(vocabulary1, vocabulary2, vocabulary3, vocabulary4, vocabulary5, vocabulary6, vocabulary7, vocabulary8);
                 await context.SaveChangesAsync();
             }
 
-            await using (var context = new ModelDbContext(ContextOptionsBuilder))
+            await using (var context = new ModelDbContext(ContextOptions))
             {
                 var repository = new ReadOnlyOverwurdRepository<Vocabulary, ModelDbContext>(context);
 

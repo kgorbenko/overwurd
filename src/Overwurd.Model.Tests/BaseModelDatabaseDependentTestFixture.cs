@@ -5,13 +5,13 @@ using NUnit.Framework;
 
 namespace Overwurd.Model.Tests
 {
-    public class OverwurdBaseDatabaseDependentTestFixture
+    public class BaseModelDatabaseDependentTestFixture
     {
         protected IConfiguration TestConfiguration { get; }
 
-        protected DbContextOptionsBuilder ContextOptionsBuilder { get; }
+        protected DbContextOptions ContextOptions { get; }
 
-        protected OverwurdBaseDatabaseDependentTestFixture()
+        protected BaseModelDatabaseDependentTestFixture()
         {
             var testDirectory = TestContext.CurrentContext.TestDirectory;
             TestConfiguration = new ConfigurationBuilder()
@@ -21,16 +21,18 @@ namespace Overwurd.Model.Tests
                 .Build();
 
             var connectionString = TestConfiguration.GetConnectionString("DefaultTest");
-            ContextOptionsBuilder = new DbContextOptionsBuilder()
-                .UseNpgsql(connectionString, options => options.RemoteCertificateValidationCallback((_, _, _, _) => true));
+            ContextOptions = new DbContextOptionsBuilder()
+                .UseNpgsql(connectionString, options => options.RemoteCertificateValidationCallback((_, _, _, _) => true))
+                .Options;
         }
 
         [SetUp]
         protected async Task PrepareDatabase()
         {
-            await using var context = new ModelDbContext(ContextOptionsBuilder);
-            await context.Database.MigrateAsync();
+            await using var context = new ModelDbContext(ContextOptions);
             await context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE \"Vocabularies\" RESTART IDENTITY");
+            await context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE \"Role\" RESTART IDENTITY CASCADE");
+            await context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE \"Users\" RESTART IDENTITY CASCADE");
         }
     }
 }
