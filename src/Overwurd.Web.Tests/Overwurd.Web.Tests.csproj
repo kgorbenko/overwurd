@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Overwurd.Model.Tests\Overwurd.Model.Tests.csproj" />
+    <ProjectReference Include="..\Overwurd.Web\Overwurd.Web.csproj" />
+  </ItemGroup>
+
+</Project>

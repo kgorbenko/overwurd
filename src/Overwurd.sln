@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Overwurd.Model", "Overwurd.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Overwurd.Model.Tests", "Overwurd.Model.Tests\Overwurd.Model.Tests.csproj", "{153730E0-B89C-4AAB-9C88-6A937B8A6B63}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Overwurd.Web.Tests", "Overwurd.Web.Tests\Overwurd.Web.Tests.csproj", "{707AD036-B35F-45A6-AD1D-6E573A6EBDEC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{153730E0-B89C-4AAB-9C88-6A937B8A6B63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{153730E0-B89C-4AAB-9C88-6A937B8A6B63}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{153730E0-B89C-4AAB-9C88-6A937B8A6B63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{707AD036-B35F-45A6-AD1D-6E573A6EBDEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{707AD036-B35F-45A6-AD1D-6E573A6EBDEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{707AD036-B35F-45A6-AD1D-6E573A6EBDEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{707AD036-B35F-45A6-AD1D-6E573A6EBDEC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

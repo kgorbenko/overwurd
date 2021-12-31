@@ -12,7 +12,7 @@ namespace Overwurd.Web.Helpers
         public static Version GetApplicationVersion() =>
             Assembly.GetExecutingAssembly().GetName().Version;
 
-        public static async Task<string> GetLastDatabaseMigrationAsync(OverwurdDbContext dbContext) =>
+        public static async Task<string> GetLastDatabaseMigrationAsync(ModelDbContext dbContext) =>
             await dbContext.Database.CanConnectAsync()
                 ? (await dbContext.Database.GetAppliedMigrationsAsync()).Last()
                 : null;

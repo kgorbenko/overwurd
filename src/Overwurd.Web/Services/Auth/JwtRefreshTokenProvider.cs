@@ -9,9 +9,9 @@ namespace Overwurd.Web.Services.Auth
 {
     public class JwtRefreshTokenProvider : IJwtRefreshTokenProvider
     {
-        private readonly AuthDbContext dbContext;
+        private readonly ApplicationDbContext dbContext;
 
-        public JwtRefreshTokenProvider([NotNull] AuthDbContext dbContext)
+        public JwtRefreshTokenProvider([NotNull] ApplicationDbContext dbContext)
         {
             this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }

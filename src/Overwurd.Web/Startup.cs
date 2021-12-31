@@ -66,13 +66,11 @@ namespace Overwurd.Web
 
             var connectionString = configuration.GetConnectionString("Default");
 
-            services.AddDbContext<AuthDbContext>(options => options.UseNpgsql(connectionString));
+            services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
             services.AddTransient<IJwtRefreshTokenProvider, JwtRefreshTokenProvider>();
             services.AddTransient<IJwtAuthService, JwtAuthService>();
-
-            services.AddDbContext<OverwurdDbContext>(options => options.UseNpgsql(connectionString));
-            services.AddTransient<IOverwurdRepository<Vocabulary>, OverwurdRepository<Vocabulary, OverwurdDbContext>>();
-            services.AddTransient<IReadOnlyOverwurdRepository<Vocabulary>, ReadOnlyOverwurdRepository<Vocabulary, OverwurdDbContext>>();
+            services.AddTransient<IOverwurdRepository<Vocabulary>, OverwurdRepository<Vocabulary, ApplicationDbContext>>();
+            services.AddTransient<IReadOnlyOverwurdRepository<Vocabulary>, ReadOnlyOverwurdRepository<Vocabulary, ApplicationDbContext>>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
