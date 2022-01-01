@@ -2,14 +2,18 @@
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace Overwurd.Web.Migrations
+namespace Overwurd.Model.Migrations
 {
     public partial class InitialModel : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(
+                name: "overwurd");
+
             migrationBuilder.CreateTable(
                 name: "Role",
+                schema: "overwurd",
                 columns: table => new
                 {
                     RoleType = table.Column<int>(type: "integer", nullable: false),
@@ -22,6 +26,7 @@ namespace Overwurd.Web.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Users",
+                schema: "overwurd",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
@@ -39,6 +44,7 @@ namespace Overwurd.Web.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Vocabularies",
+                schema: "overwurd",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
@@ -53,6 +59,7 @@ namespace Overwurd.Web.Migrations
 
             migrationBuilder.CreateTable(
                 name: "JwtRefreshTokens",
+                schema: "overwurd",
                 columns: table => new
                 {
                     UserId = table.Column<long>(type: "bigint", nullable: false),
@@ -68,6 +75,7 @@ namespace Overwurd.Web.Migrations
                     table.ForeignKey(
                         name: "FK_JwtRefreshTokens_Users_UserId",
                         column: x => x.UserId,
+                        principalSchema: "overwurd",
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -75,6 +83,7 @@ namespace Overwurd.Web.Migrations
 
             migrationBuilder.CreateTable(
                 name: "RoleUser",
+                schema: "overwurd",
                 columns: table => new
                 {
                     RolesRoleType = table.Column<int>(type: "integer", nullable: false),
@@ -86,41 +95,48 @@ namespace Overwurd.Web.Migrations
                     table.ForeignKey(
                         name: "FK_RoleUser_Role_RolesRoleType",
                         column: x => x.RolesRoleType,
+                        principalSchema: "overwurd",
                         principalTable: "Role",
                         principalColumn: "RoleType",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_RoleUser_Users_UsersId",
                         column: x => x.UsersId,
+                        principalSchema: "overwurd",
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
+                schema: "overwurd",
                 table: "Role",
                 columns: new[] { "RoleType", "Name" },
                 values: new object[] { 0, "Administrator" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Role_Name",
+                schema: "overwurd",
                 table: "Role",
                 column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_RoleUser_UsersId",
+                schema: "overwurd",
                 table: "RoleUser",
                 column: "UsersId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_Login",
+                schema: "overwurd",
                 table: "Users",
                 column: "Login",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Vocabularies_Name",
+                schema: "overwurd",
                 table: "Vocabularies",
                 column: "Name",
                 unique: true);
@@ -129,19 +145,24 @@ namespace Overwurd.Web.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "JwtRefreshTokens");
+                name: "JwtRefreshTokens",
+                schema: "overwurd");
 
             migrationBuilder.DropTable(
-                name: "RoleUser");
+                name: "RoleUser",
+                schema: "overwurd");
 
             migrationBuilder.DropTable(
-                name: "Vocabularies");
+                name: "Vocabularies",
+                schema: "overwurd");
 
             migrationBuilder.DropTable(
-                name: "Role");
+                name: "Role",
+                schema: "overwurd");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Users",
+                schema: "overwurd");
         }
     }
 }

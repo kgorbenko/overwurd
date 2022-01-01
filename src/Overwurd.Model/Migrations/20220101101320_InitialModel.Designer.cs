@@ -5,21 +5,49 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using Overwurd.Web;
+using Overwurd.Model;
 
-namespace Overwurd.Web.Migrations
+namespace Overwurd.Model.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20211231124733_InitialModel")]
+    [DbContext(typeof(ModelDbContext))]
+    [Migration("20220101101320_InitialModel")]
     partial class InitialModel
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("overwurd")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
                 .HasAnnotation("ProductVersion", "5.0.13")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+            modelBuilder.Entity("Overwurd.Model.Models.JwtRefreshToken", b =>
+                {
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("AccessTokenId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("TokenString")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("JwtRefreshTokens");
+                });
 
             modelBuilder.Entity("Overwurd.Model.Models.Role", b =>
                 {
@@ -96,33 +124,6 @@ namespace Overwurd.Web.Migrations
                     b.ToTable("Vocabularies");
                 });
 
-            modelBuilder.Entity("Overwurd.Web.Services.Auth.JwtRefreshToken", b =>
-                {
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("AccessTokenId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTimeOffset>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsRevoked")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("TokenString")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("UserId");
-
-                    b.ToTable("JwtRefreshTokens");
-                });
-
             modelBuilder.Entity("RoleUser", b =>
                 {
                     b.Property<int>("RolesRoleType")
@@ -138,11 +139,11 @@ namespace Overwurd.Web.Migrations
                     b.ToTable("RoleUser");
                 });
 
-            modelBuilder.Entity("Overwurd.Web.Services.Auth.JwtRefreshToken", b =>
+            modelBuilder.Entity("Overwurd.Model.Models.JwtRefreshToken", b =>
                 {
                     b.HasOne("Overwurd.Model.Models.User", null)
                         .WithOne()
-                        .HasForeignKey("Overwurd.Web.Services.Auth.JwtRefreshToken", "UserId")
+                        .HasForeignKey("Overwurd.Model.Models.JwtRefreshToken", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

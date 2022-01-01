@@ -9,7 +9,8 @@ using Overwurd.Model.Repositories;
 using Overwurd.Model.Tests.EqualityComparers;
 
 namespace Overwurd.Model.Tests.Repositories {
-    public class TestReadOnlyOverwurdRepository : BaseModelDatabaseDependentTestFixture {
+    public class TestReadOnlyOverwurdRepository : BaseModelDatabaseDependentTestFixture
+    {
         private static readonly IEqualityComparer<Vocabulary> vocabulariesComparer = new VocabulariesComparerForTests();
 
         private static readonly IEqualityComparer<OverwurdPaginationResult<Vocabulary>> vocabulariesPaginationResultComparer =

@@ -9,7 +9,7 @@ namespace Overwurd.Model.Tests
     {
         protected IConfiguration TestConfiguration { get; }
 
-        protected DbContextOptions ContextOptions { get; }
+        protected DbContextOptions<ModelDbContext> ContextOptions { get; }
 
         protected BaseModelDatabaseDependentTestFixture()
         {
@@ -21,18 +21,23 @@ namespace Overwurd.Model.Tests
                 .Build();
 
             var connectionString = TestConfiguration.GetConnectionString("DefaultTest");
-            ContextOptions = new DbContextOptionsBuilder()
-                .UseNpgsql(connectionString, options => options.RemoteCertificateValidationCallback((_, _, _, _) => true))
+            ContextOptions = new DbContextOptionsBuilder<ModelDbContext>()
+                .UseNpgsql(connectionString)
                 .Options;
+        }
+
+        protected virtual async Task CleanDatabase()
+        {
+            await using var context = new ModelDbContext(ContextOptions);
+            await context.Database.ExecuteSqlRawAsync($"DROP SCHEMA IF EXISTS {ModelDbContext.SchemaName} CASCADE");
         }
 
         [SetUp]
         protected async Task PrepareDatabase()
         {
+            await CleanDatabase();
             await using var context = new ModelDbContext(ContextOptions);
-            await context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE \"Vocabularies\" RESTART IDENTITY");
-            await context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE \"Role\" RESTART IDENTITY CASCADE");
-            await context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE \"Users\" RESTART IDENTITY CASCADE");
+            await context.Database.EnsureCreatedAsync();
         }
     }
 }

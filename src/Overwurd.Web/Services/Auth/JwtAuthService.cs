@@ -7,6 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.IdentityModel.Tokens;
+using Overwurd.Model.Models;
+using Overwurd.Model.Services;
 using Overwurd.Web.Options;
 
 namespace Overwurd.Web.Services.Auth

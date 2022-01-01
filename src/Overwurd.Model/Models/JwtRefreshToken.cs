@@ -1,6 +1,6 @@
 using System;
 
-namespace Overwurd.Web.Services.Auth
+namespace Overwurd.Model.Models
 {
     public record JwtRefreshToken(
         string AccessTokenId,

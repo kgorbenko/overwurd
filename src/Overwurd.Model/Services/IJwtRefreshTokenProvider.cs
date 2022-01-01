@@ -1,7 +1,8 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Overwurd.Model.Models;
 
-namespace Overwurd.Web.Services.Auth
+namespace Overwurd.Model.Services
 {
     public interface IJwtRefreshTokenProvider
     {

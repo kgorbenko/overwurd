@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Overwurd.Model.Models;
 
-namespace Overwurd.Web.Services.Auth
+namespace Overwurd.Model.Models
 {
     public class JwtRefreshTokenEntityTypeConfiguration : IEntityTypeConfiguration<JwtRefreshToken>
     {

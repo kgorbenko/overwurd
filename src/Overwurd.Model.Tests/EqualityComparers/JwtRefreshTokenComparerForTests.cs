@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Overwurd.Web.Services.Auth;
+using Overwurd.Model.Models;
 
-namespace Overwurd.Web.Tests.EqualityComparers
+namespace Overwurd.Model.Tests.EqualityComparers
 {
     public class JwtRefreshTokenComparerForTests : IEqualityComparer<JwtRefreshToken>
     {

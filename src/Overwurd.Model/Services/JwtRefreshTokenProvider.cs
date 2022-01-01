@@ -4,14 +4,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Overwurd.Model.Models;
 
-namespace Overwurd.Web.Services.Auth
+namespace Overwurd.Model.Services
 {
     public class JwtRefreshTokenProvider : IJwtRefreshTokenProvider
     {
-        private readonly ApplicationDbContext dbContext;
+        private readonly ModelDbContext dbContext;
 
-        public JwtRefreshTokenProvider([NotNull] ApplicationDbContext dbContext)
+        public JwtRefreshTokenProvider([NotNull] ModelDbContext dbContext)
         {
             this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
@@ -37,7 +38,8 @@ namespace Overwurd.Web.Services.Auth
 
             if (userToken is not null)
             {
-                dbContext.JwtRefreshTokens.RemoveRange(userToken);
+                dbContext.JwtRefreshTokens.Remove(userToken);
+                await dbContext.SaveChangesAsync(cancellationToken);
             }
         }
     }

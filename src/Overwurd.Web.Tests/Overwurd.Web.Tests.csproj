@@ -14,5 +14,9 @@
     <ProjectReference Include="..\Overwurd.Model.Tests\Overwurd.Model.Tests.csproj" />
     <ProjectReference Include="..\Overwurd.Web\Overwurd.Web.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="EqualityComparers" />
+  </ItemGroup>
 
 </Project>

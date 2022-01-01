@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using Overwurd.Model;
 using Overwurd.Model.Models;
 using Overwurd.Model.Repositories;
+using Overwurd.Model.Services;
 using Overwurd.Web.Options;
 using Overwurd.Web.Services.Auth;
 
@@ -66,11 +67,17 @@ namespace Overwurd.Web
 
             var connectionString = configuration.GetConnectionString("Default");
 
-            services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
+            services.AddDbContext<ModelDbContext>(
+                options => options.UseNpgsql(
+                    connectionString,
+                    builder => builder.MigrationsHistoryTable(
+                        ModelDbContext.MigrationsHistoryTableName,
+                        ModelDbContext.SchemaName))
+            );
             services.AddTransient<IJwtRefreshTokenProvider, JwtRefreshTokenProvider>();
             services.AddTransient<IJwtAuthService, JwtAuthService>();
-            services.AddTransient<IOverwurdRepository<Vocabulary>, OverwurdRepository<Vocabulary, ApplicationDbContext>>();
-            services.AddTransient<IReadOnlyOverwurdRepository<Vocabulary>, ReadOnlyOverwurdRepository<Vocabulary, ApplicationDbContext>>();
+            services.AddTransient<IOverwurdRepository<Vocabulary>, OverwurdRepository<Vocabulary, ModelDbContext>>();
+            services.AddTransient<IReadOnlyOverwurdRepository<Vocabulary>, ReadOnlyOverwurdRepository<Vocabulary, ModelDbContext>>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
