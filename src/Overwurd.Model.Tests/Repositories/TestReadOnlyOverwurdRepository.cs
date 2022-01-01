@@ -22,15 +22,15 @@ namespace Overwurd.Model.Tests.Repositories {
             var vocabulary1 = new Vocabulary("Vocabulary 1");
             var vocabulary2 = new Vocabulary("Vocabulary 2");
 
-            await using (var context = new ModelDbContext(ContextOptions))
+            await using (var context = new ApplicationDbContext(ContextOptions))
             {
                 await context.AddRangeAsync(vocabulary1, vocabulary2);
                 await context.SaveChangesAsync();
             }
 
-            await using (var context = new ModelDbContext(ContextOptions))
+            await using (var context = new ApplicationDbContext(ContextOptions))
             {
-                var repository = new ReadOnlyOverwurdRepository<Vocabulary, ModelDbContext>(context);
+                var repository = new ReadOnlyOverwurdRepository<Vocabulary, ApplicationDbContext>(context);
 
                 var actual = await repository.FindByIdAsync(vocabulary1.Id);
 
@@ -45,15 +45,15 @@ namespace Overwurd.Model.Tests.Repositories {
             var vocabulary1 = new Vocabulary("Vocabulary 1");
             var vocabulary2 = new Vocabulary("Vocabulary 2");
 
-            await using (var context = new ModelDbContext(ContextOptions))
+            await using (var context = new ApplicationDbContext(ContextOptions))
             {
                 await context.AddRangeAsync(vocabulary1, vocabulary2);
                 await context.SaveChangesAsync();
             }
 
-            await using (var context = new ModelDbContext(ContextOptions))
+            await using (var context = new ApplicationDbContext(ContextOptions))
             {
-                var repository = new ReadOnlyOverwurdRepository<Vocabulary, ModelDbContext>(context);
+                var repository = new ReadOnlyOverwurdRepository<Vocabulary, ApplicationDbContext>(context);
 
                 var actual = (await repository.FindByAsync(x => x.Name == "Vocabulary 2")).Single();
 
@@ -69,15 +69,15 @@ namespace Overwurd.Model.Tests.Repositories {
             var vocabulary2 = new Vocabulary("Vocabulary 2");
             var vocabulary3 = new Vocabulary("Vocabulary 3");
 
-            await using (var context = new ModelDbContext(ContextOptions))
+            await using (var context = new ApplicationDbContext(ContextOptions))
             {
                 await context.AddRangeAsync(vocabulary1, vocabulary2, vocabulary3);
                 await context.SaveChangesAsync();
             }
 
-            await using (var context = new ModelDbContext(ContextOptions))
+            await using (var context = new ApplicationDbContext(ContextOptions))
             {
-                var repository = new ReadOnlyOverwurdRepository<Vocabulary, ModelDbContext>(context);
+                var repository = new ReadOnlyOverwurdRepository<Vocabulary, ApplicationDbContext>(context);
 
                 var actual = (await repository.GetAllAsync()).ToArray();
 
@@ -100,15 +100,15 @@ namespace Overwurd.Model.Tests.Repositories {
             var vocabulary7 = new Vocabulary("Vocabulary 7");
             var vocabulary8 = new Vocabulary("Vocabulary 8");
 
-            await using (var context = new ModelDbContext(ContextOptions))
+            await using (var context = new ApplicationDbContext(ContextOptions))
             {
                 await context.Vocabularies.AddRangeAsync(vocabulary1, vocabulary2, vocabulary3, vocabulary4, vocabulary5, vocabulary6, vocabulary7, vocabulary8);
                 await context.SaveChangesAsync();
             }
 
-            await using (var context = new ModelDbContext(ContextOptions))
+            await using (var context = new ApplicationDbContext(ContextOptions))
             {
-                var repository = new ReadOnlyOverwurdRepository<Vocabulary, ModelDbContext>(context);
+                var repository = new ReadOnlyOverwurdRepository<Vocabulary, ApplicationDbContext>(context);
 
                 var firstPageActual = await repository.PaginateAsync(x => true, page: 1, pageSize: 3);
                 var firstPageExpected = new OverwurdPaginationResult<Vocabulary>(new[] { vocabulary1, vocabulary2, vocabulary3 }.ToImmutableArray(), 8);

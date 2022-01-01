@@ -4,13 +4,13 @@ using Overwurd.Model.Models;
 
 namespace Overwurd.Model
 {
-    public class ModelDbContext : DbContext
+    public class ApplicationDbContext : DbContext
     {
         public const string MigrationsHistoryTableName = "__MigrationsHistory";
 
         public const string SchemaName = "overwurd";
 
-        public ModelDbContext(DbContextOptions<ModelDbContext> options) : base(options) { }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
         public DbSet<User> Users { get; [UsedImplicitly] set; }
 
@@ -21,7 +21,7 @@ namespace Overwurd.Model
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasDefaultSchema(SchemaName);
-            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ModelDbContext).Assembly);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         }
     }
 }

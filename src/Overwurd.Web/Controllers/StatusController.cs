@@ -15,11 +15,11 @@ namespace Overwurd.Web.Controllers
     [Route("api/status")]
     public class StatusController : Controller
     {
-        private readonly ModelDbContext dbContext;
+        private readonly ApplicationDbContext dbContext;
         private readonly IWebHostEnvironment webHostEnvironment;
 
         public StatusController([NotNull] IWebHostEnvironment webHostEnvironment,
-                                [NotNull] ModelDbContext dbContext)
+                                [NotNull] ApplicationDbContext dbContext)
         {
             this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             this.webHostEnvironment = webHostEnvironment ?? throw new ArgumentNullException(nameof(webHostEnvironment));

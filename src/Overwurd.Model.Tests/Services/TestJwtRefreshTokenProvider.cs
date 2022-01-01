@@ -17,7 +17,7 @@ namespace Overwurd.Model.Tests.Services
 
         private async Task<User> SaveUserAsync(string login)
         {
-            await using var context = new ModelDbContext(ContextOptions);
+            await using var context = new ApplicationDbContext(ContextOptions);
             var user = new User { Login = login };
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
@@ -27,7 +27,7 @@ namespace Overwurd.Model.Tests.Services
 
         private async Task SaveRefreshTokenAsync(JwtRefreshToken token)
         {
-            await using var context = new ModelDbContext(ContextOptions);
+            await using var context = new ApplicationDbContext(ContextOptions);
             await context.JwtRefreshTokens.AddAsync(token);
             await context.SaveChangesAsync();
         }
@@ -49,7 +49,7 @@ namespace Overwurd.Model.Tests.Services
 
             await SaveRefreshTokenAsync(token);
 
-            await using var context = new ModelDbContext(ContextOptions);
+            await using var context = new ApplicationDbContext(ContextOptions);
             var provider = new JwtRefreshTokenProvider(context);
             var actualToken = await provider.GetUserTokenAsync(user.Id, CancellationToken.None);
 
@@ -74,13 +74,13 @@ namespace Overwurd.Model.Tests.Services
 
             await SaveRefreshTokenAsync(token);
 
-            await using (var context = new ModelDbContext(ContextOptions))
+            await using (var context = new ApplicationDbContext(ContextOptions))
             {
                 var provider = new JwtRefreshTokenProvider(context);
                 await provider.RemoveUserTokenAsync(user.Id, CancellationToken.None);
             }
 
-            await using (var context = new ModelDbContext(ContextOptions))
+            await using (var context = new ApplicationDbContext(ContextOptions))
             {
                 var actualTokens = await context.JwtRefreshTokens.ToArrayAsync();
                 Assert.That(actualTokens, Is.Empty);
@@ -104,7 +104,7 @@ namespace Overwurd.Model.Tests.Services
 
             await SaveRefreshTokenAsync(token);
 
-            await using var context = new ModelDbContext(ContextOptions);
+            await using var context = new ApplicationDbContext(ContextOptions);
             var provider = new JwtRefreshTokenProvider(context);
             await provider.RemoveUserTokenAsync(user.Id + 1, CancellationToken.None);
 
@@ -127,13 +127,13 @@ namespace Overwurd.Model.Tests.Services
                 IsRevoked: false
             );
 
-            await using (var context = new ModelDbContext(ContextOptions))
+            await using (var context = new ApplicationDbContext(ContextOptions))
             {
                 var provider = new JwtRefreshTokenProvider(context);
                 await provider.AddTokenAsync(token, CancellationToken.None);
             }
 
-            await using (var context = new ModelDbContext(ContextOptions))
+            await using (var context = new ApplicationDbContext(ContextOptions))
             {
                 var actualTokens = await context.JwtRefreshTokens.ToArrayAsync();
                 Assert.That(actualTokens, Is.EqualTo(new[] { token }).Using(refreshTokenComparer));
@@ -167,7 +167,7 @@ namespace Overwurd.Model.Tests.Services
                 IsRevoked: false
             );
 
-            await using var context = new ModelDbContext(ContextOptions);
+            await using var context = new ApplicationDbContext(ContextOptions);
             var provider = new JwtRefreshTokenProvider(context);
 
             Assert.ThrowsAsync<DbUpdateException>(async () => await provider.AddTokenAsync(token2, CancellationToken.None));

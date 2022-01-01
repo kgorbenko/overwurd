@@ -10,9 +10,9 @@ namespace Overwurd.Model.Services
 {
     public class JwtRefreshTokenProvider : IJwtRefreshTokenProvider
     {
-        private readonly ModelDbContext dbContext;
+        private readonly ApplicationDbContext dbContext;
 
-        public JwtRefreshTokenProvider([NotNull] ModelDbContext dbContext)
+        public JwtRefreshTokenProvider([NotNull] ApplicationDbContext dbContext)
         {
             this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }

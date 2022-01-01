@@ -9,8 +9,8 @@ using Overwurd.Model;
 
 namespace Overwurd.Model.Migrations
 {
-    [DbContext(typeof(ModelDbContext))]
-    [Migration("20220101101320_InitialModel")]
+    [DbContext(typeof(ApplicationDbContext))]
+    [Migration("20220101102407_InitialModel")]
     partial class InitialModel
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

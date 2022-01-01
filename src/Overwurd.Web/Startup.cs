@@ -67,17 +67,17 @@ namespace Overwurd.Web
 
             var connectionString = configuration.GetConnectionString("Default");
 
-            services.AddDbContext<ModelDbContext>(
+            services.AddDbContext<ApplicationDbContext>(
                 options => options.UseNpgsql(
                     connectionString,
                     builder => builder.MigrationsHistoryTable(
-                        ModelDbContext.MigrationsHistoryTableName,
-                        ModelDbContext.SchemaName))
+                        ApplicationDbContext.MigrationsHistoryTableName,
+                        ApplicationDbContext.SchemaName))
             );
             services.AddTransient<IJwtRefreshTokenProvider, JwtRefreshTokenProvider>();
             services.AddTransient<IJwtAuthService, JwtAuthService>();
-            services.AddTransient<IOverwurdRepository<Vocabulary>, OverwurdRepository<Vocabulary, ModelDbContext>>();
-            services.AddTransient<IReadOnlyOverwurdRepository<Vocabulary>, ReadOnlyOverwurdRepository<Vocabulary, ModelDbContext>>();
+            services.AddTransient<IOverwurdRepository<Vocabulary>, OverwurdRepository<Vocabulary, ApplicationDbContext>>();
+            services.AddTransient<IReadOnlyOverwurdRepository<Vocabulary>, ReadOnlyOverwurdRepository<Vocabulary, ApplicationDbContext>>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

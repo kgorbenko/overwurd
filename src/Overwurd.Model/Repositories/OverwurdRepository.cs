@@ -11,7 +11,7 @@ namespace Overwurd.Model.Repositories
 {
     public class OverwurdRepository<T, TContext> : IOverwurdRepository<T>
         where T : class, IEntityWithNumericId
-        where TContext : ModelDbContext
+        where TContext : ApplicationDbContext
     {
         private readonly DbContext dbContext;
         private readonly DbSet<T> dbSet;
