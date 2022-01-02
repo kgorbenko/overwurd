@@ -14,6 +14,8 @@ namespace Overwurd.Model.Models
 
             builder.Property(x => x.Login);
             builder.HasIndex(x => x.Login).IsUnique();
+            builder.Property(x => x.NormalizedLogin);
+            builder.HasIndex(x => x.NormalizedLogin).IsUnique();
             builder.Property(x => x.Password);
 
             builder.HasMany(x => x.Roles)

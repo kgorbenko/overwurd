@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Overwurd.Model.Models;
 using Overwurd.Model.Services;
@@ -17,14 +18,18 @@ namespace Overwurd.Web.Services.Auth
     {
         private readonly JwtConfiguration jwtConfiguration;
         private readonly TokenValidationParameters tokenValidationParameters;
+        private readonly ClaimsIdentityOptions claimsIdentityOptions;
         private readonly IJwtRefreshTokenProvider jwtRefreshTokenProvider;
+
 
         public JwtAuthService([NotNull] JwtConfiguration jwtConfiguration,
                               [NotNull] TokenValidationParameters tokenValidationParameters,
+                              [NotNull] ClaimsIdentityOptions claimsIdentityOptions,
                               [NotNull] IJwtRefreshTokenProvider jwtRefreshTokenProvider)
         {
             this.jwtConfiguration = jwtConfiguration ?? throw new ArgumentNullException(nameof(jwtConfiguration));
             this.tokenValidationParameters = tokenValidationParameters ?? throw new ArgumentNullException(nameof(tokenValidationParameters));
+            this.claimsIdentityOptions = claimsIdentityOptions ?? throw new ArgumentNullException(nameof(claimsIdentityOptions));
             this.jwtRefreshTokenProvider = jwtRefreshTokenProvider ?? throw new ArgumentNullException(nameof(jwtRefreshTokenProvider));
         }
 
@@ -34,14 +39,14 @@ namespace Overwurd.Web.Services.Auth
                                                              CancellationToken cancellationToken)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var jwtSecurityToken = CreateAccessToken(jwtConfiguration, claims.ToArray(), now);
+            var jwtSecurityToken = CreateAccessToken(userId, jwtConfiguration, claims.ToArray(), now);
             var accessTokenEncrypted = tokenHandler.WriteToken(jwtSecurityToken);
 
             var refreshToken = new JwtRefreshToken(
                 AccessTokenId: jwtSecurityToken.Id,
                 UserId: userId,
                 TokenString: Guid.NewGuid().ToString(),
-                ExpiresAt: now.AddMinutes(jwtConfiguration.RefreshTokenExpirationInDays),
+                ExpiresAt: now.AddDays(jwtConfiguration.RefreshTokenExpirationInDays),
                 CreatedAt: now,
                 IsRevoked: false
             );
@@ -50,33 +55,42 @@ namespace Overwurd.Web.Services.Auth
             await jwtRefreshTokenProvider.AddTokenAsync(refreshToken, cancellationToken);
 
             return new JwtAuthResult(
-                AccessToken: accessTokenEncrypted,
-                RefreshToken: refreshToken.TokenString);
+                IsSuccess: true,
+                Tokens: new JwtTokenPair(
+                    AccessToken: accessTokenEncrypted,
+                    RefreshToken: refreshToken.TokenString),
+                ErrorMessage: null);
         }
 
-        public async Task<JwtAuthResult> RefreshAccessTokenAsync(long userId,
-                                                                 string accessTokenString,
+        public async Task<JwtAuthResult> RefreshAccessTokenAsync(string accessTokenString,
                                                                  string refreshTokenString,
-                                                                 IImmutableList<Claim> claims,
                                                                  DateTimeOffset now,
                                                                  CancellationToken cancellationToken)
         {
-            var validatedAccessToken = DecryptAndValidateAccessToken(accessTokenString, tokenValidationParameters);
+            var (isSuccess, validatedAccessToken, exception) = DecryptAndValidateAccessToken(accessTokenString, tokenValidationParameters);
 
-            if (IsAccessTokenValid(validatedAccessToken, now))
+            if (!isSuccess)
             {
-                return null;
+                return new JwtAuthResult(
+                    IsSuccess: false,
+                    Tokens: null,
+                    ErrorMessage: "Access token is not valid");
             }
 
+            var userIdString = validatedAccessToken.Claims.Single(x => x.Type == claimsIdentityOptions.UserIdClaimType).Value;
+            var userId = long.Parse(userIdString);
             var actualRefreshToken = await jwtRefreshTokenProvider.GetUserTokenAsync(userId, cancellationToken);
 
             if (!IsRefreshTokenValid(actualRefreshToken, refreshTokenString, validatedAccessToken.Id, now))
             {
-                return null;
+                return new JwtAuthResult(
+                    IsSuccess: false,
+                    Tokens: null,
+                    ErrorMessage: "Refresh token is not valid");
             }
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            var newAccessToken = CreateAccessToken(jwtConfiguration, claims.ToArray(), now);
+            var newAccessToken = CreateAccessToken(userId, jwtConfiguration, validatedAccessToken.Claims.ToArray(), now);
             var newAccessTokenString = tokenHandler.WriteToken(newAccessToken);
 
             var newRefreshToken = new JwtRefreshToken(
@@ -92,13 +106,11 @@ namespace Overwurd.Web.Services.Auth
             await jwtRefreshTokenProvider.AddTokenAsync(newRefreshToken, cancellationToken);
 
             return new JwtAuthResult(
-                AccessToken: newAccessTokenString,
-                RefreshToken: newRefreshToken.TokenString);
-        }
-
-        private static bool IsAccessTokenValid(JwtSecurityToken token, DateTimeOffset now)
-        {
-            return token is not null && token.ValidTo < now.UtcDateTime;
+                IsSuccess: true,
+                Tokens: new JwtTokenPair(
+                    AccessToken: newAccessTokenString,
+                    RefreshToken: newRefreshToken.TokenString),
+                ErrorMessage: null);
         }
 
         private static bool IsRefreshTokenValid(JwtRefreshToken actualToken,
@@ -113,43 +125,41 @@ namespace Overwurd.Web.Services.Auth
                    !actualToken.IsRevoked;
         }
 
-        private static JwtSecurityToken CreateAccessToken(JwtConfiguration jwtConfiguration, Claim[] claims, DateTimeOffset now) =>
-            new(
+        private static JwtSecurityToken CreateAccessToken(long userId, JwtConfiguration jwtConfiguration, Claim[] claims, DateTimeOffset now)
+        {
+            var defaultClaims = new Claim[]
+            {
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new(JwtRegisteredClaimNames.Sub, userId.ToString()),
+            };
+            return new(
                 issuer: jwtConfiguration.Issuer,
                 audience: jwtConfiguration.Audience,
-                claims: claims,
+                claims: defaultClaims.Concat(claims),
                 expires: now.AddMinutes(jwtConfiguration.AccessTokenExpirationInMinutes).UtcDateTime,
                 signingCredentials: new SigningCredentials(
                     key: new SymmetricSecurityKey(AuthHelper.GetBytesFromSigningKey(jwtConfiguration.SigningKey)),
                     algorithm: jwtConfiguration.SecurityAlgorithmSignature
                 )
             );
+        }
 
-        private static JwtSecurityToken DecryptAndValidateAccessToken(string token, TokenValidationParameters defaultTokenValidationParameters)
+        private static (bool IsSuccess, JwtSecurityToken ValidatedToken, Exception Error)
+            DecryptAndValidateAccessToken(string token, TokenValidationParameters defaultTokenValidationParameters)
         {
             try
             {
-                var tokenValidationParameters = new TokenValidationParameters {
-                    ValidateIssuer = defaultTokenValidationParameters.ValidateIssuer,
-                    ValidIssuer = defaultTokenValidationParameters.ValidIssuer,
-                    ValidateIssuerSigningKey = defaultTokenValidationParameters.ValidateIssuerSigningKey,
-                    IssuerSigningKey = defaultTokenValidationParameters.IssuerSigningKey,
-                    ValidateAudience = defaultTokenValidationParameters.ValidateAudience,
-                    ValidAudience = defaultTokenValidationParameters.ValidAudience,
-                    RequireExpirationTime = defaultTokenValidationParameters.RequireExpirationTime,
-                    ValidateLifetime = false,
-                    ClockSkew = defaultTokenValidationParameters.ClockSkew,
-                    ValidAlgorithms = defaultTokenValidationParameters.ValidAlgorithms
-                };
+                var tokenValidationParameters = defaultTokenValidationParameters.Clone();
+                tokenValidationParameters.ValidateLifetime = false;
 
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var _ = tokenHandler.ValidateToken(token, tokenValidationParameters, out var validatedToken);
 
-                return (JwtSecurityToken) validatedToken;
+                return (true, (JwtSecurityToken) validatedToken, null);
             }
-            catch
+            catch (Exception exception)
             {
-                return null;
+                return (false, null, exception);
             }
         }
     }

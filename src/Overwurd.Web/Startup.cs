@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -15,6 +16,7 @@ using Overwurd.Model.Repositories;
 using Overwurd.Model.Services;
 using Overwurd.Web.Options;
 using Overwurd.Web.Services.Auth;
+using Overwurd.Web.Services.Auth.Stores;
 
 namespace Overwurd.Web
 {
@@ -58,12 +60,17 @@ namespace Overwurd.Web
 
             services.AddSingleton(jwtConfiguration);
             services.AddSingleton(tokenValidationParameters);
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                    .AddJwtBearer(x =>
-                    {
-                        x.SaveToken = true;
-                        x.TokenValidationParameters = tokenValidationParameters;
-                    });
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(x =>
+            {
+                x.SaveToken = true;
+                x.TokenValidationParameters = tokenValidationParameters;
+            });
 
             var connectionString = configuration.GetConnectionString("Default");
 
@@ -74,10 +81,17 @@ namespace Overwurd.Web
                         ApplicationDbContext.MigrationsHistoryTableName,
                         ApplicationDbContext.SchemaName))
             );
+
+            services.AddIdentityCore<User>();
+            services.AddSingleton<ClaimsIdentityOptions>();
+            services.AddTransient<IUserStore<User>, UserPasswordStore>();
+            services.AddTransient<IUserPasswordStore<User>, UserPasswordStore>();
             services.AddTransient<IJwtRefreshTokenProvider, JwtRefreshTokenProvider>();
             services.AddTransient<IJwtAuthService, JwtAuthService>();
             services.AddTransient<IOverwurdRepository<Vocabulary>, OverwurdRepository<Vocabulary, ApplicationDbContext>>();
             services.AddTransient<IReadOnlyOverwurdRepository<Vocabulary>, ReadOnlyOverwurdRepository<Vocabulary, ApplicationDbContext>>();
+            services.AddTransient<IOverwurdRepository<User>, OverwurdRepository<User, ApplicationDbContext>>();
+            services.AddTransient<IReadOnlyOverwurdRepository<User>, ReadOnlyOverwurdRepository<User, ApplicationDbContext>>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -95,6 +109,8 @@ namespace Overwurd.Web
             app.UseSpaStaticFiles();
 
             app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

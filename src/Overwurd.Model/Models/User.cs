@@ -15,8 +15,10 @@ namespace Overwurd.Model.Models
 
         public string Login { get; set; }
 
+        public string NormalizedLogin { get; set; }
+
         public string Password { get; set; }
 
-        public Role[] Roles { get; set; }
+        public Role[] Roles { get; set; } = Array.Empty<Role>();
     }
 }

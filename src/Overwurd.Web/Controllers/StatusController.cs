@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Overwurd.Model;
@@ -12,6 +13,7 @@ namespace Overwurd.Web.Controllers
     public record StatusViewModel(string Version, string Environment, string LastMigration);
 
     [ApiController]
+    [Authorize]
     [Route("api/status")]
     public class StatusController : Controller
     {
