@@ -1,20 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using Overwurd.Model.Models;
 using Overwurd.Model.Services;
-using Overwurd.Model.Tests.EqualityComparers;
 
 namespace Overwurd.Model.Tests.Services
 {
     [TestFixture]
     public class TestJwtRefreshTokenProvider : BaseModelDatabaseDependentTestFixture
     {
-        private static readonly IEqualityComparer<JwtRefreshToken> refreshTokenComparer = new JwtRefreshTokenComparerForTests();
-
         private async Task<User> SaveUserAsync(string login)
         {
             await using var context = new ApplicationDbContext(ContextOptions);
@@ -53,7 +49,7 @@ namespace Overwurd.Model.Tests.Services
             var provider = new JwtRefreshTokenProvider(context);
             var actualToken = await provider.GetUserTokenAsync(user.Id, CancellationToken.None);
 
-            Assert.That(actualToken, Is.EqualTo(token).Using(refreshTokenComparer));
+            Assert.That(actualToken, Is.EqualTo(token));
             Assert.That(context.ChangeTracker.Entries<JwtRefreshToken>(), Is.Empty);
         }
 
@@ -106,10 +102,12 @@ namespace Overwurd.Model.Tests.Services
 
             await using var context = new ApplicationDbContext(ContextOptions);
             var provider = new JwtRefreshTokenProvider(context);
-            await provider.RemoveUserTokenAsync(user.Id + 1, CancellationToken.None);
+
+            var nonExistentUserId = user.Id + 1;
+            await provider.RemoveUserTokenAsync(nonExistentUserId, CancellationToken.None);
 
             var actualTokens = await context.JwtRefreshTokens.ToArrayAsync();
-            Assert.That(actualTokens, Is.EqualTo(new[] { token }).Using(refreshTokenComparer));
+            Assert.That(actualTokens, Is.EqualTo(new[] { token }));
         }
 
         [Test]
@@ -136,7 +134,7 @@ namespace Overwurd.Model.Tests.Services
             await using (var context = new ApplicationDbContext(ContextOptions))
             {
                 var actualTokens = await context.JwtRefreshTokens.ToArrayAsync();
-                Assert.That(actualTokens, Is.EqualTo(new[] { token }).Using(refreshTokenComparer));
+                Assert.That(actualTokens, Is.EqualTo(new[] { token }));
             }
         }
 
