@@ -34,16 +34,18 @@ namespace Overwurd.Web.Controllers
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        [UsedImplicitly]
-        public record RegistrationRequestParameters(string Login, string Password);
+        private const string InvalidLoginOrPasswordMessage = "You have entered an invalid username or password. Please double-check and try again.";
 
         [UsedImplicitly]
-        public record RegistrationResult(string AccessToken, string RefreshToken);
+        public record LoginRequestParameters(string Login, string Password);
+
+        [UsedImplicitly]
+        public record LoginResult(string AccessToken, string RefreshToken);
 
         [AllowAnonymous]
         [HttpPost]
         [Route("register")]
-        public async Task<IActionResult> Register([FromBody] RegistrationRequestParameters parameters, CancellationToken cancellationToken)
+        public async Task<IActionResult> Register([FromBody] LoginRequestParameters parameters, CancellationToken cancellationToken)
         {
             var now = DateTimeOffset.UtcNow.TrimSeconds();
             var existingUser = await userManager.FindByNameAsync(parameters.Login);
@@ -71,7 +73,7 @@ namespace Overwurd.Web.Controllers
 
             logger.LogInformation("User #{UserId} has been registered", newUser.Id);
 
-            return Ok(new RegistrationResult(
+            return Ok(new LoginResult(
                 AccessToken: tokens.AccessToken,
                 RefreshToken: tokens.RefreshToken
             ));
@@ -111,6 +113,42 @@ namespace Overwurd.Web.Controllers
 
                 return BadRequest();
             }
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequestParameters parameters, CancellationToken cancellationToken)
+        {
+            var now = DateTimeOffset.UtcNow.TrimSeconds();
+
+            var user = await userManager.FindByNameAsync(parameters.Login);
+
+            if (user is null)
+            {
+                ModelState.AddModelError(nameof(parameters.Login), InvalidLoginOrPasswordMessage);
+                logger.LogInformation("Unsuccessful attempt to login. User with such Login '{Login}' is not fonds", parameters.Login);
+                return BadRequest(ModelState);
+            }
+
+            var isPasswordValid = await userManager.CheckPasswordAsync(user, parameters.Password);
+            if (!isPasswordValid)
+            {
+                ModelState.AddModelError(nameof(parameters.Login), InvalidLoginOrPasswordMessage);
+                logger.LogInformation("Unsuccessful attempt to login from User #{UserId}. Invalid password provided", user.Id);
+                return BadRequest();
+            }
+
+            var tokens = await jwtAuthService.GenerateTokensAsync(user.Id,
+                                                                  AuthHelper.GetUserClaims(user, claimsIdentityOptions),
+                                                                  now,
+                                                                  cancellationToken);
+
+            logger.LogInformation("User #{UserId} successfully logged in", user.Id);
+            return Ok(new LoginResult(
+                AccessToken: tokens.AccessToken,
+                RefreshToken: tokens.RefreshToken
+            ));
         }
     }
 }
