@@ -1,13 +1,8 @@
 using System;
-using System.Collections.Immutable;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -43,7 +38,7 @@ namespace Overwurd.Web.Controllers
         public record RegistrationRequestParameters(string Login, string Password);
 
         [UsedImplicitly]
-        public record JwtAuthViewModel(string AccessToken, string RefreshToken);
+        public record RegistrationResult(string AccessToken, string RefreshToken);
 
         [AllowAnonymous]
         [HttpPost]
@@ -55,7 +50,7 @@ namespace Overwurd.Web.Controllers
 
             if (existingUser is not null)
             {
-                logger.LogInformation("Unsuccessful attempt to register a new user. Following user login exists already: {0}", parameters.Login);
+                logger.LogInformation("Unsuccessful attempt to register a new user. Following user login exists already: {Login}", parameters.Login);
                 return BadRequest();
             }
 
@@ -65,91 +60,56 @@ namespace Overwurd.Web.Controllers
             if (!identityResult.Succeeded)
             {
                 var errorsClause = string.Join(", ", identityResult.Errors.Select(x => $"'{x.Description}'"));
-                logger.LogInformation("Unsuccessful attempt to register a new user. Login = {0}. Errors: {1}", parameters.Login, errorsClause);
+                logger.LogInformation("Unsuccessful attempt to register a new user. Login = {Login}. Errors: {ErrorsClause}", parameters.Login, errorsClause);
                 return BadRequest();
             }
 
-            var (isSuccess, tokens, errorMessage) = await jwtAuthService.GenerateTokensAsync(newUser.Id,
-                                                                                             GetUserClaims(newUser),
-                                                                                             now,
-                                                                                             cancellationToken);
+            var tokens = await jwtAuthService.GenerateTokensAsync(newUser.Id,
+                                                                  AuthHelper.GetUserClaims(newUser, claimsIdentityOptions),
+                                                                  now,
+                                                                  cancellationToken);
 
-            if (!isSuccess)
-            {
-                logger.LogInformation("Unsuccessful attempt to register a new user. Login = {0}. Error: {1}", parameters.Login, errorMessage);
-                logger.LogInformation("Trying to remove user #{0}", newUser.Id);
-                await userManager.DeleteAsync(newUser);
-                return BadRequest(errorMessage);
-            }
+            logger.LogInformation("User #{UserId} has been registered", newUser.Id);
 
-            logger.LogInformation("User '{0}'", newUser);
-            return Ok(new JwtAuthViewModel(
+            return Ok(new RegistrationResult(
                 AccessToken: tokens.AccessToken,
-                RefreshToken: tokens.RefreshToken)
-            );
+                RefreshToken: tokens.RefreshToken
+            ));
         }
 
         [UsedImplicitly]
         public record RefreshTokenRequestParameters(string AccessToken, string RefreshToken);
+
+        [UsedImplicitly]
+        public record RefreshTokenResult(string AccessToken);
 
         [AllowAnonymous]
         [HttpPost]
         [Route("refresh")]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestParameters parameters, CancellationToken cancellationToken)
         {
-            var now = DateTimeOffset.UtcNow.TrimSeconds();
-
-            var (isSuccess, tokens, errorMessage) = await jwtAuthService.RefreshAccessTokenAsync(parameters.AccessToken,
-                                                                                                 parameters.RefreshToken,
-                                                                                                 now,
-                                                                                                 cancellationToken);
-
-            if (!isSuccess)
-            {
-                var hasUserId = TryGetUserIdFromAccessToken(parameters.AccessToken, out var userId);
-                if (hasUserId)
-                {
-                    logger.LogInformation("Unsuccessful attempt to refresh access token from user #{0}. Error: {1}", userId, errorMessage);
-                } else
-                {
-                    logger.LogInformation("Unsuccessful attempt to refresh access token from unknown user. Error: {0}", errorMessage);
-                }
-                return BadRequest(errorMessage);
-            }
-
-            return Ok(new JwtAuthViewModel(
-                AccessToken: tokens.AccessToken,
-                RefreshToken: tokens.RefreshToken));
-        }
-
-        private ImmutableArray<Claim> GetUserClaims(User user)
-        {
-            var identityClaims = new Claim[]
-            {
-                new(claimsIdentityOptions.UserIdClaimType, user.Id.ToString()),
-                new(claimsIdentityOptions.UserNameClaimType, user.Login)
-            };
-
-            var roleClaims = user.Roles
-                                 .Select(x => new Claim(claimsIdentityOptions.RoleClaimType, x.Name));
-
-            return identityClaims.Concat(roleClaims).ToImmutableArray();
-        }
-
-        private bool TryGetUserIdFromAccessToken(string tokenString, out long id)
-        {
             try
             {
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var token = tokenHandler.ReadJwtToken(tokenString);
-                var userIdString = token.Claims.Single(x => x.Type == claimsIdentityOptions.UserIdClaimType).Value;
+                var now = DateTimeOffset.UtcNow.TrimSeconds();
 
-                id = long.Parse(userIdString);
-                return true;
-            } catch
+                var tokens = await jwtAuthService.RefreshAccessTokenAsync(parameters.AccessToken,
+                                                                          parameters.RefreshToken,
+                                                                          now,
+                                                                          cancellationToken);
+
+                var userId = AuthHelper.GetUserIdFromAccessToken(tokens.AccessToken, claimsIdentityOptions.UserIdClaimType);
+                logger.LogInformation("User #{UserId} has refreshed access token", userId);
+
+                return Ok(new RefreshTokenResult(AccessToken: tokens.AccessToken));
+            } catch (Exception exception)
             {
-                id = 0;
-                return false;
+                var hasUserId = AuthHelper.TryGetUserIdFromAccessToken(parameters.AccessToken, claimsIdentityOptions.UserIdClaimType, out var userId);
+                var userClause = hasUserId
+                    ? $"user {userId}"
+                    : "unknown user";
+                logger.LogInformation(exception, "Unsuccessful attempt to refresh access token from {UserClause}", userClause);
+
+                return BadRequest();
             }
         }
     }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -20,32 +21,34 @@ namespace Overwurd.Web.Services.Auth
         private readonly TokenValidationParameters tokenValidationParameters;
         private readonly ClaimsIdentityOptions claimsIdentityOptions;
         private readonly IJwtRefreshTokenProvider jwtRefreshTokenProvider;
-
+        private readonly IGuidProvider guidProvider;
 
         public JwtAuthService([NotNull] JwtConfiguration jwtConfiguration,
                               [NotNull] TokenValidationParameters tokenValidationParameters,
                               [NotNull] ClaimsIdentityOptions claimsIdentityOptions,
-                              [NotNull] IJwtRefreshTokenProvider jwtRefreshTokenProvider)
+                              [NotNull] IJwtRefreshTokenProvider jwtRefreshTokenProvider,
+                              [NotNull] IGuidProvider guidProvider)
         {
             this.jwtConfiguration = jwtConfiguration ?? throw new ArgumentNullException(nameof(jwtConfiguration));
             this.tokenValidationParameters = tokenValidationParameters ?? throw new ArgumentNullException(nameof(tokenValidationParameters));
             this.claimsIdentityOptions = claimsIdentityOptions ?? throw new ArgumentNullException(nameof(claimsIdentityOptions));
             this.jwtRefreshTokenProvider = jwtRefreshTokenProvider ?? throw new ArgumentNullException(nameof(jwtRefreshTokenProvider));
+            this.guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
         }
 
-        public async Task<JwtAuthResult> GenerateTokensAsync(long userId,
-                                                             IImmutableList<Claim> claims,
-                                                             DateTimeOffset now,
-                                                             CancellationToken cancellationToken)
+        public async Task<JwtTokenPair> GenerateTokensAsync(long userId,
+                                                            IImmutableList<Claim> claims,
+                                                            DateTimeOffset now,
+                                                            CancellationToken cancellationToken)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var jwtSecurityToken = CreateAccessToken(userId, jwtConfiguration, claims.ToArray(), now);
+            var jwtSecurityToken = CreateAccessToken(userId, claims.ToArray(), now);
             var accessTokenEncrypted = tokenHandler.WriteToken(jwtSecurityToken);
 
             var refreshToken = new JwtRefreshToken(
                 AccessTokenId: jwtSecurityToken.Id,
                 UserId: userId,
-                TokenString: Guid.NewGuid().ToString(),
+                TokenString: guidProvider.GenerateGuid().ToString(),
                 ExpiresAt: now.AddDays(jwtConfiguration.RefreshTokenExpirationInDays),
                 CreatedAt: now,
                 IsRevoked: false
@@ -54,43 +57,33 @@ namespace Overwurd.Web.Services.Auth
             await jwtRefreshTokenProvider.RemoveUserTokenAsync(userId, cancellationToken);
             await jwtRefreshTokenProvider.AddTokenAsync(refreshToken, cancellationToken);
 
-            return new JwtAuthResult(
-                IsSuccess: true,
-                Tokens: new JwtTokenPair(
-                    AccessToken: accessTokenEncrypted,
-                    RefreshToken: refreshToken.TokenString),
-                ErrorMessage: null);
+            return new JwtTokenPair(
+                AccessToken: accessTokenEncrypted,
+                RefreshToken: refreshToken.TokenString
+            );
         }
 
-        public async Task<JwtAuthResult> RefreshAccessTokenAsync(string accessTokenString,
-                                                                 string refreshTokenString,
-                                                                 DateTimeOffset now,
-                                                                 CancellationToken cancellationToken)
+        public async Task<JwtTokenPair> RefreshAccessTokenAsync(string accessTokenString,
+                                                                string refreshTokenString,
+                                                                DateTimeOffset now,
+                                                                CancellationToken cancellationToken)
         {
-            var (isSuccess, validatedAccessToken, exception) = DecryptAndValidateAccessToken(accessTokenString, tokenValidationParameters);
+            var validatedAccessToken = DecryptAndValidateAccessToken(accessTokenString, tokenValidationParameters);
 
-            if (!isSuccess)
-            {
-                return new JwtAuthResult(
-                    IsSuccess: false,
-                    Tokens: null,
-                    ErrorMessage: "Access token is not valid");
-            }
-
-            var userIdString = validatedAccessToken.Claims.Single(x => x.Type == claimsIdentityOptions.UserIdClaimType).Value;
+            var userIdString = validatedAccessToken.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Sub).Value;
             var userId = long.Parse(userIdString);
             var actualRefreshToken = await jwtRefreshTokenProvider.GetUserTokenAsync(userId, cancellationToken);
 
             if (!IsRefreshTokenValid(actualRefreshToken, refreshTokenString, validatedAccessToken.Id, now))
             {
-                return new JwtAuthResult(
-                    IsSuccess: false,
-                    Tokens: null,
-                    ErrorMessage: "Refresh token is not valid");
+                throw new InvalidOperationException(
+                    $"Provided by user #{userId} refresh token is not valid. Refresh token should not be expired or revoked, " +
+                    "and it should be related with provided user and provided access token");
             }
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            var newAccessToken = CreateAccessToken(userId, jwtConfiguration, validatedAccessToken.Claims.ToArray(), now);
+            var claims = GetUserClaims(validatedAccessToken.Claims);
+            var newAccessToken = CreateAccessToken(userId, claims, now);
             var newAccessTokenString = tokenHandler.WriteToken(newAccessToken);
 
             var newRefreshToken = new JwtRefreshToken(
@@ -105,12 +98,26 @@ namespace Overwurd.Web.Services.Auth
             await jwtRefreshTokenProvider.RemoveUserTokenAsync(userId, cancellationToken);
             await jwtRefreshTokenProvider.AddTokenAsync(newRefreshToken, cancellationToken);
 
-            return new JwtAuthResult(
-                IsSuccess: true,
-                Tokens: new JwtTokenPair(
-                    AccessToken: newAccessTokenString,
-                    RefreshToken: newRefreshToken.TokenString),
-                ErrorMessage: null);
+            return new JwtTokenPair(
+                AccessToken: newAccessTokenString,
+                RefreshToken: newRefreshToken.TokenString
+            );
+        }
+
+        private Claim[] GetUserClaims(IEnumerable<Claim> allClaims)
+        {
+            var userClaimTypes = new[]
+            {
+                claimsIdentityOptions.EmailClaimType,
+                claimsIdentityOptions.RoleClaimType,
+                claimsIdentityOptions.SecurityStampClaimType,
+                claimsIdentityOptions.UserIdClaimType,
+                claimsIdentityOptions.UserNameClaimType
+            }.ToHashSet();
+
+            bool IsUserClaim(Claim claim) => userClaimTypes.Contains(claim.Type);
+
+            return allClaims.Where(IsUserClaim).ToArray();
         }
 
         private static bool IsRefreshTokenValid(JwtRefreshToken actualToken,
@@ -125,12 +132,12 @@ namespace Overwurd.Web.Services.Auth
                    !actualToken.IsRevoked;
         }
 
-        private static JwtSecurityToken CreateAccessToken(long userId, JwtConfiguration jwtConfiguration, Claim[] claims, DateTimeOffset now)
+        private JwtSecurityToken CreateAccessToken(long userId, Claim[] claims, DateTimeOffset now)
         {
             var defaultClaims = new Claim[]
             {
-                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new(JwtRegisteredClaimNames.Sub, userId.ToString()),
+                new(JwtRegisteredClaimNames.Jti, guidProvider.GenerateGuid().ToString()),
+                new(JwtRegisteredClaimNames.Sub, userId.ToString())
             };
             return new(
                 issuer: jwtConfiguration.Issuer,
@@ -144,23 +151,15 @@ namespace Overwurd.Web.Services.Auth
             );
         }
 
-        private static (bool IsSuccess, JwtSecurityToken ValidatedToken, Exception Error)
-            DecryptAndValidateAccessToken(string token, TokenValidationParameters defaultTokenValidationParameters)
+        private static JwtSecurityToken DecryptAndValidateAccessToken(string token, TokenValidationParameters defaultTokenValidationParameters)
         {
-            try
-            {
-                var tokenValidationParameters = defaultTokenValidationParameters.Clone();
-                tokenValidationParameters.ValidateLifetime = false;
+            var tokenValidationParameters = defaultTokenValidationParameters.Clone();
+            tokenValidationParameters.ValidateLifetime = false;
 
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var _ = tokenHandler.ValidateToken(token, tokenValidationParameters, out var validatedToken);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var _ = tokenHandler.ValidateToken(token, tokenValidationParameters, out var validatedToken);
 
-                return (true, (JwtSecurityToken) validatedToken, null);
-            }
-            catch (Exception exception)
-            {
-                return (false, null, exception);
-            }
+            return (JwtSecurityToken) validatedToken;
         }
     }
 }
