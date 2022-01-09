@@ -53,7 +53,8 @@ namespace Overwurd.Web.Controllers
             if (existingUser is not null)
             {
                 logger.LogInformation("Unsuccessful attempt to register a new user. Following user login exists already: {Login}", parameters.Login);
-                return BadRequest();
+                ModelState.AddModelError(nameof(parameters.Login), "Provided Login is occupied. Please enter a new one.");
+                return BadRequest(ModelState);
             }
 
             var newUser = new User { Login = parameters.Login };
@@ -63,7 +64,13 @@ namespace Overwurd.Web.Controllers
             {
                 var errorsClause = string.Join(", ", identityResult.Errors.Select(x => $"'{x.Description}'"));
                 logger.LogInformation("Unsuccessful attempt to register a new user. Login = {Login}. Errors: {ErrorsClause}", parameters.Login, errorsClause);
-                return BadRequest();
+
+                foreach (var error in identityResult.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+
+                return BadRequest(ModelState);
             }
 
             var tokens = await jwtAuthService.GenerateTokensAsync(newUser.Id,
