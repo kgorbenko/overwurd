@@ -15,6 +15,7 @@ using Overwurd.Model.Models;
 using Overwurd.Model.Repositories;
 using Overwurd.Model.Services;
 using Overwurd.Web.Options;
+using Overwurd.Web.Services;
 using Overwurd.Web.Services.Auth;
 using Overwurd.Web.Services.Auth.Stores;
 
@@ -86,6 +87,7 @@ namespace Overwurd.Web
             services.AddSingleton<ClaimsIdentityOptions>();
             services.AddTransient<IUserStore<User>, UserPasswordStore>();
             services.AddTransient<IUserPasswordStore<User>, UserPasswordStore>();
+            services.AddTransient<IGuidProvider, GuidProvider>();
             services.AddTransient<IJwtRefreshTokenProvider, JwtRefreshTokenProvider>();
             services.AddTransient<IJwtAuthService, JwtAuthService>();
             services.AddTransient<IOverwurdRepository<Vocabulary>, OverwurdRepository<Vocabulary, ApplicationDbContext>>();
