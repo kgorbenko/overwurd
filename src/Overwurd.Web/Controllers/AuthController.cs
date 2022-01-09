@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -62,12 +61,9 @@ namespace Overwurd.Web.Controllers
 
             if (!identityResult.Succeeded)
             {
-                var errorsClause = string.Join(", ", identityResult.Errors.Select(x => $"'{x.Description}'"));
-                logger.LogInformation("Unsuccessful attempt to register a new user. Login = {Login}. Errors: {ErrorsClause}", parameters.Login, errorsClause);
-
                 foreach (var error in identityResult.Errors)
                 {
-                    ModelState.AddModelError("", error.Description);
+                    ModelState.AddModelError("errors", error.Description);
                 }
 
                 return BadRequest(ModelState);
