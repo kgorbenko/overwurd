@@ -29,13 +29,13 @@ namespace Overwurd.Model.Migrations
                 schema: "overwurd",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     FirstName = table.Column<string>(type: "text", nullable: true),
-                    SecondName = table.Column<string>(type: "text", nullable: true),
-                    Login = table.Column<string>(type: "text", nullable: true),
-                    NormalizedLogin = table.Column<string>(type: "text", nullable: true),
+                    LastName = table.Column<string>(type: "text", nullable: true),
+                    UserName = table.Column<string>(type: "text", nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "text", nullable: true),
                     Password = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
@@ -48,7 +48,7 @@ namespace Overwurd.Model.Migrations
                 schema: "overwurd",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false)
@@ -63,7 +63,7 @@ namespace Overwurd.Model.Migrations
                 schema: "overwurd",
                 columns: table => new
                 {
-                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
                     AccessTokenId = table.Column<string>(type: "text", nullable: false),
                     TokenString = table.Column<string>(type: "text", nullable: false),
                     ExpiresAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
@@ -88,7 +88,7 @@ namespace Overwurd.Model.Migrations
                 columns: table => new
                 {
                     RolesRoleType = table.Column<int>(type: "integer", nullable: false),
-                    UsersId = table.Column<long>(type: "bigint", nullable: false)
+                    UsersId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -129,17 +129,17 @@ namespace Overwurd.Model.Migrations
                 column: "UsersId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_Login",
+                name: "IX_Users_NormalizedUserName",
                 schema: "overwurd",
                 table: "Users",
-                column: "Login",
+                column: "NormalizedUserName",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_NormalizedLogin",
+                name: "IX_Users_UserName",
                 schema: "overwurd",
                 table: "Users",
-                column: "NormalizedLogin",
+                column: "UserName",
                 unique: true);
 
             migrationBuilder.CreateIndex(

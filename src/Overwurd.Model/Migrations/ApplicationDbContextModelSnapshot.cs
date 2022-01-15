@@ -22,8 +22,8 @@ namespace Overwurd.Model.Migrations
 
             modelBuilder.Entity("Overwurd.Model.Models.JwtRefreshToken", b =>
                 {
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("AccessTokenId")
                         .IsRequired()
@@ -72,9 +72,9 @@ namespace Overwurd.Model.Migrations
 
             modelBuilder.Entity("Overwurd.Model.Models.User", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<DateTimeOffset>("CreatedAt")
@@ -83,24 +83,24 @@ namespace Overwurd.Model.Migrations
                     b.Property<string>("FirstName")
                         .HasColumnType("text");
 
-                    b.Property<string>("Login")
+                    b.Property<string>("LastName")
                         .HasColumnType("text");
 
-                    b.Property<string>("NormalizedLogin")
+                    b.Property<string>("NormalizedUserName")
                         .HasColumnType("text");
 
                     b.Property<string>("Password")
                         .HasColumnType("text");
 
-                    b.Property<string>("SecondName")
+                    b.Property<string>("UserName")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Login")
+                    b.HasIndex("NormalizedUserName")
                         .IsUnique();
 
-                    b.HasIndex("NormalizedLogin")
+                    b.HasIndex("UserName")
                         .IsUnique();
 
                     b.ToTable("Users");
@@ -108,9 +108,9 @@ namespace Overwurd.Model.Migrations
 
             modelBuilder.Entity("Overwurd.Model.Models.Vocabulary", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<DateTimeOffset>("CreatedAt")
@@ -133,8 +133,8 @@ namespace Overwurd.Model.Migrations
                     b.Property<int>("RolesRoleType")
                         .HasColumnType("integer");
 
-                    b.Property<long>("UsersId")
-                        .HasColumnType("bigint");
+                    b.Property<int>("UsersId")
+                        .HasColumnType("integer");
 
                     b.HasKey("RolesRoleType", "UsersId");
 

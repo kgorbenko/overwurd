@@ -4,7 +4,7 @@ using Overwurd.Model.Helpers;
 
 namespace Overwurd.Model.Models {
     public class Vocabulary : IEntity {
-        public long Id { get; [UsedImplicitly] private set; }
+        public int Id { get; [UsedImplicitly] private set; }
 
         public DateTimeOffset CreatedAt { get; [UsedImplicitly] private set; }
 

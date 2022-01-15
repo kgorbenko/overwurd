@@ -33,30 +33,35 @@ namespace Overwurd.Web.Controllers
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        private const string InvalidLoginOrPasswordMessage = "You have entered an invalid username or password. Please double-check and try again.";
+        private const string InvalidUserNameOrPasswordMessage = "You have entered an invalid username or password. Please double-check and try again.";
 
         [UsedImplicitly]
-        public record LoginRequestParameters(string Login, string Password);
+        public record RegisterRequestParameters(string UserName, string Password, string FirstName, string LastName);
 
         [UsedImplicitly]
-        public record LoginResult(string AccessToken, string RefreshToken);
+        public record LoginResult(long Id, string UserName, string FirstName, string LastName, string AccessToken, string RefreshToken, DateTimeOffset AccessTokenExpiresAt);
 
         [AllowAnonymous]
         [HttpPost]
         [Route("register")]
-        public async Task<IActionResult> Register([FromBody] LoginRequestParameters parameters, CancellationToken cancellationToken)
+        public async Task<IActionResult> Register([FromBody] RegisterRequestParameters parameters, CancellationToken cancellationToken)
         {
             var now = DateTimeOffset.UtcNow.TrimSeconds();
-            var existingUser = await userManager.FindByNameAsync(parameters.Login);
+            var existingUser = await userManager.FindByNameAsync(parameters.UserName);
 
             if (existingUser is not null)
             {
-                logger.LogInformation("Unsuccessful attempt to register a new user. Following user login exists already: {Login}", parameters.Login);
-                ModelState.AddModelError(nameof(parameters.Login), "Provided Login is occupied. Please enter a new one.");
+                logger.LogInformation("Unsuccessful attempt to register a new user. Following UserName exists already: {UserName}", parameters.UserName);
+                ModelState.AddModelError(nameof(parameters.UserName), "Provided UserName is occupied. Please enter a new one.");
                 return BadRequest(ModelState);
             }
 
-            var newUser = new User { Login = parameters.Login };
+            var newUser = new User
+            {
+                UserName = parameters.UserName,
+                FirstName = parameters.FirstName,
+                LastName = parameters.LastName
+            };
             var identityResult = await userManager.CreateAsync(newUser, parameters.Password);
 
             if (!identityResult.Succeeded)
@@ -69,16 +74,21 @@ namespace Overwurd.Web.Controllers
                 return BadRequest(ModelState);
             }
 
-            var tokens = await jwtAuthService.GenerateTokensAsync(newUser.Id,
-                                                                  AuthHelper.GetUserClaims(newUser, claimsIdentityOptions),
-                                                                  now,
-                                                                  cancellationToken);
+            var tokenPairData = await jwtAuthService.GenerateTokensAsync(newUser.Id,
+                                                                         AuthHelper.GetUserClaims(newUser, claimsIdentityOptions),
+                                                                         now,
+                                                                         cancellationToken);
 
             logger.LogInformation("User #{UserId} has been registered", newUser.Id);
 
             return Ok(new LoginResult(
-                AccessToken: tokens.AccessToken,
-                RefreshToken: tokens.RefreshToken
+                Id: newUser.Id,
+                UserName: newUser.UserName,
+                FirstName: newUser.FirstName,
+                LastName: newUser.LastName,
+                AccessToken: tokenPairData.AccessToken,
+                RefreshToken: tokenPairData.RefreshToken,
+                AccessTokenExpiresAt: tokenPairData.AccessTokenExpiresAt
             ));
         }
 
@@ -86,7 +96,7 @@ namespace Overwurd.Web.Controllers
         public record RefreshTokenRequestParameters(string AccessToken, string RefreshToken);
 
         [UsedImplicitly]
-        public record RefreshTokenResult(string AccessToken);
+        public record RefreshTokenResult(string AccessToken, DateTimeOffset ExpiresAt);
 
         [AllowAnonymous]
         [HttpPost]
@@ -97,15 +107,18 @@ namespace Overwurd.Web.Controllers
             {
                 var now = DateTimeOffset.UtcNow.TrimSeconds();
 
-                var tokens = await jwtAuthService.RefreshAccessTokenAsync(parameters.AccessToken,
-                                                                          parameters.RefreshToken,
-                                                                          now,
-                                                                          cancellationToken);
+                var tokenPairData = await jwtAuthService.RefreshAccessTokenAsync(parameters.AccessToken,
+                                                                                 parameters.RefreshToken,
+                                                                                 now,
+                                                                                 cancellationToken);
 
-                var userId = AuthHelper.GetUserIdFromAccessToken(tokens.AccessToken, claimsIdentityOptions.UserIdClaimType);
+                var userId = AuthHelper.GetUserIdFromAccessToken(tokenPairData.AccessToken, claimsIdentityOptions.UserIdClaimType);
                 logger.LogInformation("User #{UserId} has refreshed access token", userId);
 
-                return Ok(new RefreshTokenResult(AccessToken: tokens.AccessToken));
+                return Ok(new RefreshTokenResult(
+                    AccessToken: tokenPairData.AccessToken,
+                    ExpiresAt: tokenPairData.AccessTokenExpiresAt)
+                );
             } catch (Exception exception)
             {
                 var hasUserId = AuthHelper.TryGetUserIdFromAccessToken(parameters.AccessToken, claimsIdentityOptions.UserIdClaimType, out var userId);
@@ -118,6 +131,9 @@ namespace Overwurd.Web.Controllers
             }
         }
 
+        [UsedImplicitly]
+        public record LoginRequestParameters(string UserName, string Password);
+
         [AllowAnonymous]
         [HttpPost]
         [Route("login")]
@@ -125,32 +141,38 @@ namespace Overwurd.Web.Controllers
         {
             var now = DateTimeOffset.UtcNow.TrimSeconds();
 
-            var user = await userManager.FindByNameAsync(parameters.Login);
+            var user = await userManager.FindByNameAsync(parameters.UserName);
 
             if (user is null)
             {
-                ModelState.AddModelError(nameof(parameters.Login), InvalidLoginOrPasswordMessage);
-                logger.LogInformation("Unsuccessful attempt to login. User with such Login '{Login}' is not fonds", parameters.Login);
+                ModelState.AddModelError(nameof(parameters.UserName), InvalidUserNameOrPasswordMessage);
+                logger.LogInformation("Unsuccessful attempt to login. User with such UserName '{UserName}' is not found", parameters.UserName);
                 return BadRequest(ModelState);
             }
 
             var isPasswordValid = await userManager.CheckPasswordAsync(user, parameters.Password);
             if (!isPasswordValid)
             {
-                ModelState.AddModelError(nameof(parameters.Login), InvalidLoginOrPasswordMessage);
+                ModelState.AddModelError(nameof(parameters.UserName), InvalidUserNameOrPasswordMessage);
                 logger.LogInformation("Unsuccessful attempt to login from User #{UserId}. Invalid password provided", user.Id);
                 return BadRequest();
             }
 
-            var tokens = await jwtAuthService.GenerateTokensAsync(user.Id,
-                                                                  AuthHelper.GetUserClaims(user, claimsIdentityOptions),
-                                                                  now,
-                                                                  cancellationToken);
+            var tokenPairData = await jwtAuthService.GenerateTokensAsync(user.Id,
+                                                                         AuthHelper.GetUserClaims(user, claimsIdentityOptions),
+                                                                         now,
+                                                                         cancellationToken);
 
             logger.LogInformation("User #{UserId} successfully logged in", user.Id);
+
             return Ok(new LoginResult(
-                AccessToken: tokens.AccessToken,
-                RefreshToken: tokens.RefreshToken
+                Id: user.Id,
+                UserName: user.UserName,
+                FirstName: user.FirstName,
+                LastName: user.LastName,
+                AccessToken: tokenPairData.AccessToken,
+                RefreshToken: tokenPairData.RefreshToken,
+                AccessTokenExpiresAt: tokenPairData.AccessTokenExpiresAt
             ));
         }
     }

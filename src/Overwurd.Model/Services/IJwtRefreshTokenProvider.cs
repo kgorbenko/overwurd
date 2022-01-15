@@ -8,8 +8,8 @@ namespace Overwurd.Model.Services
     {
         Task AddTokenAsync(JwtRefreshToken token, CancellationToken cancellationToken);
 
-        Task<JwtRefreshToken> GetUserTokenAsync(long userId, CancellationToken cancellationToken);
+        Task<JwtRefreshToken> GetUserTokenAsync(int userId, CancellationToken cancellationToken);
 
-        Task RemoveUserTokenAsync(long userId, CancellationToken cancellationToken);
+        Task RemoveUserTokenAsync(int userId, CancellationToken cancellationToken);
     }
 }

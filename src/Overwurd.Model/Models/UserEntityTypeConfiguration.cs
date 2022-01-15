@@ -10,12 +10,12 @@ namespace Overwurd.Model.Models
             builder.HasKey(x => x.Id);
             builder.Property(x => x.CreatedAt);
             builder.Property(x => x.FirstName);
-            builder.Property(x => x.SecondName);
+            builder.Property(x => x.LastName);
 
-            builder.Property(x => x.Login);
-            builder.HasIndex(x => x.Login).IsUnique();
-            builder.Property(x => x.NormalizedLogin);
-            builder.HasIndex(x => x.NormalizedLogin).IsUnique();
+            builder.Property(x => x.UserName);
+            builder.HasIndex(x => x.UserName).IsUnique();
+            builder.Property(x => x.NormalizedUserName);
+            builder.HasIndex(x => x.NormalizedUserName).IsUnique();
             builder.Property(x => x.Password);
 
             builder.HasMany(x => x.Roles)

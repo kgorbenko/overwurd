@@ -24,7 +24,7 @@ namespace Overwurd.Web.Services.Auth.Stores
             Task.FromResult(user.Id.ToString());
 
         public Task<string> GetUserNameAsync(User user, CancellationToken cancellationToken) =>
-            Task.FromResult(user.Login);
+            Task.FromResult(user.UserName);
 
         public Task<string> GetPasswordHashAsync(User user, CancellationToken cancellationToken) =>
             Task.FromResult(user.Password);
@@ -34,19 +34,19 @@ namespace Overwurd.Web.Services.Auth.Stores
 
         public Task SetUserNameAsync(User user, string userName, CancellationToken cancellationToken)
         {
-            user.Login = userName;
+            user.UserName = userName;
 
             return Task.CompletedTask;
         }
 
         public Task<string> GetNormalizedUserNameAsync(User user, CancellationToken cancellationToken)
         {
-            return Task.FromResult(user.NormalizedLogin);
+            return Task.FromResult(user.NormalizedUserName);
         }
 
         public Task SetNormalizedUserNameAsync(User user, string normalizedName, CancellationToken cancellationToken)
         {
-            user.NormalizedLogin = normalizedName;
+            user.NormalizedUserName = normalizedName;
 
             return Task.CompletedTask;
         }
@@ -75,12 +75,12 @@ namespace Overwurd.Web.Services.Auth.Stores
 
         public async Task<User> FindByIdAsync(string userId, CancellationToken cancellationToken)
         {
-            return await userRepository.FindByIdAsync(long.Parse(userId), cancellationToken);
+            return await userRepository.FindByIdAsync(int.Parse(userId), cancellationToken);
         }
 
         public async Task<User> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
-            return (await userRepository.FindByAsync(x => x.NormalizedLogin == normalizedUserName, cancellationToken)).SingleOrDefault();
+            return (await userRepository.FindByAsync(x => x.NormalizedUserName == normalizedUserName, cancellationToken)).SingleOrDefault();
         }
 
         public Task SetPasswordHashAsync(User user, string passwordHash, CancellationToken cancellationToken)

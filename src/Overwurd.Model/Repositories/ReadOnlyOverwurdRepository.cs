@@ -20,7 +20,7 @@ namespace Overwurd.Model.Repositories {
             dbSet = dbContext.Set<T>();
         }
 
-        public async Task<T> FindByIdAsync(long id, CancellationToken cancellationToken = default) {
+        public async Task<T> FindByIdAsync(int id, CancellationToken cancellationToken = default) {
             return (await FindByAsync(x => x.Id == id, cancellationToken))
                 .SingleOrDefault();
         }

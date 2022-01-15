@@ -45,8 +45,8 @@ namespace Overwurd.Model.Tests
         {
             await CleanDatabase();
             await using var context = new ApplicationDbContext(ContextOptions);
-            await context.Database.MigrateAsync();
             await context.Database.EnsureCreatedAsync();
+            await context.Database.MigrateAsync();
         }
     }
 }

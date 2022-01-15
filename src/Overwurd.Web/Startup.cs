@@ -55,7 +55,6 @@ namespace Overwurd.Web
                 ValidAudience = jwtConfiguration.Audience,
                 RequireExpirationTime = true,
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.FromMinutes(1),
                 ValidAlgorithms = new[] { jwtConfiguration.SecurityAlgorithmSignature }
             };
 

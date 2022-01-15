@@ -4,7 +4,7 @@ namespace Overwurd.Model.Models
 {
     public record JwtRefreshToken(
         string AccessTokenId,
-        long UserId,
+        int UserId,
         string TokenString,
         DateTimeOffset ExpiresAt,
         DateTimeOffset CreatedAt,

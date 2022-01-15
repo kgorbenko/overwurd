@@ -13,16 +13,16 @@ namespace Overwurd.Web.Services.Auth
         public static byte[] GetBytesFromSigningKey(string key) =>
             Encoding.ASCII.GetBytes(key);
 
-        public static long GetUserIdFromAccessToken(string tokenString, string userIdClaimType)
+        public static int GetUserIdFromAccessToken(string tokenString, string userIdClaimType)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.ReadJwtToken(tokenString);
             var userIdString = token.Claims.Single(x => x.Type == userIdClaimType).Value;
 
-            return long.Parse(userIdString);
+            return int.Parse(userIdString);
         }
 
-        public static bool TryGetUserIdFromAccessToken(string tokenString, string userIdClaimType, out long id)
+        public static bool TryGetUserIdFromAccessToken(string tokenString, string userIdClaimType, out int id)
         {
             try
             {
@@ -40,7 +40,7 @@ namespace Overwurd.Web.Services.Auth
             var identityClaims = new Claim[]
             {
                 new(claimsIdentityOptions.UserIdClaimType, user.Id.ToString()),
-                new(claimsIdentityOptions.UserNameClaimType, user.Login)
+                new(claimsIdentityOptions.UserNameClaimType, user.UserName)
             };
 
             var roleClaims = user.Roles

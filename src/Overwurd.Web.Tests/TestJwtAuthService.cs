@@ -19,7 +19,7 @@ namespace Overwurd.Web.Tests
 {
     public class TestJwtAuthService
     {
-        private static string MakeInvalidRefreshTokenMessage(long userId) =>
+        private static string MakeInvalidRefreshTokenMessage(int userId) =>
             $"Provided by user #{userId} refresh token is not valid. Refresh token should not be expired or revoked, " +
             "and it should be related with provided user and provided access token";
 
@@ -51,8 +51,8 @@ namespace Overwurd.Web.Tests
         [Test]
         public async Task TestTokensGeneration()
         {
-            const long userId = 25;
-            const string login = "TestUser";
+            const int userId = 25;
+            const string userName = "TestUser";
             var accessTokenId = Guid.Parse("f49d7a3b-56c1-406d-9404-0328ef63120a");
             var refreshTokenString = Guid.Parse("dccd2715-7d25-4223-b44c-920cd9d240e0");
             var date = new DateTimeOffset(year: 2021, month: 2, day: 1, hour: 0, minute: 0, second: 0, TimeSpan.Zero);
@@ -61,7 +61,7 @@ namespace Overwurd.Web.Tests
             var claims = new Claim[]
             {
                 new(claimsIdentityOptions.UserIdClaimType, userId.ToString()),
-                new(claimsIdentityOptions.UserNameClaimType, login)
+                new(claimsIdentityOptions.UserNameClaimType, userName)
             }.ToImmutableArray();
 
             var jwtConfiguration = GetJwtConfiguration();
@@ -86,7 +86,7 @@ namespace Overwurd.Web.Tests
             await jwtRefreshTokenProvider.Received().RemoveUserTokenAsync(userId, CancellationToken.None);
             await jwtRefreshTokenProvider.Received().AddTokenAsync(refreshToken, CancellationToken.None);
 
-            var expected = new JwtTokenPair(
+            var expected = new JwtTokenPairData(
                 AccessToken:
                     "eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9." +
                     "eyJqdGkiOiJmNDlkN2EzYi01NmMxLTQwNmQtOTQwNC0wMzI4ZWY2MzEyMGEiLCJzdWIiOiIyNSIsImh0dHA6Ly9zY2hlbWFzL" +
@@ -94,7 +94,8 @@ namespace Overwurd.Web.Tests
                     "1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiVGVzdFVzZXIiLCJleHAiOjE2MTIxMzc" +
                     "5MDAsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTAwMCIsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTAwMCJ9." +
                     "FOGmAT3If5aPwbyiqTW0RdpqS0SXNf3y2rTFx0_mtxo",
-                RefreshToken: refreshTokenString.ToString()
+                RefreshToken: refreshTokenString.ToString(),
+                AccessTokenExpiresAt: new DateTimeOffset(year: 2021, month: 2, day: 1, hour: 0, minute: 5, second: 0, TimeSpan.Zero)
             );
 
             Assert.That(actual, Is.EqualTo(expected));
@@ -148,7 +149,7 @@ namespace Overwurd.Web.Tests
             await jwtRefreshTokenProvider.Received().RemoveUserTokenAsync(userId, CancellationToken.None);
             await jwtRefreshTokenProvider.Received().AddTokenAsync(newRefreshToken, CancellationToken.None);
 
-            var expected = new JwtTokenPair(
+            var expected = new JwtTokenPairData(
                 AccessToken:
                     "eyJhbGciOiJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNobWFjLXNoYTI1NiIsInR5cCI6IkpXVCJ9." +
                     "eyJqdGkiOiJlYzYzN2ZmMy01MTJiLTRlZmMtYTk5Zi0zYzgyZmVjNjNmMGIiLCJzdWIiOiIyNSIsImh0dHA6Ly9zY2hlbWFzL" +
@@ -156,7 +157,8 @@ namespace Overwurd.Web.Tests
                     "1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiVGVzdFVzZXIiLCJleHAiOjE2MTIxNDE" +
                     "1MDAsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTAwMCIsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTAwMCJ9." +
                     "2ZrBjNMLhaQy0AxsPNxehV4-AVkJlVudTTT0BsSoGe4",
-                RefreshToken: "dccd2715-7d25-4223-b44c-920cd9d240e0"
+                RefreshToken: "dccd2715-7d25-4223-b44c-920cd9d240e0",
+                AccessTokenExpiresAt: new DateTimeOffset(year: 2021, month: 2, day: 1, hour: 1, minute: 5, second: 0, TimeSpan.Zero)
             );
 
             Assert.That(actual, Is.EqualTo(expected));
@@ -206,7 +208,7 @@ namespace Overwurd.Web.Tests
             var guidProvider = Substitute.For<IGuidProvider>();
             var jwtAuthService = new JwtAuthService(jwtConfiguration, tokenValidationParameters, claimsIdentityOptions, jwtRefreshTokenProvider, guidProvider);
 
-            const long userId = 25;
+            const int userId = 25;
             jwtRefreshTokenProvider.GetUserTokenAsync(userId, CancellationToken.None).Returns<JwtRefreshToken>(_ => null);
 
             var now = new DateTimeOffset(year: 2021, month: 2, day: 2, hour: 0, minute: 0, second: 0, TimeSpan.Zero);
@@ -240,7 +242,7 @@ namespace Overwurd.Web.Tests
             var guidProvider = Substitute.For<IGuidProvider>();
             var jwtAuthService = new JwtAuthService(jwtConfiguration, tokenValidationParameters, claimsIdentityOptions, jwtRefreshTokenProvider, guidProvider);
 
-            const long userId = 25;
+            const int userId = 25;
             var actualRefreshToken = new JwtRefreshToken(
                 AccessTokenId: "f49d7a3b-56c1-406d-9404-0328ef63120a",
                 UserId: userId,
@@ -282,7 +284,7 @@ namespace Overwurd.Web.Tests
             var guidProvider = Substitute.For<IGuidProvider>();
             var jwtAuthService = new JwtAuthService(jwtConfiguration, tokenValidationParameters, claimsIdentityOptions, jwtRefreshTokenProvider, guidProvider);
 
-            const long userId = 25;
+            const int userId = 25;
             const string refreshTokenString = "dccd2715-7d25-4223-b44c-920cd9d240e0";
             var actualRefreshToken = new JwtRefreshToken(
                 AccessTokenId: "ec637ff3-512b-4efc-a99f-3c82fec63f0b",
@@ -324,7 +326,7 @@ namespace Overwurd.Web.Tests
             var guidProvider = Substitute.For<IGuidProvider>();
             var jwtAuthService = new JwtAuthService(jwtConfiguration, tokenValidationParameters, claimsIdentityOptions, jwtRefreshTokenProvider, guidProvider);
 
-            const long userId = 25;
+            const int userId = 25;
             const string refreshTokenString = "dccd2715-7d25-4223-b44c-920cd9d240e0";
             var actualRefreshToken = new JwtRefreshToken(
                 AccessTokenId: "f49d7a3b-56c1-406d-9404-0328ef63120a",
@@ -366,7 +368,7 @@ namespace Overwurd.Web.Tests
             var guidProvider = Substitute.For<IGuidProvider>();
             var jwtAuthService = new JwtAuthService(jwtConfiguration, tokenValidationParameters, claimsIdentityOptions, jwtRefreshTokenProvider, guidProvider);
 
-            const long userId = 25;
+            const int userId = 25;
             const string refreshTokenString = "dccd2715-7d25-4223-b44c-920cd9d240e0";
             var actualRefreshToken = new JwtRefreshToken(
                 AccessTokenId: "f49d7a3b-56c1-406d-9404-0328ef63120a",

@@ -36,10 +36,10 @@ namespace Overwurd.Web.Services.Auth
             this.guidProvider = guidProvider ?? throw new ArgumentNullException(nameof(guidProvider));
         }
 
-        public async Task<JwtTokenPair> GenerateTokensAsync(long userId,
-                                                            IImmutableList<Claim> claims,
-                                                            DateTimeOffset now,
-                                                            CancellationToken cancellationToken)
+        public async Task<JwtTokenPairData> GenerateTokensAsync(int userId,
+                                                                IImmutableList<Claim> claims,
+                                                                DateTimeOffset now,
+                                                                CancellationToken cancellationToken)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var jwtSecurityToken = CreateAccessToken(userId, claims.ToArray(), now);
@@ -57,21 +57,22 @@ namespace Overwurd.Web.Services.Auth
             await jwtRefreshTokenProvider.RemoveUserTokenAsync(userId, cancellationToken);
             await jwtRefreshTokenProvider.AddTokenAsync(refreshToken, cancellationToken);
 
-            return new JwtTokenPair(
+            return new JwtTokenPairData(
                 AccessToken: accessTokenEncrypted,
-                RefreshToken: refreshToken.TokenString
+                RefreshToken: refreshToken.TokenString,
+                AccessTokenExpiresAt: new DateTimeOffset(jwtSecurityToken.ValidTo)
             );
         }
 
-        public async Task<JwtTokenPair> RefreshAccessTokenAsync(string accessTokenString,
-                                                                string refreshTokenString,
-                                                                DateTimeOffset now,
-                                                                CancellationToken cancellationToken)
+        public async Task<JwtTokenPairData> RefreshAccessTokenAsync(string accessTokenString,
+                                                                    string refreshTokenString,
+                                                                    DateTimeOffset now,
+                                                                    CancellationToken cancellationToken)
         {
             var validatedAccessToken = DecryptAndValidateAccessToken(accessTokenString, tokenValidationParameters);
 
             var userIdString = validatedAccessToken.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Sub).Value;
-            var userId = long.Parse(userIdString);
+            var userId = int.Parse(userIdString);
             var actualRefreshToken = await jwtRefreshTokenProvider.GetUserTokenAsync(userId, cancellationToken);
 
             if (!IsRefreshTokenValid(actualRefreshToken, refreshTokenString, validatedAccessToken.Id, now))
@@ -98,9 +99,10 @@ namespace Overwurd.Web.Services.Auth
             await jwtRefreshTokenProvider.RemoveUserTokenAsync(userId, cancellationToken);
             await jwtRefreshTokenProvider.AddTokenAsync(newRefreshToken, cancellationToken);
 
-            return new JwtTokenPair(
+            return new JwtTokenPairData(
                 AccessToken: newAccessTokenString,
-                RefreshToken: newRefreshToken.TokenString
+                RefreshToken: newRefreshToken.TokenString,
+                AccessTokenExpiresAt: new DateTimeOffset(newAccessToken.ValidTo)
             );
         }
 
@@ -132,7 +134,7 @@ namespace Overwurd.Web.Services.Auth
                    !actualToken.IsRevoked;
         }
 
-        private JwtSecurityToken CreateAccessToken(long userId, Claim[] claims, DateTimeOffset now)
+        private JwtSecurityToken CreateAccessToken(int userId, Claim[] claims, DateTimeOffset now)
         {
             var defaultClaims = new Claim[]
             {

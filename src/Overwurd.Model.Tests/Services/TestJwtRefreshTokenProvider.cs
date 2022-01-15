@@ -11,10 +11,10 @@ namespace Overwurd.Model.Tests.Services
     [TestFixture]
     public class TestJwtRefreshTokenProvider : BaseModelDatabaseDependentTestFixture
     {
-        private async Task<User> SaveUserAsync(string login)
+        private async Task<User> SaveUserAsync(string userName)
         {
             await using var context = new ApplicationDbContext(ContextOptions);
-            var user = new User { Login = login };
+            var user = new User { UserName = userName };
             await context.Users.AddAsync(user);
             await context.SaveChangesAsync();
 
