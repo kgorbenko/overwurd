@@ -12,6 +12,21 @@ using Overwurd.Web.Services.Auth;
 
 namespace Overwurd.Web.Controllers
 {
+    [UsedImplicitly]
+    public record RegisterRequestParameters(string UserName, string Password, string FirstName, string LastName);
+
+    [UsedImplicitly]
+    public record RefreshTokenRequestParameters(string AccessToken, string RefreshToken);
+
+    [UsedImplicitly]
+    public record LoginRequestParameters(string UserName, string Password);
+
+    [UsedImplicitly]
+    public record LoginResult(long Id, string UserName, string FirstName, string LastName, string AccessToken, string RefreshToken, DateTimeOffset AccessTokenExpiresAt);
+
+    [UsedImplicitly]
+    public record RefreshTokenResult(string AccessToken, DateTimeOffset ExpiresAt);
+
     [ApiController]
     [Authorize]
     [Route("api/[controller]")]
@@ -34,12 +49,6 @@ namespace Overwurd.Web.Controllers
         }
 
         private const string InvalidUserNameOrPasswordMessage = "You have entered an invalid username or password. Please double-check and try again.";
-
-        [UsedImplicitly]
-        public record RegisterRequestParameters(string UserName, string Password, string FirstName, string LastName);
-
-        [UsedImplicitly]
-        public record LoginResult(long Id, string UserName, string FirstName, string LastName, string AccessToken, string RefreshToken, DateTimeOffset AccessTokenExpiresAt);
 
         [AllowAnonymous]
         [HttpPost]
@@ -92,12 +101,6 @@ namespace Overwurd.Web.Controllers
             ));
         }
 
-        [UsedImplicitly]
-        public record RefreshTokenRequestParameters(string AccessToken, string RefreshToken);
-
-        [UsedImplicitly]
-        public record RefreshTokenResult(string AccessToken, DateTimeOffset ExpiresAt);
-
         [AllowAnonymous]
         [HttpPost]
         [Route("refresh")]
@@ -130,9 +133,6 @@ namespace Overwurd.Web.Controllers
                 return BadRequest();
             }
         }
-
-        [UsedImplicitly]
-        public record LoginRequestParameters(string UserName, string Password);
 
         [AllowAnonymous]
         [HttpPost]

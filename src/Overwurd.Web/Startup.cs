@@ -1,4 +1,6 @@
 using System;
+using System.Reflection;
+using FluentValidation.AspNetCore;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -32,7 +34,8 @@ namespace Overwurd.Web
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+            services.AddControllersWithViews()
+                    .AddFluentValidation(x => x.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()));
             services.AddSpaStaticFiles(staticFilesOptions => { staticFilesOptions.RootPath = "ClientApp/build"; });
 
             var jwtConfigurationJson = configuration.GetSection("Jwt").Get<JwtConfigurationJson>();
