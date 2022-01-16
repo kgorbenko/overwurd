@@ -8,6 +8,7 @@ WORKDIR /src
 COPY *.props .
 COPY *.sln .
 COPY Overwurd.Web/Overwurd.Web.csproj Overwurd.Web/
+COPY Overwurd.Web.Tests/Overwurd.Web.Tests.csproj Overwurd.Web.Tests/
 COPY Overwurd.Model/Overwurd.Model.csproj Overwurd.Model/
 COPY Overwurd.Model.Tests/Overwurd.Model.Tests.csproj Overwurd.Model.Tests/
 RUN dotnet restore
