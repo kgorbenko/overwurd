@@ -22,12 +22,13 @@ namespace Overwurd.Model.Tests
 
             var connectionString = TestConfiguration.GetConnectionString("DefaultTest");
             ContextOptions = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseNpgsql(
-                    connectionString,
-                    builder => builder.MigrationsHistoryTable(
-                        ApplicationDbContext.MigrationsHistoryTableName,
-                        ApplicationDbContext.SchemaName))
-                .Options;
+                             .UseNpgsql(connectionString, builder =>
+                             {
+                                 builder.MigrationsHistoryTable(ApplicationDbContext.MigrationsHistoryTableName,
+                                                                ApplicationDbContext.SchemaName);
+                                 builder.RemoteCertificateValidationCallback((_, _, _, _) => true);
+                             })
+                             .Options;
         }
 
         protected virtual async Task CleanDatabase()
