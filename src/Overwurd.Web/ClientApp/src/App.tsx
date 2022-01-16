@@ -1,11 +1,65 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout';
-import { Home } from './components/Home';
+import { Home } from './pages/Home';
+import { useCurrentDateTime } from './hooks/use-current-date-time';
+import { RequireAuth } from './components/RequireAuth';
+import { SignInPage } from './pages/SignInPage';
+import { NotFound } from './pages/NotFound';
+import { SignUpPage } from './pages/SignUpPage';
+import { useAuth } from './hooks/use-auth';
+import { withDisableAsync, withLoadingAsync } from './utils/misc';
+import { SignOutPage } from './pages/SignOutPage';
+import { CenteredCircularProgress } from './components/CenteredCircularProgress';
 
-export const App = () =>
-    <Layout>
+export const Protected = () => <h1>Protected</h1>;
+
+export const App = () => {
+    const now = useCurrentDateTime(1000);
+    const auth = useAuth(now);
+
+    const [isLoading, setLoading] = React.useState<boolean>(false);
+    const [shouldAutoRefreshToken, setShouldAutoRefreshToken] = React.useState<boolean>(false);
+
+    React.useEffect(() => {
+        (async () => {
+            await withLoadingAsync(setLoading, async () => {
+                if (auth.canRefreshAccessToken) {
+                    await auth.refreshAccessTokenAsync();
+                }
+                setShouldAutoRefreshToken(true);
+            });
+        })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    React.useEffect(() => {
+        (async () => {
+            if (shouldAutoRefreshToken && auth.canRefreshAccessToken) {
+                await withDisableAsync(setShouldAutoRefreshToken, async () => {
+                    await auth.refreshAccessTokenAsync();
+                });
+            }
+        })();
+    }, [shouldAutoRefreshToken, auth, auth.canRefreshAccessToken]);
+
+    if (isLoading) {
+        return <CenteredCircularProgress />;
+    }
+
+    return (
         <Routes>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Layout />}>
+                <Route index element={<Home />} />
+                <Route path="protected" element={<RequireAuth now={now}><Protected /></RequireAuth>} />
+            </Route>
+            <Route path="auth">
+                <Route index element={<NotFound />} />
+                <Route path="signin" element={<SignInPage />}/>
+                <Route path="signup" element={<SignUpPage />}/>
+                <Route path="signout" element={<SignOutPage />}/>
+            </Route>
+            <Route path="*" element={<NotFound />} />
         </Routes>
-    </Layout>;
+    );
+}
