@@ -52,8 +52,8 @@ namespace Overwurd.Web.Controllers
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequestParameters parameters, CancellationToken cancellationToken)
+        [Route("signup")]
+        public async Task<IActionResult> SignUp([FromBody] RegisterRequestParameters parameters, CancellationToken cancellationToken)
         {
             var now = DateTimeOffset.UtcNow.TrimSeconds();
             var existingUser = await userManager.FindByNameAsync(parameters.UserName);
@@ -61,7 +61,7 @@ namespace Overwurd.Web.Controllers
             if (existingUser is not null)
             {
                 logger.LogInformation("Unsuccessful attempt to register a new user. Following UserName exists already: {UserName}", parameters.UserName);
-                ModelState.AddModelError(nameof(parameters.UserName), "Provided UserName is occupied. Please enter a new one.");
+                ModelState.AddModelError(nameof(parameters.UserName), "Provided User name is occupied. Please enter a new one.");
                 return BadRequest(ModelState);
             }
 
@@ -136,8 +136,8 @@ namespace Overwurd.Web.Controllers
 
         [AllowAnonymous]
         [HttpPost]
-        [Route("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestParameters parameters, CancellationToken cancellationToken)
+        [Route("signin")]
+        public async Task<IActionResult> SignIn([FromBody] LoginRequestParameters parameters, CancellationToken cancellationToken)
         {
             var now = DateTimeOffset.UtcNow.TrimSeconds();
 
@@ -155,7 +155,7 @@ namespace Overwurd.Web.Controllers
             {
                 ModelState.AddModelError(nameof(parameters.UserName), InvalidUserNameOrPasswordMessage);
                 logger.LogInformation("Unsuccessful attempt to login from User #{UserId}. Invalid password provided", user.Id);
-                return BadRequest();
+                return BadRequest(ModelState);
             }
 
             var tokenPairData = await jwtAuthService.GenerateTokensAsync(user.Id,
