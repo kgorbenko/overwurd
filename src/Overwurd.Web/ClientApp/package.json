@@ -1,8 +1,14 @@
 {
   "name": "overwurd.web",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.7.1",
+    "@emotion/styled": "^11.6.0",
+    "@fontsource/roboto": "^4.5.1",
+    "@mui/icons-material": "^5.2.5",
+    "@mui/material": "^5.2.8",
+    "dayjs": "^1.10.7",
     "eslint": "7.32.0",
     "merge": "2.1.1",
     "oidc-client": "1.11.5",
@@ -14,6 +20,8 @@
     "rimraf": "3.0.2"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^5.16.1",
+    "@testing-library/react": "^12.1.2",
     "@types/jest": "27.0.3",
     "@types/node": "16.11.10",
     "@types/react": "17.0.37",
@@ -27,9 +35,18 @@
     "extends": "react-app",
     "rules": {
       "no-trailing-spaces": "error",
-      "indent": ["error", 4],
-      "quotes": ["error", "single"],
-      "jsx-quotes": ["error", "prefer-double"],
+      "indent": [
+        "error",
+        4
+      ],
+      "quotes": [
+        "error",
+        "single"
+      ],
+      "jsx-quotes": [
+        "error",
+        "prefer-double"
+      ],
       "no-unused-vars": "error"
     }
   },

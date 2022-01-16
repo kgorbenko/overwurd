@@ -11,7 +11,7 @@ namespace Overwurd.Model.Repositories
 {
     public class OverwurdRepository<T, TContext> : IOverwurdRepository<T>
         where T : class, IEntityWithNumericId
-        where TContext : OverwurdDbContext
+        where TContext : ApplicationDbContext
     {
         private readonly DbContext dbContext;
         private readonly DbSet<T> dbSet;
@@ -22,7 +22,7 @@ namespace Overwurd.Model.Repositories
             dbSet          = dbContext.Set<T>();
         }
 
-        public async Task<T> FindByIdAsync(long id, CancellationToken cancellationToken = default)
+        public async Task<T> FindByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             return await dbSet.FindAsync(new object[] { id }, cancellationToken);
         }

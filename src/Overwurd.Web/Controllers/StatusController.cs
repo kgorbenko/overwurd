@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Overwurd.Model;
@@ -12,14 +13,15 @@ namespace Overwurd.Web.Controllers
     public record StatusViewModel(string Version, string Environment, string LastMigration);
 
     [ApiController]
+    [Authorize]
     [Route("api/status")]
     public class StatusController : Controller
     {
-        private readonly OverwurdDbContext dbContext;
+        private readonly ApplicationDbContext dbContext;
         private readonly IWebHostEnvironment webHostEnvironment;
 
         public StatusController([NotNull] IWebHostEnvironment webHostEnvironment,
-                                [NotNull] OverwurdDbContext dbContext)
+                                [NotNull] ApplicationDbContext dbContext)
         {
             this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             this.webHostEnvironment = webHostEnvironment ?? throw new ArgumentNullException(nameof(webHostEnvironment));

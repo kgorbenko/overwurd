@@ -1,9 +1,10 @@
 using System;
 using JetBrains.Annotations;
+using Overwurd.Model.Helpers;
 
 namespace Overwurd.Model.Models {
     public class Vocabulary : IEntity {
-        public long Id { get; [UsedImplicitly] private set; }
+        public int Id { get; [UsedImplicitly] private set; }
 
         public DateTimeOffset CreatedAt { get; [UsedImplicitly] private set; }
 
@@ -27,9 +28,7 @@ namespace Overwurd.Model.Models {
 
         public Vocabulary(string name) {
             Name = name;
-
-            var now = DateTimeOffset.Now;
-            CreatedAt = new DateTimeOffset(year: now.Year, month: now.Month, day: now.Day, hour: now.Hour, minute: now.Minute, second: now.Second, offset: now.Offset);
+            CreatedAt = DateTimeOffset.Now.TrimSeconds();
         }
     }
 }

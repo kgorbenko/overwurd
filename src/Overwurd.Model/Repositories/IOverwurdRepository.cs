@@ -9,7 +9,7 @@ namespace Overwurd.Model.Repositories
 {
 public interface IOverwurdRepository<T> where T: IEntityWithNumericId
     {
-        Task<T> FindByIdAsync(long id, CancellationToken cancellationToken = default);
+        Task<T> FindByIdAsync(int id, CancellationToken cancellationToken = default);
 
         Task<OverwurdPaginationResult<T>> PaginateByAsync(Expression<Func<T, bool>> predicate, int page, int pageSize, CancellationToken cancellationToken = default);
 

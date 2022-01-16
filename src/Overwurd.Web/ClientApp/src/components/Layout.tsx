@@ -1,14 +1,9 @@
 import React from 'react';
 import { NavMenu } from './NavMenu';
+import { Outlet } from 'react-router-dom';
 
-type LayoutProps = {
-    children?: React.ReactNode | undefined;
-}
-
-export const Layout: React.FunctionComponent = ({
-    children
-}: LayoutProps) =>
+export const Layout: React.FunctionComponent = () =>
     <div>
         <NavMenu />
-        {children}
+        <Outlet />
     </div>;
