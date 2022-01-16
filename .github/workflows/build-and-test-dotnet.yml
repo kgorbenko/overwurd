@@ -27,4 +27,4 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
       env:
-        ConnectionStrings__TestDefault: ${{secrets.POSTGRESQL_TEST_CONNECTION_STRING}}
+        ConnectionStrings__DefaultTest: ${{secrets.POSTGRESQL_TEST_CONNECTION_STRING}}

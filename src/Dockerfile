@@ -17,7 +17,7 @@ RUN dotnet build -c Release -p:BuildNumber=$BUILD_NUMBER --no-restore
 
 FROM build as test
 ARG CONNECTION_STRING
-ENV ConnectionStrings__TestDefault=$CONNECTION_STRING
+ENV ConnectionStrings__DefaultTest=$CONNECTION_STRING
 WORKDIR /src
 RUN dotnet test -c Release --no-build
 
