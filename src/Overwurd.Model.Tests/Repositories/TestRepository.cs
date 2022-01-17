@@ -1,18 +1,15 @@
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using Overwurd.Model.Models;
 using Overwurd.Model.Repositories;
-using Overwurd.Model.Tests.EqualityComparers;
+using static Overwurd.Model.Tests.EqualityComparers.VocabularyComparers;
 
 namespace Overwurd.Model.Tests.Repositories
 {
     public class TestRepository : BaseModelDatabaseDependentTestFixture
     {
-        private readonly IEqualityComparer<Vocabulary> vocabulariesComparer = new VocabulariesComparerForTests();
-
         [Test]
         public async Task TestAddAsync()
         {
@@ -32,7 +29,7 @@ namespace Overwurd.Model.Tests.Repositories
                 var expected = new[] { vocabulary1, vocabulary2 };
                 var actual = await context.Vocabularies.ToArrayAsync();
 
-                Assert.That(actual, Is.EqualTo(expected).Using(vocabulariesComparer));
+                Assert.That(actual, Is.EqualTo(expected).Using(VocabularyComparer));
             }
         }
 
@@ -54,7 +51,7 @@ namespace Overwurd.Model.Tests.Repositories
             {
                 var actual = await context.Vocabularies.ToArrayAsync();
 
-                Assert.That(actual, Is.EqualTo(new[] { vocabulary1, vocabulary2, vocabulary3 }).Using(vocabulariesComparer));
+                Assert.That(actual, Is.EqualTo(new[] { vocabulary1, vocabulary2, vocabulary3 }).Using(VocabularyComparer));
             }
         }
 
@@ -76,7 +73,7 @@ namespace Overwurd.Model.Tests.Repositories
                 var repository = new Repository<Vocabulary, ApplicationDbContext>(context);
                 var actual = await repository.GetAllAsync();
 
-                Assert.That(actual, Is.EqualTo(new[] { vocabulary1, vocabulary2, vocabulary3 }).Using(vocabulariesComparer));
+                Assert.That(actual, Is.EqualTo(new[] { vocabulary1, vocabulary2, vocabulary3 }).Using(VocabularyComparer));
             }
         }
 
@@ -97,9 +94,9 @@ namespace Overwurd.Model.Tests.Repositories
             {
                 var repository = new Repository<Vocabulary, ApplicationDbContext>(context);
 
-                Assert.That(await repository.FindByIdAsync(vocabulary1.Id), Is.EqualTo(vocabulary1).Using(vocabulariesComparer));
-                Assert.That(await repository.FindByIdAsync(vocabulary2.Id), Is.EqualTo(vocabulary2).Using(vocabulariesComparer));
-                Assert.That(await repository.FindByIdAsync(vocabulary3.Id), Is.EqualTo(vocabulary3).Using(vocabulariesComparer));
+                Assert.That(await repository.FindByIdAsync(vocabulary1.Id), Is.EqualTo(vocabulary1).Using(VocabularyComparer));
+                Assert.That(await repository.FindByIdAsync(vocabulary2.Id), Is.EqualTo(vocabulary2).Using(VocabularyComparer));
+                Assert.That(await repository.FindByIdAsync(vocabulary3.Id), Is.EqualTo(vocabulary3).Using(VocabularyComparer));
             }
 
         }
@@ -121,8 +118,8 @@ namespace Overwurd.Model.Tests.Repositories
             {
                 var repository = new Repository<Vocabulary, ApplicationDbContext>(context);
 
-                Assert.That(await repository.FindByAsync(x => x.Id == vocabulary1.Id), Is.EqualTo(new[] { vocabulary1 }).Using(vocabulariesComparer));
-                Assert.That(await repository.FindByAsync(x => x.Name == "Vocabulary 2"), Is.EqualTo(new[] { vocabulary2 }).Using(vocabulariesComparer));
+                Assert.That(await repository.FindByAsync(x => x.Id == vocabulary1.Id), Is.EqualTo(new[] { vocabulary1 }).Using(VocabularyComparer));
+                Assert.That(await repository.FindByAsync(x => x.Name == "Vocabulary 2"), Is.EqualTo(new[] { vocabulary2 }).Using(VocabularyComparer));
             }
         }
 
@@ -152,10 +149,10 @@ namespace Overwurd.Model.Tests.Repositories
             await using (var context = new ApplicationDbContext(ContextOptions))
             {
                 var vocabulary1Updated = await context.Vocabularies.FindAsync(vocabulary1.Id);
-                Assert.That(vocabulary1Updated, Is.EqualTo(vocabulary1).Using(vocabulariesComparer));
+                Assert.That(vocabulary1Updated, Is.EqualTo(vocabulary1).Using(VocabularyComparer));
 
                 var vocabulary2Updated = await context.Vocabularies.FindAsync(vocabulary2.Id);
-                Assert.That(vocabulary2Updated, Is.EqualTo(vocabulary2).Using(vocabulariesComparer));
+                Assert.That(vocabulary2Updated, Is.EqualTo(vocabulary2).Using(VocabularyComparer));
             }
         }
 
@@ -190,10 +187,10 @@ namespace Overwurd.Model.Tests.Repositories
             await using (var context = new ApplicationDbContext(ContextOptions))
             {
                 var vocabulary1Updated = await context.Vocabularies.FindAsync(vocabulary1.Id);
-                Assert.That(vocabulary1Updated, Is.EqualTo(vocabulary1Found).Using(vocabulariesComparer));
+                Assert.That(vocabulary1Updated, Is.EqualTo(vocabulary1Found).Using(VocabularyComparer));
 
                 var vocabulary2Updated = await context.Vocabularies.FindAsync(vocabulary2.Id);
-                Assert.That(vocabulary2Updated, Is.EqualTo(vocabulary2Found).Using(vocabulariesComparer));
+                Assert.That(vocabulary2Updated, Is.EqualTo(vocabulary2Found).Using(VocabularyComparer));
             }
         }
 
@@ -219,7 +216,7 @@ namespace Overwurd.Model.Tests.Repositories
 
             await using (var context = new ApplicationDbContext(ContextOptions))
             {
-                Assert.That(await context.Vocabularies.ToArrayAsync(), Is.EqualTo(new[] { vocabulary2, vocabulary3 }).Using(vocabulariesComparer));
+                Assert.That(await context.Vocabularies.ToArrayAsync(), Is.EqualTo(new[] { vocabulary2, vocabulary3 }).Using(VocabularyComparer));
             }
         }
 
@@ -254,7 +251,7 @@ namespace Overwurd.Model.Tests.Repositories
                 var repository = new Repository<Vocabulary, ApplicationDbContext>(context);
 
                 await repository.RemoveRangeAsync(new[] { vocabulary1, vocabulary3 }.ToImmutableArray());
-                Assert.That(await context.Vocabularies.ToArrayAsync(), Is.EqualTo(new[] { vocabulary2, vocabulary4 }).Using(vocabulariesComparer));
+                Assert.That(await context.Vocabularies.ToArrayAsync(), Is.EqualTo(new[] { vocabulary2, vocabulary4 }).Using(VocabularyComparer));
             }
         }
 
@@ -284,15 +281,15 @@ namespace Overwurd.Model.Tests.Repositories
 
                 var firstPage = await repository.PaginateByAsync(x => true, page: 1, pageSize: 3);
                 Assert.That(firstPage.TotalCount, Is.EqualTo(8));
-                Assert.That(firstPage.Results, Is.EqualTo(new[] { vocabulary1, vocabulary2, vocabulary3 }).Using(vocabulariesComparer));
+                Assert.That(firstPage.Results, Is.EqualTo(new[] { vocabulary1, vocabulary2, vocabulary3 }).Using(VocabularyComparer));
 
                 var secondPage = await repository.PaginateByAsync(x => true, page: 2, pageSize: 3);
                 Assert.That(secondPage.TotalCount, Is.EqualTo(8));
-                Assert.That(secondPage.Results, Is.EqualTo(new[] { vocabulary4, vocabulary5, vocabulary6 }).Using(vocabulariesComparer));
+                Assert.That(secondPage.Results, Is.EqualTo(new[] { vocabulary4, vocabulary5, vocabulary6 }).Using(VocabularyComparer));
 
                 var thirdPage = await repository.PaginateByAsync(x => true, page: 3, pageSize: 3);
                 Assert.That(thirdPage.TotalCount, Is.EqualTo(8));
-                Assert.That(thirdPage.Results, Is.EqualTo(new[] { vocabulary7, vocabulary8 }).Using(vocabulariesComparer));
+                Assert.That(thirdPage.Results, Is.EqualTo(new[] { vocabulary7, vocabulary8 }).Using(VocabularyComparer));
 
                 var fourthPage = await repository.PaginateByAsync(x => true, page: 4, pageSize: 3);
                 Assert.That(fourthPage.TotalCount, Is.EqualTo(8));
