@@ -55,7 +55,7 @@ namespace Overwurd.Web.Controllers
         [Route("signup")]
         public async Task<IActionResult> SignUp([FromBody] RegisterRequestParameters parameters, CancellationToken cancellationToken)
         {
-            var now = DateTimeOffset.UtcNow.TrimSeconds();
+            var now = DateTimeOffsetHelper.NowUtcSeconds();
             var existingUser = await userManager.FindByNameAsync(parameters.UserName);
 
             if (existingUser is not null)
@@ -108,7 +108,7 @@ namespace Overwurd.Web.Controllers
         {
             try
             {
-                var now = DateTimeOffset.UtcNow.TrimSeconds();
+                var now = DateTimeOffsetHelper.NowUtcSeconds();
 
                 var tokenPairData = await jwtAuthService.RefreshAccessTokenAsync(parameters.AccessToken,
                                                                                  parameters.RefreshToken,
@@ -139,7 +139,7 @@ namespace Overwurd.Web.Controllers
         [Route("signin")]
         public async Task<IActionResult> SignIn([FromBody] LoginRequestParameters parameters, CancellationToken cancellationToken)
         {
-            var now = DateTimeOffset.UtcNow.TrimSeconds();
+            var now = DateTimeOffsetHelper.NowUtcSeconds();
 
             var user = await userManager.FindByNameAsync(parameters.UserName);
 
