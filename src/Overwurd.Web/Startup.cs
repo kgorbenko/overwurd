@@ -92,10 +92,10 @@ namespace Overwurd.Web
             services.AddTransient<IGuidProvider, GuidProvider>();
             services.AddTransient<IJwtRefreshTokenProvider, JwtRefreshTokenProvider>();
             services.AddTransient<IJwtAuthService, JwtAuthService>();
-            services.AddTransient<IOverwurdRepository<Vocabulary>, OverwurdRepository<Vocabulary, ApplicationDbContext>>();
-            services.AddTransient<IReadOnlyOverwurdRepository<Vocabulary>, ReadOnlyOverwurdRepository<Vocabulary, ApplicationDbContext>>();
-            services.AddTransient<IOverwurdRepository<User>, OverwurdRepository<User, ApplicationDbContext>>();
-            services.AddTransient<IReadOnlyOverwurdRepository<User>, ReadOnlyOverwurdRepository<User, ApplicationDbContext>>();
+            services.AddTransient<IRepository<Vocabulary>, Repository<Vocabulary, ApplicationDbContext>>();
+            services.AddTransient<IReadOnlyRepository<Vocabulary>, ReadOnlyRepository<Vocabulary, ApplicationDbContext>>();
+            services.AddTransient<IRepository<User>, Repository<User, ApplicationDbContext>>();
+            services.AddTransient<IReadOnlyRepository<User>, ReadOnlyRepository<User, ApplicationDbContext>>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

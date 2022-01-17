@@ -6,14 +6,14 @@ using Overwurd.Model.Models;
 using Overwurd.Model.Repositories;
 
 namespace Overwurd.Model.Tests.EqualityComparers {
-    public class VocabulariesPaginationResultComparerForTests : IEqualityComparer<OverwurdPaginationResult<Vocabulary>> {
+    public class VocabulariesPaginationResultComparerForTests : IEqualityComparer<PaginationResult<Vocabulary>> {
         private readonly IEqualityComparer<Vocabulary> vocabulariesComparer;
 
         public VocabulariesPaginationResultComparerForTests([NotNull] IEqualityComparer<Vocabulary> vocabulariesComparer) {
             this.vocabulariesComparer = vocabulariesComparer ?? throw new ArgumentNullException(nameof(vocabulariesComparer));
         }
 
-        public bool Equals(OverwurdPaginationResult<Vocabulary> x, OverwurdPaginationResult<Vocabulary> y) {
+        public bool Equals(PaginationResult<Vocabulary> x, PaginationResult<Vocabulary> y) {
             if (ReferenceEquals(x, y))
             {
                 return true;
@@ -37,7 +37,7 @@ namespace Overwurd.Model.Tests.EqualityComparers {
             return x.Results.SequenceEqual(y.Results, vocabulariesComparer) && x.TotalCount == y.TotalCount;
         }
 
-        public int GetHashCode(OverwurdPaginationResult<Vocabulary> obj) {
+        public int GetHashCode(PaginationResult<Vocabulary> obj) {
             return HashCode.Combine(obj.Results, obj.TotalCount);
         }
     }

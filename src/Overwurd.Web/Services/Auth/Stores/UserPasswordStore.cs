@@ -11,9 +11,9 @@ namespace Overwurd.Web.Services.Auth.Stores
 {
     public class UserPasswordStore : IUserPasswordStore<User>
     {
-        private readonly IOverwurdRepository<User> userRepository;
+        private readonly IRepository<User> userRepository;
 
-        public UserPasswordStore([NotNull] IOverwurdRepository<User> userRepository)
+        public UserPasswordStore([NotNull] IRepository<User> userRepository)
         {
             this.userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
