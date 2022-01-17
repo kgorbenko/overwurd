@@ -9,13 +9,13 @@ using Microsoft.EntityFrameworkCore;
 using Overwurd.Model.Models;
 
 namespace Overwurd.Model.Repositories {
-    public class ReadOnlyOverwurdRepository<T, TContext> : IReadOnlyOverwurdRepository<T>
+    public class ReadOnlyRepository<T, TContext> : IReadOnlyRepository<T>
         where T : class, IEntityWithNumericId
         where TContext : DbContext {
         private readonly DbContext dbContext;
         private readonly DbSet<T> dbSet;
 
-        public ReadOnlyOverwurdRepository(TContext dbContext) {
+        public ReadOnlyRepository(TContext dbContext) {
             this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             dbSet = dbContext.Set<T>();
         }
@@ -25,7 +25,7 @@ namespace Overwurd.Model.Repositories {
                 .SingleOrDefault();
         }
 
-        public async Task<OverwurdPaginationResult<T>> PaginateAsync(Expression<Func<T, bool>> predicate, int page, int pageSize,
+        public async Task<PaginationResult<T>> PaginateAsync(Expression<Func<T, bool>> predicate, int page, int pageSize,
                                                                      CancellationToken cancellationToken = default) {
             var query = dbSet.Where(predicate);
             var results = await query.Select(x => new { Entity = x, TotalCount = query.Count() })
@@ -34,7 +34,7 @@ namespace Overwurd.Model.Repositories {
                                      .AsNoTracking()
                                      .ToArrayAsync(cancellationToken: cancellationToken);
 
-            return new OverwurdPaginationResult<T>(
+            return new PaginationResult<T>(
                 results.Select(x => x.Entity).ToImmutableArray(),
                 results.FirstOrDefault()?.TotalCount ?? query.Count());
         }
