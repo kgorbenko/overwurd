@@ -1,8 +1,9 @@
 import * as React from 'react';
-import { CircularProgress, CircularProgressProps, Grid } from '@mui/material';
+import { CircularProgress, CircularProgressProps } from '@mui/material';
+import { Centered } from './Centered';
 
 export const CenteredCircularProgress = (props: CircularProgressProps) => (
-    <Grid container direction="column" alignItems="center" justifyContent="center" style={{ minHeight: '100vh' }}>
-        <CircularProgress size={70} />
-    </Grid>
+    <Centered>
+        <CircularProgress size={70} {...props} />
+    </Centered>
 );

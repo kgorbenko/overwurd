@@ -56,6 +56,7 @@ export const SignUpPage = () => {
                         required
                         autoComplete="given-name"
                         autoFocus
+                        size="small"
                         fullWidth
                     />
                 </Grid>
@@ -66,6 +67,7 @@ export const SignUpPage = () => {
                         label="Last Name"
                         required
                         autoComplete="family-name"
+                        size="small"
                         fullWidth
                     />
                 </Grid>
@@ -77,10 +79,10 @@ export const SignUpPage = () => {
                         required
                         autoComplete="username"
                         helperText="Valid characters are letters, numbers and '-', '.', '_', '@' and '+'"
+                        size="small"
+                        margin="normal"
                         fullWidth
                     />
-                </Grid>
-                <Grid item xs={12}>
                     <TextField
                         type="password"
                         id="password"
@@ -89,10 +91,10 @@ export const SignUpPage = () => {
                         required
                         autoComplete="new-password"
                         helperText="Minimum number of characters is 6. Password should contain lowercase and uppercase characters as well as numbers and special characters"
+                        size="small"
+                        margin="normal"
                         fullWidth
                     />
-                </Grid>
-                <Grid item xs={12}>
                     <TextField
                         type="password"
                         id="confirmPassword"
@@ -100,6 +102,8 @@ export const SignUpPage = () => {
                         label="Confirm password"
                         required
                         autoComplete="new-password"
+                        size="small"
+                        margin="normal"
                         fullWidth
                     />
                 </Grid>

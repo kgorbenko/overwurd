@@ -33,7 +33,8 @@ export const SignInPage = () => {
                 id="userName"
                 name="userName"
                 autoComplete="username"
-                margin="dense"
+                margin="normal"
+                size="small"
                 autoFocus
                 fullWidth
             />
@@ -43,8 +44,9 @@ export const SignInPage = () => {
                 label="Password"
                 id="password"
                 name="password"
-                margin="dense"
                 autoComplete="current-password"
+                margin="normal"
+                size="small"
                 fullWidth
             />
             <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
