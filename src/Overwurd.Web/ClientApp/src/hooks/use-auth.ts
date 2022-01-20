@@ -11,7 +11,7 @@ import {
 } from '../services/auth-service';
 import { Dayjs } from 'dayjs';
 
-interface ISignInResult {
+export interface ISignInResult {
     isSuccess: boolean;
     isApiError: boolean;
     validationErrors: string[];
