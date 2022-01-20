@@ -14,8 +14,8 @@ export const CenteredAuthForm = (props: React.PropsWithChildren<ICenteredAuthFor
     <Centered>
         <Container component="main" maxWidth="xs">
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
-                <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-                    <AccountCircleIcon />
+                <Avatar sx={{ m: 1, bgcolor: 'primary.main' }} style={{ width: '50px', height: '50px' }}>
+                    <AccountCircleIcon style={{ width: '1.5em', height: '1.5em', color: 'white' }} />
                 </Avatar>
                 <Typography component="h1" variant="h5" sx={{ mb: 2 }}>
                     {props.title}

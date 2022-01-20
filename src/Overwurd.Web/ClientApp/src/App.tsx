@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { Home } from './pages/Home';
 import { useCurrentDateTime } from './hooks/use-current-date-time';
@@ -11,6 +11,9 @@ import { useAuth } from './hooks/use-auth';
 import { withDisableAsync, withLoadingAsync } from './utils/misc';
 import { SignOutPage } from './pages/SignOutPage';
 import { CenteredCircularProgress } from './components/CenteredCircularProgress';
+import { AppContextProvider } from './AppContextProvider';
+import { CssBaseline, ThemeProvider } from '@mui/material';
+import { theme } from './theme';
 
 export const Protected = () => <h1>Protected</h1>;
 
@@ -20,6 +23,8 @@ export const App = () => {
 
     const [isLoading, setLoading] = React.useState<boolean>(false);
     const [shouldAutoRefreshToken, setShouldAutoRefreshToken] = React.useState<boolean>(false);
+
+    const baseUrl = document.getElementsByTagName('base')[0].getAttribute('href') ?? undefined;
 
     React.useEffect(() => {
         (async () => {
@@ -48,18 +53,25 @@ export const App = () => {
     }
 
     return (
-        <Routes>
-            <Route path="/" element={<Layout />}>
-                <Route index element={<Home />} />
-                <Route path="protected" element={<RequireAuth now={now}><Protected /></RequireAuth>} />
-            </Route>
-            <Route path="auth">
-                <Route index element={<NotFound />} />
-                <Route path="signin" element={<SignInPage />}/>
-                <Route path="signup" element={<SignUpPage />}/>
-                <Route path="signout" element={<SignOutPage />}/>
-            </Route>
-            <Route path="*" element={<NotFound />} />
-        </Routes>
+        <BrowserRouter basename={baseUrl}>
+            <AppContextProvider>
+                <ThemeProvider theme={theme}>
+                    <CssBaseline />
+                    <Routes>
+                        <Route path="/" element={<Layout />}>
+                            <Route index element={<Home />} />
+                            <Route path="protected" element={<RequireAuth now={now}><Protected /></RequireAuth>} />
+                        </Route>
+                        <Route path="auth" element={<Layout hideControls />}>
+                            <Route index element={<NotFound />} />
+                            <Route path="signin" element={<SignInPage />}/>
+                            <Route path="signup" element={<SignUpPage />}/>
+                            <Route path="signout" element={<SignOutPage />}/>
+                        </Route>
+                        <Route path="*" element={<NotFound />} />
+                    </Routes>
+                </ThemeProvider>
+            </AppContextProvider>
+        </BrowserRouter>
     );
 }

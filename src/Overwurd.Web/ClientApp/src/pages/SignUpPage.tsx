@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Button, Grid, TextField, Typography } from '@mui/material';
-import { Link, useLocation } from 'react-router-dom';
+import { Button, Grid, TextField, Link } from '@mui/material';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { ISignInResult, useAuth } from '../hooks/use-auth';
 import dayjs from 'dayjs';
 import { AuthFormProcessor, IValidationResult } from '../components/AuthFormProcessor';
@@ -54,6 +54,7 @@ export const SignUpPage = () => {
                         name="firstName"
                         label="First Name"
                         required
+                        variant="filled"
                         autoComplete="given-name"
                         autoFocus
                         size="small"
@@ -66,6 +67,7 @@ export const SignUpPage = () => {
                         name="lastName"
                         label="Last Name"
                         required
+                        variant="filled"
                         autoComplete="family-name"
                         size="small"
                         fullWidth
@@ -78,6 +80,7 @@ export const SignUpPage = () => {
                         label="User name"
                         required
                         autoComplete="username"
+                        variant="filled"
                         helperText="Valid characters are letters, numbers and '-', '.', '_', '@' and '+'"
                         size="small"
                         margin="normal"
@@ -90,6 +93,7 @@ export const SignUpPage = () => {
                         label="Password"
                         required
                         autoComplete="new-password"
+                        variant="filled"
                         helperText="Minimum number of characters is 6. Password should contain lowercase and uppercase characters as well as numbers and special characters"
                         size="small"
                         margin="normal"
@@ -101,6 +105,7 @@ export const SignUpPage = () => {
                         name="confirmPassword"
                         label="Confirm password"
                         required
+                        variant="standard"
                         autoComplete="new-password"
                         size="small"
                         margin="normal"
@@ -111,11 +116,9 @@ export const SignUpPage = () => {
             <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
                 Sign Up
             </Button>
-            <Typography variant="body2" align="right">
-                <Link to="/auth/signin" state={{ from: location.state?.from }}>
-                    Already have an account? Sign in
-                </Link>
-            </Typography>
+            <Link component={RouterLink as any} to="/auth/signin" state={{ from: location.state?.from }}>
+                Already have an account? Sign in
+            </Link>
         </AuthFormProcessor>
     );
 }

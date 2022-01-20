@@ -1,7 +1,7 @@
 import * as React from 'react';
 import dayjs from 'dayjs';
-import { Button, TextField, Typography } from '@mui/material';
-import { Link, useLocation } from 'react-router-dom';
+import { Button, TextField, Link } from '@mui/material';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { ISignInResult, useAuth } from '../hooks/use-auth';
 import { AuthFormProcessor } from '../components/AuthFormProcessor';
 
@@ -32,7 +32,7 @@ export const SignInPage = () => {
                 label="User name"
                 id="userName"
                 name="userName"
-                autoComplete="username"
+                variant="filled"
                 margin="normal"
                 size="small"
                 autoFocus
@@ -44,6 +44,7 @@ export const SignInPage = () => {
                 label="Password"
                 id="password"
                 name="password"
+                variant="filled"
                 autoComplete="current-password"
                 margin="normal"
                 size="small"
@@ -52,11 +53,9 @@ export const SignInPage = () => {
             <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
                 Sign In
             </Button>
-            <Typography variant="body2" align="right">
-                <Link to="/auth/signup" state={{ from: location.state?.from }}>
-                    Don't have an account? Sign Up
-                </Link>
-            </Typography>
+            <Link component={RouterLink as any} to="/auth/signup" state={{ from: location.state?.from }}>
+                Don't have an account? Sign Up
+            </Link>
         </AuthFormProcessor>
     );
 }
