@@ -5,21 +5,28 @@ import { Link, useLocation } from 'react-router-dom';
 import { ISignInResult, useAuth } from '../hooks/use-auth';
 import { AuthFormProcessor } from '../components/AuthFormProcessor';
 
+interface ISignInData {
+    userName: string;
+    password: string;
+}
+
 export const SignInPage = () => {
     const { signInAsync } = useAuth(dayjs.utc());
     const location = useLocation();
 
     const from = location.state?.from?.pathname ?? '/';
 
-    const handleSubmit = async (formData: FormData): Promise<ISignInResult> => {
-        return await signInAsync({
-            userName: formData.get('userName') as string,
-            password: formData.get('password') as string
-        });
+    const getDataFromForm = (formData: FormData): ISignInData => ({
+        userName: formData.get('userName') as string,
+        password: formData.get('password') as string
+    });
+
+    const onSubmit = async (signInData: ISignInData): Promise<ISignInResult> => {
+        return await signInAsync(signInData);
     }
 
     return (
-        <AuthFormProcessor title="Sign In" onSubmit={handleSubmit} from={from}>
+        <AuthFormProcessor title="Sign In" onSubmit={onSubmit} getDataFromForm={getDataFromForm} from={from}>
             <TextField
                 required
                 label="User name"

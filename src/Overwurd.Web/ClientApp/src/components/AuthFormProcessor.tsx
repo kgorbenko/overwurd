@@ -6,13 +6,27 @@ import { CenteredAuthForm } from './CenteredAuthForm';
 import { withLoadingAsync } from '../utils/misc';
 import { TopPageLinearProgress } from './TopPageLinearProgress';
 
-interface IAuthFormProcessorProps {
-    title: string;
-    onSubmit: (formData: FormData) => Promise<ISignInResult>;
-    from: string;
+export interface IValidationResult {
+    isValid: boolean;
+    errors: string[];
 }
 
-export const AuthFormProcessor = (props: React.PropsWithChildren<IAuthFormProcessorProps>) => {
+interface IAuthFormProcessorProps<TData> {
+    title: string;
+    from: string;
+    getDataFromForm: (formData: FormData) => TData;
+    onSubmit: (data: TData) => Promise<ISignInResult>;
+    validate?: (data: TData) => IValidationResult;
+}
+
+export const AuthFormProcessor = <T extends object>({
+    title,
+    from,
+    getDataFromForm,
+    validate,
+    onSubmit,
+    children
+}: React.PropsWithChildren<IAuthFormProcessorProps<T>>) => {
     const now = dayjs.utc();
     const { isAuthenticated } = useAuth(now);
 
@@ -22,25 +36,39 @@ export const AuthFormProcessor = (props: React.PropsWithChildren<IAuthFormProces
     const [canRedirectToHome, setCanRedirectToHome] = React.useState<boolean>(true);
     const [shouldRedirectToPreviousPage, setShouldRedirectToPreviousPage] = React.useState<boolean>(isAuthenticated);
 
+    const handleSignIn = async (data: T) => {
+        const { isSuccess, isApiError, validationErrors } = await onSubmit(data);
+
+        if (isSuccess) {
+            setShouldRedirectToPreviousPage(true);
+        } else {
+            setIsApiError(isApiError);
+            setValidationErrors(validationErrors);
+        }
+    }
+
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         await withLoadingAsync(setIsLoading, async () => {
             event.preventDefault();
             setCanRedirectToHome(false);
 
             const formData = new FormData(event.currentTarget);
-            const { isSuccess, isApiError, validationErrors } = await props.onSubmit(formData);
+            const data = getDataFromForm(formData);
 
-            if (isSuccess) {
-                setShouldRedirectToPreviousPage(true);
+            const validationResult = validate !== undefined
+                ? validate(data)
+                : { isValid: true, errors: [] };
+
+            if (!validationResult.isValid) {
+                setValidationErrors(validationResult.errors);
             } else {
-                setIsApiError(isApiError);
-                setValidationErrors(validationErrors);
+                await handleSignIn(data);
             }
         });
     }
 
     if (!isLoading && shouldRedirectToPreviousPage) {
-        return <Navigate to={props.from} replace />;
+        return <Navigate to={from} replace />;
     }
 
     if (isAuthenticated && canRedirectToHome) {
@@ -48,9 +76,9 @@ export const AuthFormProcessor = (props: React.PropsWithChildren<IAuthFormProces
     }
 
     return (
-        <CenteredAuthForm title={props.title} onSubmit={handleSubmit} apiError={isApiError} alerts={validationErrors}>
+        <CenteredAuthForm title={title} onSubmit={handleSubmit} apiError={isApiError} alerts={validationErrors}>
             {isLoading && <TopPageLinearProgress />}
-            {props.children}
+            {children}
         </CenteredAuthForm>
     );
 }

@@ -3,7 +3,16 @@ import { Button, Grid, TextField, Typography } from '@mui/material';
 import { Link, useLocation } from 'react-router-dom';
 import { ISignInResult, useAuth } from '../hooks/use-auth';
 import dayjs from 'dayjs';
-import { AuthFormProcessor } from '../components/AuthFormProcessor';
+import { AuthFormProcessor, IValidationResult } from '../components/AuthFormProcessor';
+import { ISignUpParameters } from '../services/auth-service';
+
+interface ISignUpData {
+    userName: string;
+    password: string;
+    confirmPassword: string;
+    firstName: string;
+    lastName: string;
+}
 
 export const SignUpPage = () => {
     const now = dayjs.utc();
@@ -12,17 +21,32 @@ export const SignUpPage = () => {
 
     const from = location.state?.from?.pathname ?? '/';
 
-    const handleSubmit = async (formData: FormData): Promise<ISignInResult> => {
-        return await signUpAsync({
-            userName: formData.get('userName') as string,
-            password: formData.get('password') as string,
-            firstName: formData.get('firstName') as string,
-            lastName: formData.get('lastName') as string
-        });
+    const getDataFromForm = (formData: FormData): ISignUpData => ({
+        userName: formData.get('userName') as string,
+        password: formData.get('password') as string,
+        confirmPassword: formData.get('confirmPassword') as string,
+        firstName: formData.get('firstName') as string,
+        lastName: formData.get('lastName') as string
+    });
+
+    const validate = (signUpData: ISignUpData): IValidationResult => {
+        return signUpData.password === signUpData.confirmPassword
+            ? { isValid: true, errors: [] }
+            : { isValid: false, errors: ['Entered passwords do not match'] }
+    }
+
+    const onSubmit = async (signUpData: ISignUpData): Promise<ISignInResult> => {
+        const signUpParameters: ISignUpParameters = {
+            userName: signUpData.userName,
+            password: signUpData.password,
+            firstName: signUpData.firstName,
+            lastName: signUpData.lastName
+        };
+        return await signUpAsync(signUpParameters);
     }
 
     return (
-        <AuthFormProcessor title="Sign Up" onSubmit={handleSubmit} from={from}>
+        <AuthFormProcessor title="Sign Up" onSubmit={onSubmit} getDataFromForm={getDataFromForm} validate={validate} from={from}>
             <Grid container spacing={1.5}>
                 <Grid item xs={12} sm={6}>
                     <TextField
@@ -65,6 +89,17 @@ export const SignUpPage = () => {
                         required
                         autoComplete="new-password"
                         helperText="Minimum number of characters is 6. Password should contain lowercase and uppercase characters as well as numbers and special characters"
+                        fullWidth
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <TextField
+                        type="password"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        label="Confirm password"
+                        required
+                        autoComplete="new-password"
                         fullWidth
                     />
                 </Grid>
