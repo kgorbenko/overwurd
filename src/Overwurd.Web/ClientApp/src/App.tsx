@@ -14,6 +14,7 @@ import { CenteredCircularProgress } from './components/CenteredCircularProgress'
 import { AppContextProvider } from './AppContextProvider';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { theme } from './theme';
+import { SignInLayout } from './components/SignInLayout';
 
 export const Protected = () => <h1>Protected</h1>;
 
@@ -62,7 +63,7 @@ export const App = () => {
                             <Route index element={<Home />} />
                             <Route path="protected" element={<RequireAuth now={now}><Protected /></RequireAuth>} />
                         </Route>
-                        <Route path="auth" element={<Layout hideControls />}>
+                        <Route path="auth" element={<SignInLayout />}>
                             <Route index element={<NotFound />} />
                             <Route path="signin" element={<SignInPage />}/>
                             <Route path="signup" element={<SignUpPage />}/>

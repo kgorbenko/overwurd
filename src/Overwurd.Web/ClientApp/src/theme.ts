@@ -10,8 +10,8 @@ export const theme = createTheme({
             main: '#d83148',
         },
         background: {
-            default: '#5c5c5c',
-            paper: '#3d3d3d',
+            default: '#0a0a0a',
+            paper: '#1d2020',
         },
     }
 });

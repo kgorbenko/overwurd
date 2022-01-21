@@ -73,7 +73,7 @@ export const SignUpPage = () => {
                         fullWidth
                     />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={12} style={{ paddingTop: '6px' }}>
                     <TextField
                         id="userName"
                         name="userName"
@@ -83,7 +83,7 @@ export const SignUpPage = () => {
                         variant="filled"
                         helperText="Valid characters are letters, numbers and '-', '.', '_', '@' and '+'"
                         size="small"
-                        margin="normal"
+                        margin="dense"
                         fullWidth
                     />
                     <TextField
@@ -96,7 +96,7 @@ export const SignUpPage = () => {
                         variant="filled"
                         helperText="Minimum number of characters is 6. Password should contain lowercase and uppercase characters as well as numbers and special characters"
                         size="small"
-                        margin="normal"
+                        margin="dense"
                         fullWidth
                     />
                     <TextField
@@ -105,10 +105,10 @@ export const SignUpPage = () => {
                         name="confirmPassword"
                         label="Confirm password"
                         required
-                        variant="standard"
+                        variant="filled"
                         autoComplete="new-password"
                         size="small"
-                        margin="normal"
+                        margin="dense"
                         fullWidth
                     />
                 </Grid>

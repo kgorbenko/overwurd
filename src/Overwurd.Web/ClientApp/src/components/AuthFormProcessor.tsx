@@ -2,7 +2,7 @@ import * as React from 'react';
 import dayjs from 'dayjs';
 import { ISignInResult, useAuth } from '../hooks/use-auth';
 import { Navigate } from 'react-router-dom';
-import { CenteredAuthForm } from './CenteredAuthForm';
+import { AuthFormContainer } from './AuthFormContainer';
 import { withLoadingAsync } from '../utils/misc';
 import { TopPageLinearProgress } from './TopPageLinearProgress';
 
@@ -76,9 +76,9 @@ export const AuthFormProcessor = <T extends object>({
     }
 
     return (
-        <CenteredAuthForm title={title} onSubmit={handleSubmit} apiError={isApiError} alerts={validationErrors}>
+        <AuthFormContainer title={title} onSubmit={handleSubmit} apiError={isApiError} alerts={validationErrors}>
             {isLoading && <TopPageLinearProgress />}
             {children}
-        </CenteredAuthForm>
+        </AuthFormContainer>
     );
 }

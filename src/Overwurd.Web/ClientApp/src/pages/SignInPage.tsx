@@ -33,7 +33,7 @@ export const SignInPage = () => {
                 id="userName"
                 name="userName"
                 variant="filled"
-                margin="normal"
+                margin="dense"
                 size="small"
                 autoFocus
                 fullWidth
@@ -46,7 +46,7 @@ export const SignInPage = () => {
                 name="password"
                 variant="filled"
                 autoComplete="current-password"
-                margin="normal"
+                margin="dense"
                 size="small"
                 fullWidth
             />
