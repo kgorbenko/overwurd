@@ -81,7 +81,7 @@ export const SignUpPage = () => {
                         required
                         autoComplete="username"
                         variant="filled"
-                        helperText="Valid characters are letters, numbers and '-', '.', '_', '@' and '+'"
+                        helperText="Use only letters, digits, -, ., _, @ and +"
                         size="small"
                         margin="dense"
                         fullWidth
@@ -94,7 +94,8 @@ export const SignUpPage = () => {
                         required
                         autoComplete="new-password"
                         variant="filled"
-                        helperText="Minimum number of characters is 6. Password should contain lowercase and uppercase characters as well as numbers and special characters"
+                        // helperText="Minimum number of characters is 6. Password should contain lowercase and uppercase characters as well as numbers and special characters"
+                        helperText="Use at least 6 characters. Uppercase, lowercase, digits and special characters are required"
                         size="small"
                         margin="dense"
                         fullWidth
