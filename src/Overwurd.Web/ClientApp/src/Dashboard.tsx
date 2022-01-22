@@ -69,7 +69,7 @@ export const Dashboard = () => {
                     <LandingPage onSignIn={navigateToSignIn} />
                 </RequireUnauthenticated>} />
             <Route path="dashboard" element={
-                <RequireAuthenticated navigateTo="/">
+                <RequireAuthenticated navigateTo="/auth/signin">
                     <Layout homePath="/dashboard" onSignOut={navigateToSignOut} />
                 </RequireAuthenticated>}>
                 <Route index element={<Protected />} />
