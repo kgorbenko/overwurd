@@ -54,12 +54,8 @@ export const Dashboard = () => {
         navigate('/auth/signout', options);
     }
 
-    const navigateToLanding = (options?: NavigateOptions) => {
-        navigate('/landing', options)
-    }
-
     const navigateHome = (options?: NavigateOptions) => {
-        navigate('/home', options);
+        navigate('/', options)
     }
 
     if (isLoading) {
@@ -69,26 +65,26 @@ export const Dashboard = () => {
     return (
         <Routes>
             <Route path="/" element={
-                <RequireAuthenticated onUnauthenticated={navigateToSignIn}>
-                    <Layout homePath="/" onSignOut={navigateToSignOut} />
+                <RequireUnauthenticated navigateTo="/dashboard">
+                    <LandingPage onSignIn={navigateToSignIn} />
+                </RequireUnauthenticated>} />
+            <Route path="dashboard" element={
+                <RequireAuthenticated navigateTo="/">
+                    <Layout homePath="/dashboard" onSignOut={navigateToSignOut} />
                 </RequireAuthenticated>}>
                 <Route index element={<Protected />} />
             </Route>
             <Route path="auth" element={
-                <RequireUnauthenticated onAuthenticated={navigateHome}>
-                    <SignInLayout homePath="/landing" />
+                <RequireUnauthenticated navigateTo="/dashboard">
+                    <SignInLayout homePath="/" />
                 </RequireUnauthenticated>}>
                 <Route index element={<NotFound />} />
-                <Route path="signin" element={<SignInPage defaultRedirectPath="/" />} />
-                <Route path="signup" element={<SignUpPage defaultRedirectPath="/" />} />
+                <Route path="signin" element={<SignInPage defaultRedirectPath="/dashboard" />} />
+                <Route path="signup" element={<SignUpPage defaultRedirectPath="/dashboard" />} />
             </Route>
-            <Route path="landing" element={
-                <RequireUnauthenticated onAuthenticated={navigateHome}>
-                    <LandingPage onSignIn={navigateToSignIn} />
-                </RequireUnauthenticated>} />
             <Route path="auth/signout" element={
-                <RequireAuthenticated onUnauthenticated={navigateToLanding}>
-                    <SignOutPage onPostSignOut={navigateToLanding} />
+                <RequireAuthenticated navigateTo="/">
+                    <SignOutPage onPostSignOut={navigateHome} />
                 </RequireAuthenticated>} />
             <Route path="*" element={<NotFound />} />
         </Routes>
