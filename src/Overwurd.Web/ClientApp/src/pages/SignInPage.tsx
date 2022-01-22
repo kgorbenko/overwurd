@@ -10,11 +10,17 @@ interface ISignInData {
     password: string;
 }
 
-export const SignInPage = () => {
+interface ISignInPageProps {
+    defaultRedirectPath: string;
+}
+
+export const SignInPage: React.FunctionComponent<ISignInPageProps> = ({
+    defaultRedirectPath,
+}: ISignInPageProps) => {
     const { signInAsync } = useAuth(dayjs.utc());
     const location = useLocation();
 
-    const from = location.state?.from?.pathname ?? '/';
+    const from = location.state?.from?.pathname ?? defaultRedirectPath;
 
     const getDataFromForm = (formData: FormData): ISignInData => ({
         userName: formData.get('userName') as string,

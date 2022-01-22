@@ -1,26 +1,27 @@
 import * as React from 'react';
 import { useAuth } from '../hooks/use-auth';
-import { useLocation } from 'react-router-dom';
-import { Navigate } from 'react-router-dom';
+import { NavigateOptions, useLocation } from 'react-router-dom';
 import { CenteredCircularProgress } from './CenteredCircularProgress';
 import dayjs from 'dayjs';
 
 interface IRequireAuthenticatedProps {
-    navigateTo: string;
+    onUnauthenticated: (options?: NavigateOptions) => void;
 }
 
 export const RequireAuthenticated: React.FunctionComponent<IRequireAuthenticatedProps> = ({
-    navigateTo,
+    onUnauthenticated,
     children,
 }: React.PropsWithChildren<IRequireAuthenticatedProps>) => {
     const { isAuthenticated } = useAuth(dayjs().utc());
     const [isLoading, setIsLoading] = React.useState(true);
-    const [shouldNavigate, setShouldNavigate] = React.useState(false);
     const location = useLocation();
 
     React.useEffect(() => {
         if (!isAuthenticated) {
-            setShouldNavigate(true);
+            onUnauthenticated({
+                state: { from: location },
+                replace: true
+            });
         }
         setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -28,10 +29,6 @@ export const RequireAuthenticated: React.FunctionComponent<IRequireAuthenticated
 
     if (isLoading) {
         return <CenteredCircularProgress />;
-    }
-
-    if (shouldNavigate) {
-        return <Navigate to={navigateTo} state={{ from: location }} replace />;
     }
 
     return <>{children}</>;

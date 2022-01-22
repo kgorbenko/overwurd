@@ -14,12 +14,18 @@ interface ISignUpData {
     lastName: string;
 }
 
-export const SignUpPage = () => {
+interface ISignUpPageProps {
+    defaultRedirectPath?: string;
+}
+
+export const SignUpPage: React.FunctionComponent<ISignUpPageProps> = ({
+    defaultRedirectPath,
+}: ISignUpPageProps) => {
     const now = dayjs.utc();
     const { signUpAsync } = useAuth(now);
     const location = useLocation();
 
-    const from = location.state?.from?.pathname ?? '/';
+    const from = location.state?.from?.pathname ?? defaultRedirectPath;
 
     const getDataFromForm = (formData: FormData): ISignUpData => ({
         userName: formData.get('userName') as string,
