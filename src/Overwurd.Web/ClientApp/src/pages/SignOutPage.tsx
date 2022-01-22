@@ -6,14 +6,14 @@ import dayjs from 'dayjs';
 
 export const SignOutPage = () => {
     const now = dayjs.utc();
-    const { isAuthenticated, signOutAsync } = useAuth(now);
+    const { signOutAsync } = useAuth(now);
     const [shouldRedirectToHome, setShouldRedirectToHome] = React.useState<boolean>(false);
 
     React.useEffect(() => {
-        if (isAuthenticated) {
-            signOutAsync();
-        }
-        setShouldRedirectToHome(true);
+        (async () => {
+            await signOutAsync();
+            setShouldRedirectToHome(true);
+        })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

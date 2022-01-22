@@ -33,10 +33,10 @@ export function useAuth(now: Dayjs) {
     }, [hasTokenExpirationDate, expirationDate, now]);
 
     const canRefreshAccessToken = React.useMemo(() => {
-        const expiration = context.userData?.accessTokenExpiresAt;
-        const hasToken = expiration !== undefined;
-        return hasToken && (now.isAfter(expiration!) || expiration!.diff(now, 'minutes') < 3);
-    }, [now, context.userData?.accessTokenExpiresAt])
+        const isTokenExpired = hasTokenExpirationDate && now.isAfter(expirationDate!);
+        const isWithinRefreshRange = hasTokenExpirationDate && expirationDate!.diff(now, 'minutes') < 3;
+        return isTokenExpired || isWithinRefreshRange;
+    }, [expirationDate, hasTokenExpirationDate, now]);
 
     async function signInAsync(parameters: ISignInParameters): Promise<ISignInResult> {
         const result = await signInInternalAsync(parameters);
@@ -110,7 +110,6 @@ export function useAuth(now: Dayjs) {
 
     return {
         isAuthenticated,
-        hasExpirationDate: hasTokenExpirationDate,
         canRefreshAccessToken,
         signUpAsync,
         signInAsync,

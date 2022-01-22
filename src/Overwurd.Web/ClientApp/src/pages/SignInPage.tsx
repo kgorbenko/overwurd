@@ -32,6 +32,7 @@ export const SignInPage = () => {
                 label="User name"
                 id="userName"
                 name="userName"
+                autoComplete="username"
                 variant="filled"
                 margin="dense"
                 size="small"

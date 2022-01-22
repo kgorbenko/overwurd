@@ -33,7 +33,6 @@ export const AuthFormProcessor = <T extends object>({
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const [isApiError, setIsApiError] = React.useState<boolean>(false);
     const [validationErrors, setValidationErrors] = React.useState<string[]>([]);
-    const [canRedirectToHome, setCanRedirectToHome] = React.useState<boolean>(true);
     const [shouldRedirectToPreviousPage, setShouldRedirectToPreviousPage] = React.useState<boolean>(isAuthenticated);
 
     const handleSignIn = async (data: T) => {
@@ -50,7 +49,6 @@ export const AuthFormProcessor = <T extends object>({
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         await withLoadingAsync(setIsLoading, async () => {
             event.preventDefault();
-            setCanRedirectToHome(false);
 
             const formData = new FormData(event.currentTarget);
             const data = getDataFromForm(formData);
@@ -69,10 +67,6 @@ export const AuthFormProcessor = <T extends object>({
 
     if (!isLoading && shouldRedirectToPreviousPage) {
         return <Navigate to={from} replace />;
-    }
-
-    if (isAuthenticated && canRedirectToHome) {
-        return <Navigate to="/" replace />;
     }
 
     return (
