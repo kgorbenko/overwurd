@@ -4,11 +4,11 @@ import { LinearProgressProps } from '@mui/material/LinearProgress/LinearProgress
 
 export const TopPageLinearProgress = (props: LinearProgressProps) => {
     return (
-        <LinearProgress {...props} style={{
+        <LinearProgress style={{
             position: 'fixed',
             top: 0,
             left: 0,
             width: '100vw'
-        }} />
+        }} {...props} color="secondary" />
     );
 }

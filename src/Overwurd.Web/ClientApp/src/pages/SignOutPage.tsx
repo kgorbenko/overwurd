@@ -1,25 +1,25 @@
 import * as React from 'react';
 import { useAuth } from '../hooks/use-auth';
-import { Navigate } from 'react-router-dom';
 import { CenteredCircularProgress } from '../components/CenteredCircularProgress';
 import dayjs from 'dayjs';
 
-export const SignOutPage = () => {
+interface ISignOutPageProps {
+    onPostSignOut : () => void;
+}
+
+export const SignOutPage: React.FunctionComponent<ISignOutPageProps> = ({
+    onPostSignOut,
+}: ISignOutPageProps) => {
     const now = dayjs.utc();
-    const { isAuthenticated, signOutAsync } = useAuth(now);
-    const [shouldRedirectToHome, setShouldRedirectToHome] = React.useState<boolean>(false);
+    const { signOutAsync } = useAuth(now);
 
     React.useEffect(() => {
-        if (isAuthenticated) {
-            signOutAsync();
-        }
-        setShouldRedirectToHome(true);
+        (async () => {
+            await signOutAsync();
+            onPostSignOut();
+        })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-    if (shouldRedirectToHome) {
-        return <Navigate to="/" replace />;
-    }
 
     return <CenteredCircularProgress />;
 }

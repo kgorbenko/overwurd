@@ -1,16 +1,21 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../hooks/use-auth';
+import { Dayjs } from 'dayjs';
 import { Context } from '../AppContextProvider';
 
-export const NavMenu = () => {
-    const context = React.useContext(Context);
+interface INavMenuProps {
+    now: Dayjs;
+}
 
-    const userData = context.userData;
+export const NavMenu: React.FunctionComponent<INavMenuProps> = ({ now }: React.PropsWithChildren<INavMenuProps>) => {
+    const context = React.useContext(Context);
+    const { isAuthenticated } = useAuth(now);
 
     const user =
-        userData === undefined
-            ? <span>Signed Out</span>
-            : <span>Signed In as {userData.firstName} {userData.lastName} #{userData.id}</span>
+        isAuthenticated
+            ? <span>Signed In as {context.userData!.firstName} {context.userData!.lastName} #{context.userData!.id}</span>
+            : <span>Signed Out</span>;
 
     return (
         <header>

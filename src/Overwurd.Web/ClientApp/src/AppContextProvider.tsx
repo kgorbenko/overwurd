@@ -35,17 +35,14 @@ interface IAppContextDataRaw {
     userData: IUserDataRaw | undefined;
 }
 
-interface IAppContextProps {
-    children: JSX.Element;
-}
-
-export const Context = React.createContext<IAppContext>({
+const emptyContext = {
     userData: undefined,
-    setUserData: (_) => { throw new Error('An unassigned AppContext is used.'); }
-});
+    setUserData: (_: IUserData | undefined) => { throw new Error('An unassigned AppContext is used.'); }
+};
+export const Context = React.createContext<IAppContext>(emptyContext);
 
-export const AppContextProvider = (props: IAppContextProps) => {
-    const [appContextData, setAppContextData] = useLocalStorage<IAppContextData, IAppContextDataRaw>('OverwurdAppContext', { userData: undefined } , (raw: IAppContextDataRaw) => {
+export const AppContextProvider: React.FunctionComponent = ({ children }: React.PropsWithChildren<{}>) => {
+    const [appContextData, setAppContextData] = useLocalStorage<IAppContextData, IAppContextDataRaw>('OverwurdAppContext', emptyContext, (raw: IAppContextDataRaw) => {
         const isUserDataPresent = raw.userData !== undefined;
         const expiresAtRaw = raw.userData?.accessTokenExpiresAt;
         const expiresAt = expiresAtRaw !== undefined ? dayjs.utc(expiresAtRaw) : undefined;
@@ -83,7 +80,7 @@ export const AppContextProvider = (props: IAppContextProps) => {
 
     return (
         <Context.Provider value={contextValue}>
-            {props.children}
+            {children}
         </Context.Provider>
     );
 }
