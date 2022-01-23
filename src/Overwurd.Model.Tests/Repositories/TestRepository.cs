@@ -10,38 +10,20 @@ namespace Overwurd.Model.Tests.Repositories
 {
     public class TestRepository : BaseModelDatabaseDependentTestFixture
     {
-        private async Task<Course> CreateAndStoreCourseAsync()
+        private async Task StoreVocabulariesAsync(params Vocabulary[] vocabularies)
         {
             await using var context = new ApplicationDbContext(ContextOptions);
-
-            var user = new User { UserName = "Test User" };
-            await context.Users.AddAsync(user);
-
-            var course = new Course(name: "Course test name", description: "Course test description")
-            {
-                User = user
-            };
-            await context.Courses.AddAsync(course);
-
-            return course;
-        }
-
-        private static Vocabulary CreateVocabulary(string name, string description, Course course)
-        {
-            var vocabulary = new Vocabulary(name: name, description: description)
-            {
-                Course = course
-            };
-
-            return vocabulary;
+            await context.Vocabularies.AddRangeAsync(vocabularies);
+            await context.SaveChangesAsync();
         }
 
         [Test]
         public async Task TestAddAsync()
         {
-            var course = await CreateAndStoreCourseAsync();
-            var vocabulary1 = CreateVocabulary("Vocabulary 1", "Description 1", course);
-            var vocabulary2 = CreateVocabulary("Vocabulary 2", "Description 2", course);
+            var user = new User { UserName = "Test User" };
+            var course = new Course("Course", "Description") { User = user };
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1") { Course = course };
+            var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2") { Course = course };
 
             await using (var context = new ApplicationDbContext(ContextOptions))
             {
@@ -63,10 +45,11 @@ namespace Overwurd.Model.Tests.Repositories
         [Test]
         public async Task TestAddRangeAsync()
         {
-            var course = await CreateAndStoreCourseAsync();
-            var vocabulary1 = CreateVocabulary("Vocabulary 1", "Description 1", course);
-            var vocabulary2 = CreateVocabulary("Vocabulary 2", "Description 2", course);
-            var vocabulary3 = CreateVocabulary("Vocabulary 3", "Description 3", course);
+            var user = new User { UserName = "Test User" };
+            var course = new Course("Course", "Description") { User = user };
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1") { Course = course };
+            var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2") { Course = course };
+            var vocabulary3 = new Vocabulary("Vocabulary 3", "Description 3") { Course = course };
 
             await using (var context = new ApplicationDbContext(ContextOptions))
             {
@@ -86,86 +69,68 @@ namespace Overwurd.Model.Tests.Repositories
         [Test]
         public async Task TestGetAllAsync()
         {
-            var course = await CreateAndStoreCourseAsync();
-            var vocabulary1 = CreateVocabulary("Vocabulary 1", "Description 1", course);
-            var vocabulary2 = CreateVocabulary("Vocabulary 2", "Description 2", course);
-            var vocabulary3 = CreateVocabulary("Vocabulary 3", "Description 3", course);
+            var user = new User { UserName = "Test User" };
+            var course = new Course("Course", "Description") { User = user };
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1") { Course = course };
+            var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2") { Course = course };
+            var vocabulary3 = new Vocabulary("Vocabulary 3", "Description 3") { Course = course };
 
-            await using (var context = new ApplicationDbContext(ContextOptions))
-            {
-                await context.Vocabularies.AddRangeAsync(vocabulary1, vocabulary2, vocabulary3);
-                await context.SaveChangesAsync();
-            }
+            await StoreVocabulariesAsync(vocabulary1, vocabulary2, vocabulary3);
 
-            await using (var context = new ApplicationDbContext(ContextOptions))
-            {
-                var repository = new Repository<Vocabulary>(context);
-                var actual = await repository.GetAllAsync();
+            await using var context = new ApplicationDbContext(ContextOptions);
+            var repository = new Repository<Vocabulary>(context);
 
-                Assert.That(actual, Is.EqualTo(new[] { vocabulary1, vocabulary2, vocabulary3 }).Using(VocabularyRelationshipAgnosticComparer));
-            }
+            var actual = await repository.GetAllAsync();
+
+            Assert.That(actual, Is.EqualTo(new[] { vocabulary1, vocabulary2, vocabulary3 }).Using(VocabularyRelationshipAgnosticComparer));
         }
 
         [Test]
         public async Task TestFindByIdAsync()
         {
-            var course = await CreateAndStoreCourseAsync();
-            var vocabulary1 = CreateVocabulary("Vocabulary 1", "Description 1", course);
-            var vocabulary2 = CreateVocabulary("Vocabulary 2", "Description 2", course);
-            var vocabulary3 = CreateVocabulary("Vocabulary 3", "Description 3", course);
+            var user = new User { UserName = "Test User" };
+            var course = new Course("Course", "Description") { User = user };
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1") { Course = course };
+            var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2") { Course = course };
+            var vocabulary3 = new Vocabulary("Vocabulary 3", "Description 3") { Course = course };
 
-            await using (var context = new ApplicationDbContext(ContextOptions))
-            {
-                await context.Vocabularies.AddRangeAsync(vocabulary1, vocabulary2, vocabulary3);
-                await context.SaveChangesAsync();
-            }
+            await StoreVocabulariesAsync(vocabulary1, vocabulary2, vocabulary3);
 
-            await using (var context = new ApplicationDbContext(ContextOptions))
-            {
-                var repository = new Repository<Vocabulary>(context);
+            await using var context = new ApplicationDbContext(ContextOptions);
+            var repository = new Repository<Vocabulary>(context);
 
-                Assert.That(await repository.FindByIdAsync(vocabulary1.Id), Is.EqualTo(vocabulary1).Using(VocabularyRelationshipAgnosticComparer));
-                Assert.That(await repository.FindByIdAsync(vocabulary2.Id), Is.EqualTo(vocabulary2).Using(VocabularyRelationshipAgnosticComparer));
-                Assert.That(await repository.FindByIdAsync(vocabulary3.Id), Is.EqualTo(vocabulary3).Using(VocabularyRelationshipAgnosticComparer));
-            }
-
+            Assert.That(await repository.FindByIdAsync(vocabulary1.Id), Is.EqualTo(vocabulary1).Using(VocabularyRelationshipAgnosticComparer));
+            Assert.That(await repository.FindByIdAsync(vocabulary2.Id), Is.EqualTo(vocabulary2).Using(VocabularyRelationshipAgnosticComparer));
+            Assert.That(await repository.FindByIdAsync(vocabulary3.Id), Is.EqualTo(vocabulary3).Using(VocabularyRelationshipAgnosticComparer));
         }
 
         [Test]
         public async Task TestFindByAsync()
         {
-            var course = await CreateAndStoreCourseAsync();
-            var vocabulary1 = CreateVocabulary("Vocabulary 1", "Description 1", course);
-            var vocabulary2 = CreateVocabulary("Vocabulary 2", "Description 2", course);
-            var vocabulary3 = CreateVocabulary("Vocabulary 3", "Description 3", course);
+            var user = new User { UserName = "Test User" };
+            var course = new Course("Course", "Description") { User = user };
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1") { Course = course };
+            var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2") { Course = course };
+            var vocabulary3 = new Vocabulary("Vocabulary 3", "Description 3") { Course = course };
 
-            await using (var context = new ApplicationDbContext(ContextOptions))
-            {
-                await context.Vocabularies.AddRangeAsync(vocabulary1, vocabulary2, vocabulary3);
-                await context.SaveChangesAsync();
-            }
+            await StoreVocabulariesAsync(vocabulary1, vocabulary2, vocabulary3);
 
-            await using (var context = new ApplicationDbContext(ContextOptions))
-            {
-                var repository = new Repository<Vocabulary>(context);
+            await using var context = new ApplicationDbContext(ContextOptions);
+            var repository = new Repository<Vocabulary>(context);
 
-                Assert.That(await repository.FindByAsync(x => x.Id == vocabulary1.Id), Is.EqualTo(new[] { vocabulary1 }).Using(VocabularyRelationshipAgnosticComparer));
-                Assert.That(await repository.FindByAsync(x => x.Name == "Vocabulary 2"), Is.EqualTo(new[] { vocabulary2 }).Using(VocabularyRelationshipAgnosticComparer));
-            }
+            Assert.That(await repository.FindByAsync(x => x.Id == vocabulary1.Id), Is.EqualTo(new[] { vocabulary1 }).Using(VocabularyRelationshipAgnosticComparer));
+            Assert.That(await repository.FindByAsync(x => x.Name == "Vocabulary 2"), Is.EqualTo(new[] { vocabulary2 }).Using(VocabularyRelationshipAgnosticComparer));
         }
 
         [Test]
         public async Task TestUpdateAsyncAddedEntities()
         {
-            var course = await CreateAndStoreCourseAsync();
-            var vocabulary1 = CreateVocabulary("Vocabulary 1", "Description 1", course);
-            var vocabulary2 = CreateVocabulary("Vocabulary 2", "Description 2", course);
+            var user = new User { UserName = "Test User" };
+            var course = new Course("Course", "Description") { User = user };
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1") { Course = course };
+            var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2") { Course = course };
 
-            await using (var context = new ApplicationDbContext(ContextOptions))
-            {
-                await context.Vocabularies.AddRangeAsync(vocabulary1, vocabulary2);
-                await context.SaveChangesAsync();
-            }
+            await StoreVocabulariesAsync(vocabulary1, vocabulary2);
 
             await using (var context = new ApplicationDbContext(ContextOptions))
             {
@@ -191,15 +156,12 @@ namespace Overwurd.Model.Tests.Repositories
         [Test]
         public async Task TestUpdateAsyncAfterGetting()
         {
-            var course = await CreateAndStoreCourseAsync();
-            var vocabulary1 = CreateVocabulary("Vocabulary 1", "Description 1", course);
-            var vocabulary2 = CreateVocabulary("Vocabulary 2", "Description 2", course);
+            var user = new User { UserName = "Test User" };
+            var course = new Course("Course", "Description") { User = user };
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1") { Course = course };
+            var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2") { Course = course };
 
-            await using (var context = new ApplicationDbContext(ContextOptions))
-            {
-                await context.Vocabularies.AddRangeAsync(vocabulary1, vocabulary2);
-                await context.SaveChangesAsync();
-            }
+            await StoreVocabulariesAsync(vocabulary1, vocabulary2);
 
             Vocabulary vocabulary1Found, vocabulary2Found;
 
@@ -230,16 +192,13 @@ namespace Overwurd.Model.Tests.Repositories
         [Test]
         public async Task TestRemoveAsync()
         {
-            var course = await CreateAndStoreCourseAsync();
-            var vocabulary1 = CreateVocabulary("Vocabulary 1", "Description 1", course);
-            var vocabulary2 = CreateVocabulary("Vocabulary 2", "Description 2", course);
-            var vocabulary3 = CreateVocabulary("Vocabulary 3", "Description 3", course);
+            var user = new User { UserName = "Test User" };
+            var course = new Course("Course", "Description") { User = user };
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1") { Course = course };
+            var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2") { Course = course };
+            var vocabulary3 = new Vocabulary("Vocabulary 3", "Description 3") { Course = course };
 
-            await using (var context = new ApplicationDbContext(ContextOptions))
-            {
-                await context.Vocabularies.AddRangeAsync(vocabulary1, vocabulary2, vocabulary3);
-                await context.SaveChangesAsync();
-            }
+            await StoreVocabulariesAsync(vocabulary1, vocabulary2, vocabulary3);
 
             await using (var context = new ApplicationDbContext(ContextOptions))
             {
@@ -260,8 +219,9 @@ namespace Overwurd.Model.Tests.Repositories
             await using var context = new ApplicationDbContext(ContextOptions);
             var repository = new Repository<Vocabulary>(context);
 
-            var course = await CreateAndStoreCourseAsync();
-            var vocabulary1 = CreateVocabulary("Vocabulary 1", "Description 1", course);
+            var user = new User { UserName = "Test User" };
+            var course = new Course("Course", "Description") { User = user };
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1") { Course = course };
             vocabulary1.GetType().GetProperty("Id")!.SetValue(vocabulary1, value: 1);
 
             Assert.ThrowsAsync<DbUpdateConcurrencyException>(async () => await repository.RemoveAsync(vocabulary1));
@@ -270,68 +230,58 @@ namespace Overwurd.Model.Tests.Repositories
         [Test]
         public async Task TestRemoveRangeAsync()
         {
-            var course = await CreateAndStoreCourseAsync();
-            var vocabulary1 = CreateVocabulary("Vocabulary 1", "Description 1", course);
-            var vocabulary2 = CreateVocabulary("Vocabulary 2", "Description 2", course);
-            var vocabulary3 = CreateVocabulary("Vocabulary 3", "Description 3", course);
-            var vocabulary4 = CreateVocabulary("Vocabulary 4", "Description 4", course);
+            var user = new User { UserName = "Test User" };
+            var course = new Course("Course", "Description") { User = user };
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1") { Course = course };
+            var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2") { Course = course };
+            var vocabulary3 = new Vocabulary("Vocabulary 3", "Description 3") { Course = course };
+            var vocabulary4 = new Vocabulary("Vocabulary 4", "Description 4") { Course = course };
 
-            await using (var context = new ApplicationDbContext(ContextOptions))
-            {
-                await context.Vocabularies.AddRangeAsync(vocabulary1, vocabulary2, vocabulary3, vocabulary4);
-                await context.SaveChangesAsync();
-            }
+            await StoreVocabulariesAsync(vocabulary1, vocabulary2, vocabulary3, vocabulary4);
 
-            await using (var context = new ApplicationDbContext(ContextOptions))
-            {
-                var repository = new Repository<Vocabulary>(context);
+            await using var context = new ApplicationDbContext(ContextOptions);
+            var repository = new Repository<Vocabulary>(context);
 
-                await repository.RemoveRangeAsync(new[] { vocabulary1, vocabulary3 }.ToImmutableArray());
-                Assert.That(await context.Vocabularies.ToArrayAsync(), Is.EqualTo(new[] { vocabulary2, vocabulary4 }).Using(VocabularyRelationshipAgnosticComparer));
-            }
+            await repository.RemoveRangeAsync(new[] { vocabulary1, vocabulary3 }.ToImmutableArray());
+            Assert.That(await context.Vocabularies.ToArrayAsync(), Is.EqualTo(new[] { vocabulary2, vocabulary4 }).Using(VocabularyRelationshipAgnosticComparer));
         }
 
         [Test]
         public async Task TestPaginate()
         {
-            var course = await CreateAndStoreCourseAsync();
-            var vocabulary1 = CreateVocabulary("Vocabulary 1", "Description 1", course);
-            var vocabulary2 = CreateVocabulary("Vocabulary 2", "Description 2", course);
-            var vocabulary3 = CreateVocabulary("Vocabulary 3", "Description 3", course);
+            var user = new User { UserName = "Test User" };
+            var course = new Course("Course", "Description") { User = user };
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1") { Course = course };
+            var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2") { Course = course };
+            var vocabulary3 = new Vocabulary("Vocabulary 3", "Description 3") { Course = course };
 
-            var vocabulary4 = CreateVocabulary("Vocabulary 4", "Description 4", course);
-            var vocabulary5 = CreateVocabulary("Vocabulary 5", "Description 5", course);
-            var vocabulary6 = CreateVocabulary("Vocabulary 6", "Description 6", course);
+            var vocabulary4 = new Vocabulary("Vocabulary 4", "Description 4") { Course = course };
+            var vocabulary5 = new Vocabulary("Vocabulary 5", "Description 5") { Course = course };
+            var vocabulary6 = new Vocabulary("Vocabulary 6", "Description 6") { Course = course };
 
-            var vocabulary7 = CreateVocabulary("Vocabulary 7", "Description 7", course);
-            var vocabulary8 = CreateVocabulary("Vocabulary 8", "Description 8", course);
+            var vocabulary7 = new Vocabulary("Vocabulary 7", "Description 7") { Course = course };
+            var vocabulary8 = new Vocabulary("Vocabulary 8", "Description 8") { Course = course };
 
-            await using (var context = new ApplicationDbContext(ContextOptions))
-            {
-                await context.Vocabularies.AddRangeAsync(vocabulary1, vocabulary2, vocabulary3, vocabulary4, vocabulary5, vocabulary6, vocabulary7, vocabulary8);
-                await context.SaveChangesAsync();
-            }
+            await StoreVocabulariesAsync(vocabulary1, vocabulary2, vocabulary3, vocabulary4, vocabulary5, vocabulary6, vocabulary7, vocabulary8);
 
-            await using (var context = new ApplicationDbContext(ContextOptions))
-            {
-                var repository = new Repository<Vocabulary>(context);
+            await using var context = new ApplicationDbContext(ContextOptions);
+            var repository = new Repository<Vocabulary>(context);
 
-                var firstPage = await repository.PaginateByAsync(x => true, page: 1, pageSize: 3);
-                Assert.That(firstPage.TotalCount, Is.EqualTo(8));
-                Assert.That(firstPage.Results, Is.EqualTo(new[] { vocabulary1, vocabulary2, vocabulary3 }).Using(VocabularyRelationshipAgnosticComparer));
+            var firstPage = await repository.PaginateByAsync(x => true, page: 1, pageSize: 3);
+            Assert.That(firstPage.TotalCount, Is.EqualTo(8));
+            Assert.That(firstPage.Results, Is.EqualTo(new[] { vocabulary1, vocabulary2, vocabulary3 }).Using(VocabularyRelationshipAgnosticComparer));
 
-                var secondPage = await repository.PaginateByAsync(x => true, page: 2, pageSize: 3);
-                Assert.That(secondPage.TotalCount, Is.EqualTo(8));
-                Assert.That(secondPage.Results, Is.EqualTo(new[] { vocabulary4, vocabulary5, vocabulary6 }).Using(VocabularyRelationshipAgnosticComparer));
+            var secondPage = await repository.PaginateByAsync(x => true, page: 2, pageSize: 3);
+            Assert.That(secondPage.TotalCount, Is.EqualTo(8));
+            Assert.That(secondPage.Results, Is.EqualTo(new[] { vocabulary4, vocabulary5, vocabulary6 }).Using(VocabularyRelationshipAgnosticComparer));
 
-                var thirdPage = await repository.PaginateByAsync(x => true, page: 3, pageSize: 3);
-                Assert.That(thirdPage.TotalCount, Is.EqualTo(8));
-                Assert.That(thirdPage.Results, Is.EqualTo(new[] { vocabulary7, vocabulary8 }).Using(VocabularyRelationshipAgnosticComparer));
+            var thirdPage = await repository.PaginateByAsync(x => true, page: 3, pageSize: 3);
+            Assert.That(thirdPage.TotalCount, Is.EqualTo(8));
+            Assert.That(thirdPage.Results, Is.EqualTo(new[] { vocabulary7, vocabulary8 }).Using(VocabularyRelationshipAgnosticComparer));
 
-                var fourthPage = await repository.PaginateByAsync(x => true, page: 4, pageSize: 3);
-                Assert.That(fourthPage.TotalCount, Is.EqualTo(8));
-                Assert.That(fourthPage.Results, Is.Empty);
-            }
+            var fourthPage = await repository.PaginateByAsync(x => true, page: 4, pageSize: 3);
+            Assert.That(fourthPage.TotalCount, Is.EqualTo(8));
+            Assert.That(fourthPage.Results, Is.Empty);
         }
     }
 }
