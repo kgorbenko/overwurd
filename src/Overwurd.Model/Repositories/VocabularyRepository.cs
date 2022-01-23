@@ -7,14 +7,14 @@ using Overwurd.Model.Models;
 
 namespace Overwurd.Model.Repositories
 {
-    public class CourseRepository : Repository<Course>, ICourseRepository
+    public class VocabularyRepository : Repository<Vocabulary>, IVocabularyRepository
     {
-        public CourseRepository(ApplicationDbContext dbContext) : base(dbContext) { }
+        public VocabularyRepository(ApplicationDbContext dbContext) : base(dbContext) { }
 
-        public async Task<IImmutableList<Course>> GetUserCoursesAsync(int userId, CancellationToken cancellationToken)
+        public async Task<IImmutableList<Vocabulary>> GetCourseVocabulariesAsync(int courseId, CancellationToken cancellationToken)
         {
-            return (await DbContext.Courses
-                                   .Where(x => x.User.Id == userId)
+            return (await DbContext.Vocabularies
+                                   .Where(x => x.Course.Id == courseId)
                                    .OrderBy(x => x.CreatedAt)
                                    .ToArrayAsync(cancellationToken: cancellationToken))
                 .ToImmutableList();
