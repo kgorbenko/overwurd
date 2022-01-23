@@ -1,5 +1,5 @@
 import dayjs, { Dayjs } from 'dayjs';
-import { getModelErrors } from '../utils/misc';
+import { getModelErrors } from '../utils/Misc';
 
 export interface ISignInResult {
     isSuccess: boolean;

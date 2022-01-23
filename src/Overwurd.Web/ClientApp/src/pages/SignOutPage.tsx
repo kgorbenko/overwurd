@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useAuth } from '../hooks/use-auth';
+import { useAuth } from '../hooks/UseAuth';
 import { CenteredCircularProgress } from '../components/CenteredCircularProgress';
 import dayjs from 'dayjs';
 

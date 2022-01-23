@@ -8,7 +8,7 @@ import {
     ISignUpParameters,
     IRefreshAccessTokenParameters,
     ISignInResult as SignInServiceResult,
-} from '../services/auth-service';
+} from '../services/AuthService';
 import { Dayjs } from 'dayjs';
 
 export interface ISignInResult {

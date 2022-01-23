@@ -2,7 +2,7 @@ import * as React from 'react';
 import dayjs from 'dayjs';
 import { Button, TextField, Link } from '@mui/material';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
-import { ISignInResult, useAuth } from '../hooks/use-auth';
+import { ISignInResult, useAuth } from '../hooks/UseAuth';
 import { AuthFormProcessor } from '../components/AuthFormProcessor';
 
 interface ISignInData {

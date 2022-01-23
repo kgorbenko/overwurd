@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useLocalStorage } from './hooks/use-local-storage';
+import { useLocalStorage } from './hooks/UseLocalStorage';
 import dayjs, { Dayjs } from 'dayjs';
 
 interface IUserData {
