@@ -1,21 +1,22 @@
 using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 using Overwurd.Model.Helpers;
 
 namespace Overwurd.Model.Models
 {
-    public class Vocabulary : IEntity
+    public class Course : IEntity
     {
         public int Id { get; [UsedImplicitly] private set; }
 
         public DateTimeOffset CreatedAt { get; [UsedImplicitly] private set; }
 
-        private Course course;
+        private User user;
 
-        public Course Course
+        public User User
         {
-            get => course;
-            set => course = value ?? throw new ArgumentNullException(nameof(value));
+            get => user;
+            set => user = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         private string name;
@@ -26,8 +27,8 @@ namespace Overwurd.Model.Models
             set
             {
                 string MakeMessage(string invalidValue) =>
-                    $"An attempt to set {nameof(Vocabulary)} name to an invalid value. " +
-                    $"{nameof(Vocabulary)} name cannot be null, empty or whitespace, but was {invalidValue}.";
+                    $"An attempt to set {nameof(Course)} name to an invalid value. " +
+                    $"{nameof(Course)} name cannot be null, empty or whitespace, but was {invalidValue}.";
 
                 name = value switch
                 {
@@ -47,8 +48,8 @@ namespace Overwurd.Model.Models
             set
             {
                 string MakeMessage(string invalidValue) =>
-                    $"An attempt to set {nameof(Vocabulary)} description to an invalid value. " +
-                    $"{nameof(Vocabulary)} description cannot be null, empty or whitespace, but was {invalidValue}.";
+                    $"An attempt to set {nameof(Course)} description to an invalid value. " +
+                    $"{nameof(Course)} description cannot be null, empty or whitespace, but was {invalidValue}.";
 
                 description = value switch
                 {
@@ -60,7 +61,10 @@ namespace Overwurd.Model.Models
             }
         }
 
-        public Vocabulary(string name, string description)
+        [UsedImplicitly]
+        public ICollection<Vocabulary> Vocabularies { get; private set; }
+
+        public Course(string name, string description)
         {
             Name = name;
             Description = description;

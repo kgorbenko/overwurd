@@ -9,14 +9,12 @@ using Microsoft.EntityFrameworkCore;
 using Overwurd.Model.Models;
 
 namespace Overwurd.Model.Repositories {
-    public class ReadOnlyRepository<T, TContext> : IReadOnlyRepository<T>
-        where T : class, IEntityWithNumericId
-        where TContext : DbContext {
-        private readonly DbContext dbContext;
+    public class ReadOnlyRepository<T> : IReadOnlyRepository<T> where T : class, IEntityWithNumericId {
+        protected ApplicationDbContext DbContext { get; }
         private readonly DbSet<T> dbSet;
 
-        public ReadOnlyRepository(TContext dbContext) {
-            this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+        public ReadOnlyRepository(ApplicationDbContext dbContext) {
+            DbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             dbSet = dbContext.Set<T>();
         }
 

@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Overwurd.Model.Models
 {
-    public class VocabularyEntityTypeConfiguration : IEntityTypeConfiguration<Vocabulary>
+    public class CourseEntityTypeConfiguration : IEntityTypeConfiguration<Course>
     {
-        public void Configure(EntityTypeBuilder<Vocabulary> builder)
+        public void Configure(EntityTypeBuilder<Course> builder)
         {
             builder.HasKey(x => x.Id);
             builder.Property(x => x.Name)
@@ -19,10 +19,16 @@ namespace Overwurd.Model.Models
             builder.HasIndex(x => new { x.Name, x.Id })
                    .IsUnique();
 
-            builder.HasOne(x => x.Course)
-                   .WithMany(x => x.Vocabularies)
+            builder.HasOne(x => x.User)
+                   .WithMany()
                    .IsRequired()
                    .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(x => x.Vocabularies)
+                   .WithOne(x => x.Course)
+                   .OnDelete(DeleteBehavior.Restrict);
+
+            builder.ToTable("Courses");
         }
     }
 }
