@@ -4,7 +4,8 @@ using Overwurd.Model.Models;
 
 namespace Overwurd.Model.Tests.Models
 {
-    public static class TestVocabulary {
+    public static class TestCourse
+    {
         [TestCase(null)]
         [TestCase("")]
         [TestCase(" ")]
@@ -12,7 +13,7 @@ namespace Overwurd.Model.Tests.Models
         {
             void Action(string name)
             {
-                var vocabulary = new Vocabulary(name: "Test name", description: "Test description");
+                var vocabulary = new Course(name: "Test name", description: "Test description");
                 vocabulary.Name = name;
             }
 
@@ -24,7 +25,7 @@ namespace Overwurd.Model.Tests.Models
         [TestCase(" ")]
         public static void TestConstructorInvalidValuesForName(string invalidName)
         {
-            void Action(string name) => new Vocabulary(name: name, description: "Test description");
+            void Action(string name) => new Course(name: name, description: "Test description");
 
             Assert.Throws<ArgumentException>(() => Action(invalidName));
         }
@@ -36,7 +37,7 @@ namespace Overwurd.Model.Tests.Models
         {
             void Action(string description)
             {
-                var vocabulary = new Vocabulary("Test name", "Test description");
+                var vocabulary = new Course("Test name", "Test description");
                 vocabulary.Description = description;
             }
 
@@ -48,7 +49,7 @@ namespace Overwurd.Model.Tests.Models
         [TestCase(" ")]
         public static void TestConstructorInvalidValuesForDescription(string invalidDescription)
         {
-            void Action(string description) => new Vocabulary(name: "Test name", description: description);
+            void Action(string description) => new Course(name: "Test name", description: description);
 
             Assert.Throws<ArgumentException>(() => Action(invalidDescription));
         }
