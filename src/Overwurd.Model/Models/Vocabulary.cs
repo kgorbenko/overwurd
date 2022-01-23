@@ -10,7 +10,13 @@ namespace Overwurd.Model.Models
 
         public DateTimeOffset CreatedAt { get; [UsedImplicitly] private set; }
 
-        public Course Course { get; set; }
+        private Course course;
+
+        public Course Course
+        {
+            get => course;
+            set => course = value ?? throw new ArgumentNullException(nameof(value));
+        }
 
         private string name;
 

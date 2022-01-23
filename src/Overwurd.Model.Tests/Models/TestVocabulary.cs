@@ -24,7 +24,8 @@ namespace Overwurd.Model.Tests.Models
         [TestCase(" ")]
         public static void TestConstructorInvalidValuesForName(string invalidName)
         {
-            void Action(string name) => new Vocabulary(name: name, description: "Test description");
+            void Action(string name) =>
+                new Vocabulary(name: name, description: "Test description");
 
             Assert.Throws<ArgumentException>(() => Action(invalidName));
         }
@@ -48,7 +49,8 @@ namespace Overwurd.Model.Tests.Models
         [TestCase(" ")]
         public static void TestConstructorInvalidValuesForDescription(string invalidDescription)
         {
-            void Action(string description) => new Vocabulary(name: "Test name", description: description);
+            void Action(string description) =>
+                new Vocabulary(name: "Test name", description: description);
 
             Assert.Throws<ArgumentException>(() => Action(invalidDescription));
         }

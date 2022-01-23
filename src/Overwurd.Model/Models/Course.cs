@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 using Overwurd.Model.Helpers;
 
@@ -10,7 +11,13 @@ namespace Overwurd.Model.Models
 
         public DateTimeOffset CreatedAt { get; [UsedImplicitly] private set; }
 
-        public User User { get; set; }
+        private User user;
+
+        public User User
+        {
+            get => user;
+            set => user = value ?? throw new ArgumentNullException(nameof(value));
+        }
 
         private string name;
 
@@ -54,7 +61,8 @@ namespace Overwurd.Model.Models
             }
         }
 
-        public Vocabulary[] Vocabularies { get; set; } = Array.Empty<Vocabulary>();
+        [UsedImplicitly]
+        public ICollection<Vocabulary> Vocabularies { get; private set; }
 
         public Course(string name, string description)
         {

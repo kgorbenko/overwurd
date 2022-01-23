@@ -16,6 +16,8 @@ namespace Overwurd.Model
 
         public DbSet<JwtRefreshToken> JwtRefreshTokens { get; [UsedImplicitly] set; }
 
+        public DbSet<Course> Courses { get; [UsedImplicitly] set; }
+
         public DbSet<Vocabulary> Vocabularies { get; [UsedImplicitly] set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

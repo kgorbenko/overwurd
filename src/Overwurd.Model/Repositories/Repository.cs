@@ -9,16 +9,15 @@ using Overwurd.Model.Models;
 
 namespace Overwurd.Model.Repositories
 {
-    public class Repository<T, TContext> : IRepository<T>
+    public class Repository<T> : IRepository<T>
         where T : class, IEntityWithNumericId
-        where TContext : ApplicationDbContext
     {
-        private readonly DbContext dbContext;
+        protected ApplicationDbContext DbContext { get; }
         private readonly DbSet<T> dbSet;
 
-        public Repository(TContext dbContext)
+        public Repository(ApplicationDbContext dbContext)
         {
-            this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+            DbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             dbSet          = dbContext.Set<T>();
         }
 
@@ -53,31 +52,31 @@ namespace Overwurd.Model.Repositories
         public async Task AddAsync(T entity, CancellationToken cancellationToken = default)
         {
             await dbSet.AddAsync(entity, cancellationToken);
-            await dbContext.SaveChangesAsync(cancellationToken);
+            await DbContext.SaveChangesAsync(cancellationToken);
         }
 
         public async Task AddRangeAsync(IImmutableList<T> entities, CancellationToken cancellationToken = default)
         {
             await dbSet.AddRangeAsync(entities, cancellationToken);
-            await dbContext.SaveChangesAsync(cancellationToken);
+            await DbContext.SaveChangesAsync(cancellationToken);
         }
 
         public async Task UpdateAsync(T entity, CancellationToken cancellationToken = default)
         {
             dbSet.Update(entity);
-            await dbContext.SaveChangesAsync(cancellationToken);
+            await DbContext.SaveChangesAsync(cancellationToken);
         }
 
         public async Task RemoveAsync(T entity, CancellationToken cancellationToken = default)
         {
             dbSet.Remove(entity);
-            await dbContext.SaveChangesAsync(cancellationToken);
+            await DbContext.SaveChangesAsync(cancellationToken);
         }
 
         public async Task RemoveRangeAsync(IImmutableList<T> entities, CancellationToken cancellationToken = default)
         {
             dbSet.RemoveRange(entities);
-            await dbContext.SaveChangesAsync(cancellationToken);
+            await DbContext.SaveChangesAsync(cancellationToken);
         }
     }
 }
