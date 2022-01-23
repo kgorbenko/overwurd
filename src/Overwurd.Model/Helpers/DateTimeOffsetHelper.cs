@@ -13,9 +13,6 @@ namespace Overwurd.Model.Helpers
                 second: dateTimeOffset.Second,
                 offset: dateTimeOffset.Offset);
 
-        public static DateTimeOffset NowSeconds() =>
-            DateTimeOffset.Now.TrimSeconds();
-
         public static DateTimeOffset NowUtcSeconds() =>
             DateTimeOffset.UtcNow.TrimSeconds();
     }

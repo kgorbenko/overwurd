@@ -13,8 +13,8 @@ namespace Overwurd.Model.Tests.Repositories
         [Test]
         public async Task TestAddAsync()
         {
-            var vocabulary1 = new Vocabulary("Vocabulary 1");
-            var vocabulary2 = new Vocabulary("Vocabulary 2");
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1");
+            var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2");
 
             await using (var context = new ApplicationDbContext(ContextOptions))
             {
@@ -36,9 +36,9 @@ namespace Overwurd.Model.Tests.Repositories
         [Test]
         public async Task TestAddRangeAsync()
         {
-            var vocabulary1 = new Vocabulary("Vocabulary 1");
-            var vocabulary2 = new Vocabulary("Vocabulary 2");
-            var vocabulary3 = new Vocabulary("Vocabulary 3");
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1");
+            var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2");
+            var vocabulary3 = new Vocabulary("Vocabulary 3", "Description 3");
 
             await using (var context = new ApplicationDbContext(ContextOptions))
             {
@@ -58,9 +58,9 @@ namespace Overwurd.Model.Tests.Repositories
         [Test]
         public async Task TestGetAllAsync()
         {
-            var vocabulary1 = new Vocabulary("Vocabulary 1");
-            var vocabulary2 = new Vocabulary("Vocabulary 2");
-            var vocabulary3 = new Vocabulary("Vocabulary 3");
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1");
+            var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2");
+            var vocabulary3 = new Vocabulary("Vocabulary 3", "Description 3");
 
             await using (var context = new ApplicationDbContext(ContextOptions))
             {
@@ -80,9 +80,9 @@ namespace Overwurd.Model.Tests.Repositories
         [Test]
         public async Task TestFindByIdAsync()
         {
-            var vocabulary1 = new Vocabulary("Vocabulary 1");
-            var vocabulary2 = new Vocabulary("Vocabulary 2");
-            var vocabulary3 = new Vocabulary("Vocabulary 3");
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1");
+            var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2");
+            var vocabulary3 = new Vocabulary("Vocabulary 3", "Description 3");
 
             await using (var context = new ApplicationDbContext(ContextOptions))
             {
@@ -104,9 +104,9 @@ namespace Overwurd.Model.Tests.Repositories
         [Test]
         public async Task TestFindByAsync()
         {
-            var vocabulary1 = new Vocabulary("Vocabulary 1");
-            var vocabulary2 = new Vocabulary("Vocabulary 2");
-            var vocabulary3 = new Vocabulary("Vocabulary 3");
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1");
+            var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2");
+            var vocabulary3 = new Vocabulary("Vocabulary 3", "Description 3");
 
             await using (var context = new ApplicationDbContext(ContextOptions))
             {
@@ -126,8 +126,8 @@ namespace Overwurd.Model.Tests.Repositories
         [Test]
         public async Task TestUpdateAsyncAddedEntities()
         {
-            var vocabulary1 = new Vocabulary("Vocabulary 1");
-            var vocabulary2 = new Vocabulary("Vocabulary 2");
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1");
+            var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2");
 
             await using (var context = new ApplicationDbContext(ContextOptions))
             {
@@ -159,8 +159,8 @@ namespace Overwurd.Model.Tests.Repositories
         [Test]
         public async Task TestUpdateAsyncAfterGetting()
         {
-            var vocabulary1 = new Vocabulary("Vocabulary 1");
-            var vocabulary2 = new Vocabulary("Vocabulary 2");
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1");
+            var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2");
 
             await using (var context = new ApplicationDbContext(ContextOptions))
             {
@@ -197,9 +197,9 @@ namespace Overwurd.Model.Tests.Repositories
         [Test]
         public async Task TestRemoveAsync()
         {
-            var vocabulary1 = new Vocabulary("Vocabulary 1");
-            var vocabulary2 = new Vocabulary("Vocabulary 2");
-            var vocabulary3 = new Vocabulary("Vocabulary 3");
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1");
+            var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2");
+            var vocabulary3 = new Vocabulary("Vocabulary 3", "Description 3");
 
             await using (var context = new ApplicationDbContext(ContextOptions))
             {
@@ -226,7 +226,7 @@ namespace Overwurd.Model.Tests.Repositories
             await using var context = new ApplicationDbContext(ContextOptions);
             var repository = new Repository<Vocabulary, ApplicationDbContext>(context);
 
-            var vocabulary1 = new Vocabulary("Vocabulary 1");
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1");
             vocabulary1.GetType().GetProperty("Id")!.SetValue(vocabulary1, value: 1);
 
             Assert.ThrowsAsync<DbUpdateConcurrencyException>(async () => await repository.RemoveAsync(vocabulary1));
@@ -235,10 +235,10 @@ namespace Overwurd.Model.Tests.Repositories
         [Test]
         public async Task TestRemoveRangeAsync()
         {
-            var vocabulary1 = new Vocabulary("Vocabulary 1");
-            var vocabulary2 = new Vocabulary("Vocabulary 2");
-            var vocabulary3 = new Vocabulary("Vocabulary 3");
-            var vocabulary4 = new Vocabulary("Vocabulary 4");
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1");
+            var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2");
+            var vocabulary3 = new Vocabulary("Vocabulary 3", "Description 3");
+            var vocabulary4 = new Vocabulary("Vocabulary 4", "Description 4");
 
             await using (var context = new ApplicationDbContext(ContextOptions))
             {
@@ -258,16 +258,16 @@ namespace Overwurd.Model.Tests.Repositories
         [Test]
         public async Task TestPaginate()
         {
-            var vocabulary1 = new Vocabulary("Vocabulary 1");
-            var vocabulary2 = new Vocabulary("Vocabulary 2");
-            var vocabulary3 = new Vocabulary("Vocabulary 3");
+            var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1");
+            var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2");
+            var vocabulary3 = new Vocabulary("Vocabulary 3", "Description 3");
 
-            var vocabulary4 = new Vocabulary("Vocabulary 4");
-            var vocabulary5 = new Vocabulary("Vocabulary 5");
-            var vocabulary6 = new Vocabulary("Vocabulary 6");
+            var vocabulary4 = new Vocabulary("Vocabulary 4", "Description 4");
+            var vocabulary5 = new Vocabulary("Vocabulary 5", "Description 5");
+            var vocabulary6 = new Vocabulary("Vocabulary 6", "Description 6");
 
-            var vocabulary7 = new Vocabulary("Vocabulary 7");
-            var vocabulary8 = new Vocabulary("Vocabulary 8");
+            var vocabulary7 = new Vocabulary("Vocabulary 7", "Description 7");
+            var vocabulary8 = new Vocabulary("Vocabulary 8", "Description 8");
 
             await using (var context = new ApplicationDbContext(ContextOptions))
             {

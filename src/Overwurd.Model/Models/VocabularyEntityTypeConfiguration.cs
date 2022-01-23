@@ -13,6 +13,9 @@ namespace Overwurd.Model.Models
                    .IsRequired();
             builder.HasIndex(x => x.Name)
                    .IsUnique();
+            builder.Property(x => x.Description)
+                   .HasField("description")
+                   .IsRequired();
             builder.Property(x => x.CreatedAt);
         }
     }

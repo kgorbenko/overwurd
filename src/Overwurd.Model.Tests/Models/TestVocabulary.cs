@@ -18,7 +18,7 @@ namespace Overwurd.Model.Tests.Models
         [Test]
         public static void SettingEmptyStringToNameThrowsArgumentException()
         {
-            var exception = Assert.Throws<ArgumentException>(() => new Vocabulary("Test").Name = "");
+            var exception = Assert.Throws<ArgumentException>(() => new Vocabulary("Test", "Description").Name = "");
             Assert.That(exception, Is.Not.Null);
             Assert.That(exception.Message, Is.EqualTo(CannotSetNameToEmptyStringMessage));
         }
@@ -26,7 +26,7 @@ namespace Overwurd.Model.Tests.Models
         [Test]
         public static void SettingWhitespaceToNameThrowsArgumentException()
         {
-            var exception = Assert.Throws<ArgumentException>(() => new Vocabulary("Test").Name = " ");
+            var exception = Assert.Throws<ArgumentException>(() => new Vocabulary("Test", "Description").Name = " ");
             Assert.That(exception, Is.Not.Null);
             Assert.That(exception.Message, Is.EqualTo(CannotSetNameToWhitespaceMessage));
         }
@@ -34,28 +34,28 @@ namespace Overwurd.Model.Tests.Models
         [Test]
         public static void SettingNullToNameThrowsArgumentException()
         {
-            var exception = Assert.Throws<ArgumentException>(() => new Vocabulary("Test").Name = null);
+            var exception = Assert.Throws<ArgumentException>(() => new Vocabulary("Test", "Description").Name = null);
             Assert.That(exception, Is.Not.Null);
             Assert.That(exception.Message, Is.EqualTo(CannotSetNameToNullMessage));
         }
 
         [Test]
         public static void PassingEmptyStringNameToConstructorThrowsArgumentException() {
-            var exception = Assert.Throws<ArgumentException>(() => { var vocabulary = new Vocabulary(""); });
+            var exception = Assert.Throws<ArgumentException>(() => { var vocabulary = new Vocabulary("", "Description"); });
             Assert.That(exception, Is.Not.Null);
             Assert.That(exception.Message, Is.EqualTo(CannotSetNameToEmptyStringMessage));
         }
 
         [Test]
         public static void PassingWhitespaceNameToConstructorThrowsArgumentException() {
-            var exception = Assert.Throws<ArgumentException>(() => { var vocabulary = new Vocabulary(" "); });
+            var exception = Assert.Throws<ArgumentException>(() => { var vocabulary = new Vocabulary(" ", "Description"); });
             Assert.That(exception, Is.Not.Null);
             Assert.That(exception.Message, Is.EqualTo(CannotSetNameToWhitespaceMessage));
         }
 
         [Test]
         public static void PassingNullNameToConstructorThrowsArgumentException() {
-            var exception = Assert.Throws<ArgumentException>(() => { var vocabulary = new Vocabulary(name: null); });
+            var exception = Assert.Throws<ArgumentException>(() => { var vocabulary = new Vocabulary(name: null, "Description"); });
             Assert.That(exception, Is.Not.Null);
             Assert.That(exception.Message, Is.EqualTo(CannotSetNameToNullMessage));
         }
