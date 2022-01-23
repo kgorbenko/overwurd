@@ -1,9 +1,9 @@
 import * as React from 'react';
 import dayjs from 'dayjs';
-import { ISignInResult, useAuth } from '../hooks/use-auth';
+import { ISignInResult, useAuth } from '../hooks/UseAuth';
 import { Navigate } from 'react-router-dom';
 import { AuthFormContainer } from './AuthFormContainer';
-import { withLoadingAsync } from '../utils/misc';
+import { withLoadingAsync } from '../utils/Misc';
 import { TopPageLinearProgress } from './TopPageLinearProgress';
 
 export interface IValidationResult {

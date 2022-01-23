@@ -1,13 +1,13 @@
 import React from 'react';
 import { NavigateOptions, Route, Routes, useNavigate } from 'react-router-dom';
 import { LandingPage } from './pages/LandingPage';
-import { useCurrentDateTime } from './hooks/use-current-date-time';
+import { useCurrentDateTime } from './hooks/UseCurrentDateTime';
 import { RequireAuthenticated } from './components/RequireAuthenticated';
 import { SignInPage } from './pages/SignInPage';
 import { NotFound } from './pages/NotFound';
 import { SignUpPage } from './pages/SignUpPage';
-import { useAuth } from './hooks/use-auth';
-import { withDisableAsync, withLoadingAsync } from './utils/misc';
+import { useAuth } from './hooks/UseAuth';
+import { withDisableAsync, withLoadingAsync } from './utils/Misc';
 import { SignOutPage } from './pages/SignOutPage';
 import { CenteredCircularProgress } from './components/CenteredCircularProgress';
 import { SignInLayout } from './components/SignInLayout';

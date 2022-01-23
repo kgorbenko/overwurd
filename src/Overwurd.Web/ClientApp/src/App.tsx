@@ -2,7 +2,7 @@ import * as React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { AppContextProvider } from './AppContextProvider';
 import { Dashboard } from './Dashboard';
-import { theme } from './theme';
+import { theme } from './Theme';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 
 export const App: React.FunctionComponent<{}> = (props: React.PropsWithChildren<{}>) => {

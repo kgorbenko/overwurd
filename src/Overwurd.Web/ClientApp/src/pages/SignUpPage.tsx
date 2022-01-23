@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Button, Grid, TextField, Link } from '@mui/material';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
-import { ISignInResult, useAuth } from '../hooks/use-auth';
+import { ISignInResult, useAuth } from '../hooks/UseAuth';
 import dayjs from 'dayjs';
 import { AuthFormProcessor, IValidationResult } from '../components/AuthFormProcessor';
-import { ISignUpParameters } from '../services/auth-service';
+import { ISignUpParameters } from '../services/AuthService';
 
 interface ISignUpData {
     userName: string;
