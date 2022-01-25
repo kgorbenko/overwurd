@@ -1,7 +1,6 @@
-namespace Overwurd.Model.Models
+namespace Overwurd.Model.Models;
+
+public interface IEntityWithNumericId
 {
-    public interface IEntityWithNumericId
-    {
-        int Id { get; }
-    }
+    int Id { get; }
 }

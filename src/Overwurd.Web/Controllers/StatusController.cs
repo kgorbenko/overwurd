@@ -7,32 +7,31 @@ using Microsoft.AspNetCore.Mvc;
 using Overwurd.Model;
 using Overwurd.Web.Helpers;
 
-namespace Overwurd.Web.Controllers
+namespace Overwurd.Web.Controllers;
+
+[UsedImplicitly]
+public record StatusViewModel(string Version, string Environment, string LastMigration);
+
+[ApiController]
+[Authorize]
+[Route("api/status")]
+public class StatusController : Controller
 {
-    [UsedImplicitly]
-    public record StatusViewModel(string Version, string Environment, string LastMigration);
+    private readonly ApplicationDbContext dbContext;
+    private readonly IWebHostEnvironment webHostEnvironment;
 
-    [ApiController]
-    [Authorize]
-    [Route("api/status")]
-    public class StatusController : Controller
+    public StatusController([NotNull] IWebHostEnvironment webHostEnvironment,
+                            [NotNull] ApplicationDbContext dbContext)
     {
-        private readonly ApplicationDbContext dbContext;
-        private readonly IWebHostEnvironment webHostEnvironment;
+        this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+        this.webHostEnvironment = webHostEnvironment ?? throw new ArgumentNullException(nameof(webHostEnvironment));
+    }
 
-        public StatusController([NotNull] IWebHostEnvironment webHostEnvironment,
-                                [NotNull] ApplicationDbContext dbContext)
-        {
-            this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-            this.webHostEnvironment = webHostEnvironment ?? throw new ArgumentNullException(nameof(webHostEnvironment));
-        }
-
-        [HttpGet]
-        public async Task<StatusViewModel> Get()
-        {
-            return new StatusViewModel(Version: EnvironmentHelper.GetApplicationVersion()?.ToString(),
-                                       Environment: webHostEnvironment.EnvironmentName,
-                                       LastMigration: await EnvironmentHelper.GetLastDatabaseMigrationAsync(dbContext));
-        }
+    [HttpGet]
+    public async Task<StatusViewModel> Get()
+    {
+        return new StatusViewModel(Version: EnvironmentHelper.GetApplicationVersion()?.ToString(),
+                                   Environment: webHostEnvironment.EnvironmentName,
+                                   LastMigration: await EnvironmentHelper.GetLastDatabaseMigrationAsync(dbContext));
     }
 }

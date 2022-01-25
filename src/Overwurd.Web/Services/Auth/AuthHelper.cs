@@ -6,47 +6,46 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Overwurd.Model.Models;
 
-namespace Overwurd.Web.Services.Auth
+namespace Overwurd.Web.Services.Auth;
+
+public static class AuthHelper
 {
-    public static class AuthHelper
+    public static byte[] GetBytesFromSigningKey(string key) =>
+        Encoding.ASCII.GetBytes(key);
+
+    public static int GetUserIdFromAccessToken(string tokenString, string userIdClaimType)
     {
-        public static byte[] GetBytesFromSigningKey(string key) =>
-            Encoding.ASCII.GetBytes(key);
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var token = tokenHandler.ReadJwtToken(tokenString);
+        var userIdString = token.Claims.Single(x => x.Type == userIdClaimType).Value;
 
-        public static int GetUserIdFromAccessToken(string tokenString, string userIdClaimType)
+        return int.Parse(userIdString);
+    }
+
+    public static bool TryGetUserIdFromAccessToken(string tokenString, string userIdClaimType, out int id)
+    {
+        try
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.ReadJwtToken(tokenString);
-            var userIdString = token.Claims.Single(x => x.Type == userIdClaimType).Value;
-
-            return int.Parse(userIdString);
-        }
-
-        public static bool TryGetUserIdFromAccessToken(string tokenString, string userIdClaimType, out int id)
+            id = GetUserIdFromAccessToken(tokenString, userIdClaimType);
+            return true;
+        } catch
         {
-            try
-            {
-                id = GetUserIdFromAccessToken(tokenString, userIdClaimType);
-                return true;
-            } catch
-            {
-                id = 0;
-                return false;
-            }
+            id = 0;
+            return false;
         }
+    }
 
-        public static ImmutableArray<Claim> GetUserClaims(User user, ClaimsIdentityOptions claimsIdentityOptions)
+    public static ImmutableArray<Claim> GetUserClaims(User user, ClaimsIdentityOptions claimsIdentityOptions)
+    {
+        var identityClaims = new Claim[]
         {
-            var identityClaims = new Claim[]
-            {
-                new(claimsIdentityOptions.UserIdClaimType, user.Id.ToString()),
-                new(claimsIdentityOptions.UserNameClaimType, user.UserName)
-            };
+            new(claimsIdentityOptions.UserIdClaimType, user.Id.ToString()),
+            new(claimsIdentityOptions.UserNameClaimType, user.UserName)
+        };
 
-            var roleClaims = user.Roles
-                                 .Select(x => new Claim(claimsIdentityOptions.RoleClaimType, x.Name));
+        var roleClaims = user.Roles
+                             .Select(x => new Claim(claimsIdentityOptions.RoleClaimType, x.Name));
 
-            return identityClaims.Concat(roleClaims).ToImmutableArray();
-        }
+        return identityClaims.Concat(roleClaims).ToImmutableArray();
     }
 }

@@ -2,69 +2,68 @@ using System;
 using JetBrains.Annotations;
 using Overwurd.Model.Helpers;
 
-namespace Overwurd.Model.Models
+namespace Overwurd.Model.Models;
+
+public class Vocabulary : IEntity
 {
-    public class Vocabulary : IEntity
+    public int Id { get; [UsedImplicitly] private set; }
+
+    public DateTimeOffset CreatedAt { get; [UsedImplicitly] private set; }
+
+    private Course course;
+
+    public Course Course
     {
-        public int Id { get; [UsedImplicitly] private set; }
+        get => course;
+        set => course = value ?? throw new ArgumentNullException(nameof(value));
+    }
 
-        public DateTimeOffset CreatedAt { get; [UsedImplicitly] private set; }
+    private string name;
 
-        private Course course;
-
-        public Course Course
+    public string Name
+    {
+        get => name;
+        set
         {
-            get => course;
-            set => course = value ?? throw new ArgumentNullException(nameof(value));
-        }
+            string MakeMessage(string invalidValue) =>
+                $"An attempt to set {nameof(Vocabulary)} name to an invalid value. " +
+                $"{nameof(Vocabulary)} name cannot be null, empty or whitespace, but was {invalidValue}.";
 
-        private string name;
-
-        public string Name
-        {
-            get => name;
-            set
+            name = value switch
             {
-                string MakeMessage(string invalidValue) =>
-                    $"An attempt to set {nameof(Vocabulary)} name to an invalid value. " +
-                    $"{nameof(Vocabulary)} name cannot be null, empty or whitespace, but was {invalidValue}.";
-
-                name = value switch
-                {
-                    null => throw new ArgumentException(MakeMessage("null")),
-                    var s when string.IsNullOrEmpty(s) => throw new ArgumentException(MakeMessage("empty")),
-                    var s when string.IsNullOrWhiteSpace(s) => throw new ArgumentException(MakeMessage("whitespace")),
-                    var s => s
-                };
-            }
+                null => throw new ArgumentException(MakeMessage("null")),
+                var s when string.IsNullOrEmpty(s) => throw new ArgumentException(MakeMessage("empty")),
+                var s when string.IsNullOrWhiteSpace(s) => throw new ArgumentException(MakeMessage("whitespace")),
+                var s => s
+            };
         }
+    }
 
-        private string description;
+    private string description;
 
-        public string Description
+    public string Description
+    {
+        get => description;
+        set
         {
-            get => description;
-            set
+            string MakeMessage(string invalidValue) =>
+                $"An attempt to set {nameof(Vocabulary)} description to an invalid value. " +
+                $"{nameof(Vocabulary)} description cannot be null, empty or whitespace, but was {invalidValue}.";
+
+            description = value switch
             {
-                string MakeMessage(string invalidValue) =>
-                    $"An attempt to set {nameof(Vocabulary)} description to an invalid value. " +
-                    $"{nameof(Vocabulary)} description cannot be null, empty or whitespace, but was {invalidValue}.";
-
-                description = value switch
-                {
-                    null => throw new ArgumentException(MakeMessage("null")),
-                    var s when string.IsNullOrEmpty(s) => throw new ArgumentException(MakeMessage("empty")),
-                    var s when string.IsNullOrWhiteSpace(s) => throw new ArgumentException(MakeMessage("whitespace")),
-                    var s => s
-                };
-            }
+                null => throw new ArgumentException(MakeMessage("null")),
+                var s when string.IsNullOrEmpty(s) => throw new ArgumentException(MakeMessage("empty")),
+                var s when string.IsNullOrWhiteSpace(s) => throw new ArgumentException(MakeMessage("whitespace")),
+                var s => s
+            };
         }
+    }
 
-        public Vocabulary(string name, string description)
-        {
-            Name = name;
-            Description = description;
-            CreatedAt = DateTimeOffsetHelper.NowUtcSeconds();
-        }
+    public Vocabulary(string name, string description)
+    {
+        Name = name;
+        Description = description;
+        CreatedAt = DateTimeOffsetHelper.NowUtcSeconds();
     }
 }

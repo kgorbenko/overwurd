@@ -1,9 +1,8 @@
 using System;
 
-namespace Overwurd.Web.Services
+namespace Overwurd.Web.Services;
+
+public interface IGuidProvider
 {
-    public interface IGuidProvider
-    {
-        Guid GenerateGuid();
-    }
+    Guid GenerateGuid();
 }

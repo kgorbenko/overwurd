@@ -1,12 +1,11 @@
 using System;
 
-namespace Overwurd.Web.Services
+namespace Overwurd.Web.Services;
+
+public class GuidProvider : IGuidProvider
 {
-    public class GuidProvider : IGuidProvider
+    public Guid GenerateGuid()
     {
-        public Guid GenerateGuid()
-        {
-            return Guid.NewGuid();
-        }
+        return Guid.NewGuid();
     }
 }

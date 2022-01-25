@@ -3,10 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Overwurd.Model.Models;
 
-namespace Overwurd.Model.Repositories
+namespace Overwurd.Model.Repositories;
+
+public interface ICourseRepository : IRepository<Course>
 {
-    public interface ICourseRepository : IRepository<Course>
-    {
-        Task<IImmutableList<Course>> GetUserCoursesAsync(int userId, CancellationToken cancellationToken);
-    }
+    Task<IImmutableList<Course>> GetUserCoursesAsync(int userId, CancellationToken cancellationToken);
 }

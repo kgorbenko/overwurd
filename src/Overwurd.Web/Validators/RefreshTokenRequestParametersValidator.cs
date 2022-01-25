@@ -1,14 +1,13 @@
 using FluentValidation;
 using Overwurd.Web.Controllers;
 
-namespace Overwurd.Web.Validators
+namespace Overwurd.Web.Validators;
+
+public class RefreshTokenRequestParametersValidator : AbstractValidator<RefreshTokenRequestParameters>
 {
-    public class RefreshTokenRequestParametersValidator : AbstractValidator<RefreshTokenRequestParameters>
+    public RefreshTokenRequestParametersValidator()
     {
-        public RefreshTokenRequestParametersValidator()
-        {
-            RuleFor(x => x.AccessToken).NotEmpty();
-            RuleFor(x => x.RefreshToken).NotEmpty();
-        }
+        RuleFor(x => x.AccessToken).NotEmpty();
+        RuleFor(x => x.RefreshToken).NotEmpty();
     }
 }

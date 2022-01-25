@@ -21,109 +21,108 @@ using Overwurd.Web.Services;
 using Overwurd.Web.Services.Auth;
 using Overwurd.Web.Services.Auth.Stores;
 
-namespace Overwurd.Web
+namespace Overwurd.Web;
+
+public class Startup
 {
-    public class Startup
+    private readonly IConfiguration configuration;
+
+    public Startup([NotNull] IConfiguration configuration)
     {
-        private readonly IConfiguration configuration;
+        this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+    }
 
-        public Startup([NotNull] IConfiguration configuration)
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddControllersWithViews()
+                .AddFluentValidation(x => x.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()));
+        services.AddSpaStaticFiles(staticFilesOptions => { staticFilesOptions.RootPath = "ClientApp/build"; });
+
+        var jwtConfigurationJson = configuration.GetSection("Jwt").Get<JwtConfigurationJson>();
+        var jwtConfiguration = new JwtConfiguration(
+            SecurityAlgorithmSignature: SecurityAlgorithms.HmacSha256Signature,
+            SigningKey: jwtConfigurationJson.SigningKey,
+            Issuer: jwtConfigurationJson.Issuer,
+            Audience: jwtConfigurationJson.Audience,
+            AccessTokenExpirationInMinutes: jwtConfigurationJson.AccessTokenExpirationInMinutes,
+            RefreshTokenExpirationInDays: jwtConfigurationJson.RefreshTokenExpirationInDays
+        );
+
+        var tokenValidationParameters = new TokenValidationParameters
         {
-            this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-        }
+            ValidateIssuer = true,
+            ValidIssuer = jwtConfiguration.Issuer,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(AuthHelper.GetBytesFromSigningKey(jwtConfiguration.SigningKey)),
+            ValidateAudience = true,
+            ValidAudience = jwtConfiguration.Audience,
+            RequireExpirationTime = true,
+            ValidateLifetime = true,
+            ValidAlgorithms = new[] { jwtConfiguration.SecurityAlgorithmSignature }
+        };
 
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddControllersWithViews()
-                    .AddFluentValidation(x => x.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()));
-            services.AddSpaStaticFiles(staticFilesOptions => { staticFilesOptions.RootPath = "ClientApp/build"; });
-
-            var jwtConfigurationJson = configuration.GetSection("Jwt").Get<JwtConfigurationJson>();
-            var jwtConfiguration = new JwtConfiguration(
-                SecurityAlgorithmSignature: SecurityAlgorithms.HmacSha256Signature,
-                SigningKey: jwtConfigurationJson.SigningKey,
-                Issuer: jwtConfigurationJson.Issuer,
-                Audience: jwtConfigurationJson.Audience,
-                AccessTokenExpirationInMinutes: jwtConfigurationJson.AccessTokenExpirationInMinutes,
-                RefreshTokenExpirationInDays: jwtConfigurationJson.RefreshTokenExpirationInDays
-            );
-
-            var tokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidIssuer = jwtConfiguration.Issuer,
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(AuthHelper.GetBytesFromSigningKey(jwtConfiguration.SigningKey)),
-                ValidateAudience = true,
-                ValidAudience = jwtConfiguration.Audience,
-                RequireExpirationTime = true,
-                ValidateLifetime = true,
-                ValidAlgorithms = new[] { jwtConfiguration.SecurityAlgorithmSignature }
-            };
-
-            services.AddSingleton(jwtConfiguration);
-            services.AddSingleton(tokenValidationParameters);
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(x =>
-            {
-                x.SaveToken = true;
-                x.TokenValidationParameters = tokenValidationParameters;
-            });
-
-            var connectionString = configuration.GetConnectionString("Default");
-
-            services.AddDbContext<ApplicationDbContext>(
-                options => options.UseNpgsql(
-                    connectionString,
-                    builder => builder.MigrationsHistoryTable(
-                        ApplicationDbContext.MigrationsHistoryTableName,
-                        ApplicationDbContext.SchemaName))
-            );
-
-            services.AddIdentityCore<User>();
-            services.AddSingleton<ClaimsIdentityOptions>();
-            services.AddTransient<IUserStore<User>, UserPasswordStore>();
-            services.AddTransient<IUserPasswordStore<User>, UserPasswordStore>();
-            services.AddTransient<IGuidProvider, GuidProvider>();
-            services.AddTransient<IJwtRefreshTokenProvider, JwtRefreshTokenProvider>();
-            services.AddTransient<IJwtAuthService, JwtAuthService>();
-            services.AddTransient<IRepository<Vocabulary>, Repository<Vocabulary>>();
-            services.AddTransient<IReadOnlyRepository<Vocabulary>, ReadOnlyRepository<Vocabulary>>();
-            services.AddTransient<IRepository<User>, Repository<User>>();
-            services.AddTransient<IReadOnlyRepository<User>, ReadOnlyRepository<User>>();
-        }
-
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            app.UseHsts();
-            app.UseStaticFiles();
-            app.UseSpaStaticFiles();
-
-            app.UseRouting();
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller}/{action=Index}/{id?}");
-            });
-
-            app.UseSpa(spa =>
-            {
-                spa.Options.SourcePath = "ClientApp";
-
-                if (env.IsDevelopment())
+        services.AddSingleton(jwtConfiguration);
+        services.AddSingleton(tokenValidationParameters);
+        services.AddAuthentication(options =>
                 {
-                    spa.UseReactDevelopmentServer(npmScript: "start");
-                }
-            });
-        }
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(x =>
+                {
+                    x.SaveToken = true;
+                    x.TokenValidationParameters = tokenValidationParameters;
+                });
+
+        var connectionString = configuration.GetConnectionString("Default");
+
+        services.AddDbContext<ApplicationDbContext>(
+            options => options.UseNpgsql(
+                connectionString,
+                builder => builder.MigrationsHistoryTable(
+                    ApplicationDbContext.MigrationsHistoryTableName,
+                    ApplicationDbContext.SchemaName))
+        );
+
+        services.AddIdentityCore<User>();
+        services.AddSingleton<ClaimsIdentityOptions>();
+        services.AddTransient<IUserStore<User>, UserPasswordStore>();
+        services.AddTransient<IUserPasswordStore<User>, UserPasswordStore>();
+        services.AddTransient<IGuidProvider, GuidProvider>();
+        services.AddTransient<IJwtRefreshTokenProvider, JwtRefreshTokenProvider>();
+        services.AddTransient<IJwtAuthService, JwtAuthService>();
+        services.AddTransient<IRepository<Vocabulary>, Repository<Vocabulary>>();
+        services.AddTransient<IReadOnlyRepository<Vocabulary>, ReadOnlyRepository<Vocabulary>>();
+        services.AddTransient<IRepository<User>, Repository<User>>();
+        services.AddTransient<IReadOnlyRepository<User>, ReadOnlyRepository<User>>();
+    }
+
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        app.UseHsts();
+        app.UseStaticFiles();
+        app.UseSpaStaticFiles();
+
+        app.UseRouting();
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllerRoute(
+                name: "default",
+                pattern: "{controller}/{action=Index}/{id?}");
+        });
+
+        app.UseSpa(spa =>
+        {
+            spa.Options.SourcePath = "ClientApp";
+
+            if (env.IsDevelopment())
+            {
+                spa.UseReactDevelopmentServer(npmScript: "start");
+            }
+        });
     }
 }
