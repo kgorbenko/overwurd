@@ -190,7 +190,7 @@ public class TestJwtAuthService
             "1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiVGVzdFVzZXIiLCJleHAiOjE2MTIxMzc" +
             "5MDAsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTAwMCIsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6NTAwMCJ9." +
             "FOGmAT3If5aPwbyiqTW0RdpqS0SXNf3y2rTFx0_mtxo";
-        Assert.ThrowsAsync<SecurityTokenInvalidSignatureException>(
+        Assert.ThrowsAsync<SecurityTokenSignatureKeyNotFoundException>(
             async () => await jwtAuthService.RefreshAccessTokenAsync(accessTokenString, "", date, CancellationToken.None)
         );
 
