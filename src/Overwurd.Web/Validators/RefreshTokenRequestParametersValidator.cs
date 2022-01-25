@@ -1,5 +1,4 @@
 using FluentValidation;
-using Overwurd.Web.Controllers;
 
 namespace Overwurd.Web.Validators;
 

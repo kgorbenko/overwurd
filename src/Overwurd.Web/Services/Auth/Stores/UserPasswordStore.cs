@@ -4,8 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Identity;
-using Overwurd.Model.Models;
-using Overwurd.Model.Repositories;
 
 namespace Overwurd.Web.Services.Auth.Stores;
 

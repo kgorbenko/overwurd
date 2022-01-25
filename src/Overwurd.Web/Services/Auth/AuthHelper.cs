@@ -4,7 +4,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
-using Overwurd.Model.Models;
 
 namespace Overwurd.Web.Services.Auth;
 

@@ -4,8 +4,6 @@ using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Overwurd.Model;
-using Overwurd.Web.Helpers;
 
 namespace Overwurd.Web.Controllers;
 

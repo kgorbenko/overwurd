@@ -3,7 +3,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Overwurd.Model;
 
 namespace Overwurd.Web.Helpers;
 

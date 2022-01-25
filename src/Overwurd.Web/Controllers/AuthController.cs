@@ -6,9 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Overwurd.Model.Helpers;
-using Overwurd.Model.Models;
-using Overwurd.Web.Services.Auth;
 
 namespace Overwurd.Web.Controllers;
 

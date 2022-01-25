@@ -12,14 +12,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using Overwurd.Model;
-using Overwurd.Model.Models;
-using Overwurd.Model.Repositories;
-using Overwurd.Model.Services;
-using Overwurd.Web.Options;
-using Overwurd.Web.Services;
-using Overwurd.Web.Services.Auth;
-using Overwurd.Web.Services.Auth.Stores;
 
 namespace Overwurd.Web;
 
