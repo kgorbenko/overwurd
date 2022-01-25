@@ -1,4 +1,4 @@
-﻿FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
+﻿FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 ARG BUILD_NUMBER
 
 RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
@@ -26,7 +26,7 @@ FROM test AS publish
 WORKDIR /src
 RUN dotnet publish Overwurd.Web/Overwurd.Web.csproj -c Release -o /publish --no-build
 
-FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS run
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS run
 WORKDIR /app
 COPY --from=publish /publish .
 ENV ASPNETCORE_ENVIRONMENT="Production"
