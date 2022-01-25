@@ -100,15 +100,7 @@ namespace Overwurd.Web
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            } else
-            {
-                app.UseExceptionHandler("/Error");
-                app.UseHsts();
-            }
-
+            app.UseHsts();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
