@@ -79,4 +79,9 @@ public class Repository<T> : IRepository<T>
         dbSet.RemoveRange(entities);
         await DbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<int> CountByAsync(Expression<Func<T, bool>> filter, CancellationToken cancellationToken = default)
+    {
+        return await dbSet.Where(filter).CountAsync(cancellationToken);
+    }
 }

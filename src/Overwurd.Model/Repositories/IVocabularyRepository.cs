@@ -8,4 +8,6 @@ namespace Overwurd.Model.Repositories;
 public interface IVocabularyRepository : IRepository<Vocabulary>
 {
     Task<IImmutableList<Vocabulary>> GetCourseVocabulariesAsync(int courseId, CancellationToken cancellationToken);
+
+    Task<int> CountCourseVocabulariesAsync(int courseId, CancellationToken cancellationToken);
 }

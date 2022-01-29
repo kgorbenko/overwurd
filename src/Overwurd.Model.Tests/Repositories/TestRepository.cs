@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
@@ -304,5 +305,55 @@ public class TestRepository : BaseModelDatabaseDependentTestFixture
         var thirdPageActual = await repository.PaginateByAsync(x => x.Description == "Description", page: 2, pageSize: 1);
         var thirdPageExpected = new PaginationResult<Vocabulary>(ImmutableArray<Vocabulary>.Empty, TotalCount: 1);
         Assert.That(thirdPageActual, Is.EqualTo(thirdPageExpected).Using(PaginationResultComparer));
+    }
+
+    [Test]
+    public async Task TestCountByEmpty()
+    {
+        await using var context = new ApplicationDbContext(ContextOptions);
+        var repository = new Repository<Vocabulary>(context);
+
+        var actual = await repository.CountByAsync(x => true);
+
+        Assert.That(actual, Is.EqualTo(0));
+    }
+
+    [Test]
+    public async Task TestCountByFilter()
+    {
+        var user = new User { UserName = "Test User" };
+        var course = new Course("Course", "Description") { User = user };
+        var vocabulary1 = new Vocabulary("Vocabulary 1", "Description") { Course = course };
+        var vocabulary2 = new Vocabulary("Vocabulary 2", "Another Description") { Course = course };
+
+        await StoreVocabulariesAsync(vocabulary1, vocabulary2);
+
+        await using var context = new ApplicationDbContext(ContextOptions);
+        var repository = new Repository<Vocabulary>(context);
+
+        var actual = await repository.CountByAsync(x => x.Name == "Vocabulary 1");
+
+        Assert.That(actual, Is.EqualTo(1));
+    }
+
+    [Test]
+    public async Task TestCountByNumber()
+    {
+        var user = new User { UserName = "Test User" };
+        var course = new Course("Course", "Description") { User = user };
+        var vocabulary1 = new Vocabulary("Vocabulary 1", "Description 1") { Course = course };
+        var vocabulary2 = new Vocabulary("Vocabulary 2", "Description 2") { Course = course };
+        var vocabulary3 = new Vocabulary("Vocabulary 3", "Description 3") { Course = course };
+        var vocabulary4 = new Vocabulary("Vocabulary 4", "Description 4") { Course = course };
+        var vocabulary5 = new Vocabulary("Vocabulary 5", "Description 5") { Course = course };
+
+        await StoreVocabulariesAsync(vocabulary1, vocabulary2, vocabulary3, vocabulary4, vocabulary5);
+
+        await using var context = new ApplicationDbContext(ContextOptions);
+        var repository = new Repository<Vocabulary>(context);
+
+        var actual = await repository.CountByAsync(x => x.CourseId == course.Id);
+
+        Assert.That(actual, Is.EqualTo(5));
     }
 }

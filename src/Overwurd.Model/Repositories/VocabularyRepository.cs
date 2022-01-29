@@ -19,4 +19,7 @@ public class VocabularyRepository : Repository<Vocabulary>, IVocabularyRepositor
                                .ToArrayAsync(cancellationToken: cancellationToken))
             .ToImmutableList();
     }
+
+    public async Task<int> CountCourseVocabulariesAsync(int courseId, CancellationToken cancellationToken) =>
+        await CountByAsync(x => x.CourseId == courseId, cancellationToken);
 }

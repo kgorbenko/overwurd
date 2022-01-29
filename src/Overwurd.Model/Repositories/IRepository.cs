@@ -26,4 +26,6 @@ public interface IRepository<T> where T: IEntityWithNumericId
     Task RemoveAsync(T entity, CancellationToken cancellationToken = default);
 
     Task RemoveRangeAsync(IImmutableList<T> entities, CancellationToken cancellationToken = default);
+
+    Task<int> CountByAsync(Expression<Func<T, bool>> filter, CancellationToken cancellationToken = default);
 }
