@@ -1,7 +1,6 @@
-namespace Overwurd.Model.Models
+namespace Overwurd.Model.Models;
+
+public enum RoleType
 {
-    public enum RoleType
-    {
-        Administrator = 0
-    }
+    Administrator = 0
 }
