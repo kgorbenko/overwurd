@@ -29,7 +29,8 @@ public class Repository<T> : IRepository<T>
     public async Task<PaginationResult<T>> PaginateByAsync(Expression<Func<T, bool>> predicate, int page, int pageSize, CancellationToken cancellationToken = default)
     {
         var query = dbSet.Where(predicate);
-        var results = await query.Select(x => new { Entity = x, TotalCount = query.Count() })
+        var results = await query.OrderByDescending(x => x.Id)
+                                 .Select(x => new { Entity = x, TotalCount = query.Count() })
                                  .Skip(pageSize * (page - 1))
                                  .Take(pageSize)
                                  .ToArrayAsync(cancellationToken: cancellationToken);
