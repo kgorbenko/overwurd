@@ -86,6 +86,8 @@ public class Startup
         services.AddTransient<IJwtAuthService, JwtAuthService>();
         services.AddTransient<IRepository<Vocabulary>, Repository<Vocabulary>>();
         services.AddTransient<IReadOnlyRepository<Vocabulary>, ReadOnlyRepository<Vocabulary>>();
+        services.AddTransient<ICourseRepository, CourseRepository>();
+        services.AddTransient<IReadOnlyCourseRepository, ReadOnlyCourseRepository>();
         services.AddTransient<IRepository<User>, Repository<User>>();
         services.AddTransient<IReadOnlyRepository<User>, ReadOnlyRepository<User>>();
     }
