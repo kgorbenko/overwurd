@@ -17,7 +17,7 @@ public record CourseViewModel(int Id, string Name, string Description, DateTimeO
 public record PaginatedCoursesViewModel(CourseViewModel[] Courses, int TotalCount);
 
 [UsedImplicitly]
-public record CreateCourseParameters(string Name, string Description);
+public record CourseParameters(string Name, string Description);
 
 [ApiController]
 [Authorize]
@@ -27,11 +27,13 @@ public class CourseController : ControllerBase
     private readonly UserManager<User> userManager;
     private readonly ICourseRepository courseRepository;
     private readonly IReadOnlyCourseRepository readOnlyCourseRepository;
+    private readonly IReadOnlyVocabularyRepository readOnlyVocabularyRepository;
     private readonly ILogger<CourseController> logger;
 
     public CourseController([NotNull] UserManager<User> userManager,
                             [NotNull] ICourseRepository courseRepository,
                             [NotNull] IReadOnlyCourseRepository readOnlyCourseRepository,
+                            [NotNull] IReadOnlyVocabularyRepository readOnlyVocabularyRepository,
                             [NotNull] ILogger<CourseController> logger)
     {
         if (userManager == null) throw new ArgumentNullException(nameof(userManager));
@@ -39,24 +41,27 @@ public class CourseController : ControllerBase
         this.userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         this.courseRepository = courseRepository ?? throw new ArgumentNullException(nameof(courseRepository));
         this.readOnlyCourseRepository = readOnlyCourseRepository ?? throw new ArgumentNullException(nameof(readOnlyCourseRepository));
+        this.readOnlyVocabularyRepository = readOnlyVocabularyRepository ?? throw new ArgumentNullException(nameof(readOnlyVocabularyRepository));
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
+    [HttpGet]
     [Route("{id:int}")]
     public async Task<IActionResult> GetCourse(int id, CancellationToken cancellationToken)
     {
         var userId = userManager.GetUserId(User).ParseUserId();
         var course = await readOnlyCourseRepository.FindByIdAsync(id, cancellationToken);
 
-        if (course.User.Id != userId)
+        if (course.UserId != userId)
         {
-            logger.LogInformation("User #{UserId} attempted to get Course #{CourseId}, but had no permission", userId, course.Id);
+            logger.LogWarning("User #{UserId} attempted to get Course #{CourseId}, but had no permission", userId, course.Id);
             return NotFound();
         }
 
         return Ok(MakeViewModel(course));
     }
 
+    [HttpGet]
     public async Task<IActionResult> PaginateUserCourses(int page, int pageSize, CancellationToken cancellationToken)
     {
         var userId = userManager.GetUserId(User).ParseUserId();
@@ -65,6 +70,7 @@ public class CourseController : ControllerBase
         return Ok(MakePaginatedViewModel(paginatedCourses));
     }
 
+    [HttpGet]
     [Route("all")]
     public async Task<IActionResult> GetAllUserCourses(CancellationToken cancellationToken)
     {
@@ -75,7 +81,7 @@ public class CourseController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateCourse([FromBody] CreateCourseParameters parameters, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateCourse([FromBody] CourseParameters parameters, CancellationToken cancellationToken)
     {
         var user = await userManager.GetUserAsync(User);
 
@@ -90,19 +96,43 @@ public class CourseController : ControllerBase
         return Ok(course.Id);
     }
 
+    [HttpPut]
+    [Route("{id:int}")]
+    public async Task<IActionResult> UpdateCourse(int id, [FromBody] CourseParameters parameters, CancellationToken cancellationToken)
+    {
+        var userId = userManager.GetUserId(User).ParseUserId();
+        var course = await courseRepository.FindByIdAsync(id, cancellationToken);
+
+        if (course.UserId != userId)
+        {
+            logger.LogWarning("User #{UserId} attempted to update Course #{CourseId}, but had not permission", userId, course.Id);
+            return NotFound();
+        }
+
+        course.Name = parameters.Name;
+        course.Description = parameters.Description;
+
+        await courseRepository.UpdateAsync(course, cancellationToken);
+        logger.LogInformation("User #{UserId} successfully updated Course #{CourseId}", userId, course.Id);
+
+        return NoContent();
+    }
+
     [HttpDelete]
+    [Route("{id:int}")]
     public async Task<IActionResult> RemoveCourse(int id, CancellationToken cancellationToken)
     {
         var userId = userManager.GetUserId(User).ParseUserId();
         var course = await courseRepository.FindByIdAsync(id, cancellationToken);
 
-        if (course.User.Id != userId)
+        if (course.UserId != userId)
         {
-            logger.LogInformation("User #{UserId} attempted to remove Course #{CourseId}, but had no permission", userId, course.Id);
+            logger.LogWarning("User #{UserId} attempted to remove Course #{CourseId}, but had no permission", userId, course.Id);
             return NotFound();
         }
 
-        if (course.Vocabularies.Any())
+        var vocabularyCount = await readOnlyVocabularyRepository.CountCourseVocabulariesAsync(course.Id, cancellationToken);
+        if (vocabularyCount > 0)
         {
             logger.LogInformation("User #{UserId} attempted to remove Course #{CourseId}, but that Course contains some vocabularies", userId, course.Id);
             return BadRequest($"Cannot remove Course #{id} because it contains vocabularies.");
