@@ -247,7 +247,7 @@ public class TestRepository : BaseModelDatabaseDependentTestFixture
     }
 
     [Test]
-    public async Task TestPaginate()
+    public async Task TestPaginateBy()
     {
         var user = new User { UserName = "Test User" };
         var course = new Course("Course", "Description") { User = user };
@@ -267,20 +267,42 @@ public class TestRepository : BaseModelDatabaseDependentTestFixture
         await using var context = new ApplicationDbContext(ContextOptions);
         var repository = new Repository<Vocabulary>(context);
 
-        var firstPage = await repository.PaginateByAsync(x => true, page: 1, pageSize: 3);
-        Assert.That(firstPage.TotalCount, Is.EqualTo(8));
-        Assert.That(firstPage.Results, Is.EqualTo(new[] { vocabulary1, vocabulary2, vocabulary3 }).Using(VocabularyRelationshipAgnosticComparer));
+        var firstPageActual = await repository.PaginateByAsync(x => true, page: 1, pageSize: 3);
+        var firstPageExpected = new PaginationResult<Vocabulary>(new[] { vocabulary8, vocabulary7, vocabulary6 }.ToImmutableArray(), 8);
+        Assert.That(firstPageActual, Is.EqualTo(firstPageExpected).Using(PaginationResultComparer));
 
-        var secondPage = await repository.PaginateByAsync(x => true, page: 2, pageSize: 3);
-        Assert.That(secondPage.TotalCount, Is.EqualTo(8));
-        Assert.That(secondPage.Results, Is.EqualTo(new[] { vocabulary4, vocabulary5, vocabulary6 }).Using(VocabularyRelationshipAgnosticComparer));
+        var secondPageActual = await repository.PaginateByAsync(x => true, page: 2, pageSize: 3);
+        var secondPageExpected = new PaginationResult<Vocabulary>(new[] { vocabulary5, vocabulary4, vocabulary3 }.ToImmutableArray(), 8);
+        Assert.That(secondPageActual, Is.EqualTo(secondPageExpected).Using(PaginationResultComparer));
 
-        var thirdPage = await repository.PaginateByAsync(x => true, page: 3, pageSize: 3);
-        Assert.That(thirdPage.TotalCount, Is.EqualTo(8));
-        Assert.That(thirdPage.Results, Is.EqualTo(new[] { vocabulary7, vocabulary8 }).Using(VocabularyRelationshipAgnosticComparer));
+        var thirdPageActual = await repository.PaginateByAsync(x => true, page: 3, pageSize: 3);
+        var thirdPageExpected = new PaginationResult<Vocabulary>(new[] { vocabulary2, vocabulary1 }.ToImmutableArray(), 8);
+        Assert.That(thirdPageActual, Is.EqualTo(thirdPageExpected).Using(PaginationResultComparer));
 
-        var fourthPage = await repository.PaginateByAsync(x => true, page: 4, pageSize: 3);
-        Assert.That(fourthPage.TotalCount, Is.EqualTo(8));
-        Assert.That(fourthPage.Results, Is.Empty);
+        var fourthPageActual = await repository.PaginateByAsync(x => true, page: 4, pageSize: 3);
+        var fourthPageExpected = new PaginationResult<Vocabulary>(ImmutableArray<Vocabulary>.Empty, 8);
+        Assert.That(fourthPageActual, Is.EqualTo(fourthPageExpected).Using(PaginationResultComparer));
+    }
+
+    [Test]
+    public async Task TestPaginateWithFilter()
+    {
+        var user = new User { UserName = "Test User" };
+        var course = new Course("Course", "Description") { User = user };
+        var vocabulary1 = new Vocabulary("Vocabulary 1", "Description") { Course = course };
+        var vocabulary2 = new Vocabulary("Vocabulary 2", "Another Description") { Course = course };
+
+        await StoreVocabulariesAsync(vocabulary1, vocabulary2);
+
+        await using var context = new ApplicationDbContext(ContextOptions);
+        var repository = new Repository<Vocabulary>(context);
+
+        var firstPageActual = await repository.PaginateByAsync(x => x.Description == "Description", page: 1, pageSize: 1);
+        var firstPageExpected = new PaginationResult<Vocabulary>(new[] { vocabulary1 }.ToImmutableArray(), TotalCount: 1);
+        Assert.That(firstPageActual, Is.EqualTo(firstPageExpected).Using(PaginationResultComparer));
+
+        var thirdPageActual = await repository.PaginateByAsync(x => x.Description == "Description", page: 2, pageSize: 1);
+        var thirdPageExpected = new PaginationResult<Vocabulary>(ImmutableArray<Vocabulary>.Empty, TotalCount: 1);
+        Assert.That(thirdPageActual, Is.EqualTo(thirdPageExpected).Using(PaginationResultComparer));
     }
 }
