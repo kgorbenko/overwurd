@@ -25,7 +25,7 @@ public record LoginResult(long Id, string UserName, string FirstName, string Las
 public record RefreshTokenResult(string AccessToken, DateTimeOffset ExpiresAt);
 
 [ApiController]
-[Authorize]
+[AllowAnonymous]
 [Route("api/[controller]")]
 public class AuthController : Controller
 {
@@ -47,7 +47,6 @@ public class AuthController : Controller
 
     private const string InvalidUserNameOrPasswordMessage = "You have entered an invalid username or password. Please double-check and try again.";
 
-    [AllowAnonymous]
     [HttpPost]
     [Route("signup")]
     public async Task<IActionResult> SignUp([FromBody] RegisterRequestParameters parameters, CancellationToken cancellationToken)
@@ -64,9 +63,7 @@ public class AuthController : Controller
 
         var newUser = new User
         {
-            UserName = parameters.UserName,
-            FirstName = parameters.FirstName,
-            LastName = parameters.LastName
+            UserName = parameters.UserName, FirstName = parameters.FirstName, LastName = parameters.LastName
         };
         var identityResult = await userManager.CreateAsync(newUser, parameters.Password);
 
@@ -87,51 +84,63 @@ public class AuthController : Controller
 
         logger.LogInformation("User #{UserId} has been registered", newUser.Id);
 
-        return Ok(new LoginResult(
-                      Id: newUser.Id,
-                      UserName: newUser.UserName,
-                      FirstName: newUser.FirstName,
-                      LastName: newUser.LastName,
-                      AccessToken: tokenPairData.AccessToken,
-                      RefreshToken: tokenPairData.RefreshToken,
-                      AccessTokenExpiresAt: tokenPairData.AccessTokenExpiresAt
-                  ));
+        return Ok(
+            new LoginResult(
+                Id: newUser.Id,
+                UserName: newUser.UserName,
+                FirstName: newUser.FirstName,
+                LastName: newUser.LastName,
+                AccessToken: tokenPairData.AccessToken,
+                RefreshToken: tokenPairData.RefreshToken,
+                AccessTokenExpiresAt: tokenPairData.AccessTokenExpiresAt
+            )
+        );
     }
 
-    [AllowAnonymous]
     [HttpPost]
     [Route("refresh")]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestParameters parameters, CancellationToken cancellationToken)
     {
+        var now = DateTimeOffsetHelper.NowUtcSeconds();
+
+        var tokenPairData = await RefreshAccessTokenAsync(parameters.AccessToken, parameters.RefreshToken, now, cancellationToken);
+
+        if (tokenPairData is null)
+        {
+            return BadRequest();
+        }
+
+        var userId = AuthHelper.GetUserIdFromAccessToken(tokenPairData.AccessToken, claimsIdentityOptions.UserIdClaimType);
+        logger.LogInformation("User #{UserId} has refreshed access token", userId);
+
+        return Ok(
+            new RefreshTokenResult(
+                AccessToken: tokenPairData.AccessToken,
+                ExpiresAt: tokenPairData.AccessTokenExpiresAt
+            )
+        );
+    }
+
+    private async Task<JwtTokenPairData> RefreshAccessTokenAsync(string accessToken,
+                                                                 string refreshToken,
+                                                                 DateTimeOffset now,
+                                                                 CancellationToken cancellationToken)
+    {
         try
         {
-            var now = DateTimeOffsetHelper.NowUtcSeconds();
-
-            var tokenPairData = await jwtAuthService.RefreshAccessTokenAsync(parameters.AccessToken,
-                                                                             parameters.RefreshToken,
-                                                                             now,
-                                                                             cancellationToken);
-
-            var userId = AuthHelper.GetUserIdFromAccessToken(tokenPairData.AccessToken, claimsIdentityOptions.UserIdClaimType);
-            logger.LogInformation("User #{UserId} has refreshed access token", userId);
-
-            return Ok(new RefreshTokenResult(
-                          AccessToken: tokenPairData.AccessToken,
-                          ExpiresAt: tokenPairData.AccessTokenExpiresAt)
-            );
+            return await jwtAuthService.RefreshAccessTokenAsync(accessToken, refreshToken, now, cancellationToken);
         } catch (Exception exception)
         {
-            var hasUserId = AuthHelper.TryGetUserIdFromAccessToken(parameters.AccessToken, claimsIdentityOptions.UserIdClaimType, out var userId);
+            var hasUserId = AuthHelper.TryGetUserIdFromAccessToken(accessToken, claimsIdentityOptions.UserIdClaimType, out var userId);
             var userClause = hasUserId
                 ? $"user {userId}"
                 : "unknown user";
             logger.LogInformation(exception, "Unsuccessful attempt to refresh access token from {UserClause}", userClause);
 
-            return BadRequest();
+            return null;
         }
     }
 
-    [AllowAnonymous]
     [HttpPost]
     [Route("signin")]
     public async Task<IActionResult> SignIn([FromBody] LoginRequestParameters parameters, CancellationToken cancellationToken)
@@ -162,14 +171,16 @@ public class AuthController : Controller
 
         logger.LogInformation("User #{UserId} successfully logged in", user.Id);
 
-        return Ok(new LoginResult(
-                      Id: user.Id,
-                      UserName: user.UserName,
-                      FirstName: user.FirstName,
-                      LastName: user.LastName,
-                      AccessToken: tokenPairData.AccessToken,
-                      RefreshToken: tokenPairData.RefreshToken,
-                      AccessTokenExpiresAt: tokenPairData.AccessTokenExpiresAt
-                  ));
+        return Ok(
+            new LoginResult(
+                Id: user.Id,
+                UserName: user.UserName,
+                FirstName: user.FirstName,
+                LastName: user.LastName,
+                AccessToken: tokenPairData.AccessToken,
+                RefreshToken: tokenPairData.RefreshToken,
+                AccessTokenExpiresAt: tokenPairData.AccessTokenExpiresAt
+            )
+        );
     }
 }
