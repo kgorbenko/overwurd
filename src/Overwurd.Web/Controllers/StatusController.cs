@@ -13,7 +13,7 @@ public record StatusViewModel(string Version, string Environment, string LastMig
 [ApiController]
 [Authorize]
 [Route("api/status")]
-public class StatusController : Controller
+public class StatusController : ControllerBase
 {
     private readonly ApplicationDbContext dbContext;
     private readonly IWebHostEnvironment webHostEnvironment;

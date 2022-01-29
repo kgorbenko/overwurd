@@ -27,7 +27,7 @@ public record RefreshTokenResult(string AccessToken, DateTimeOffset ExpiresAt);
 [ApiController]
 [AllowAnonymous]
 [Route("api/[controller]")]
-public class AuthController : Controller
+public class AuthController : ControllerBase
 {
     private readonly UserManager<User> userManager;
     private readonly IJwtAuthService jwtAuthService;
