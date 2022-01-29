@@ -69,7 +69,7 @@ public class JwtAuthService : IJwtAuthService
         var validatedAccessToken = DecryptAndValidateAccessToken(accessTokenString, tokenValidationParameters);
 
         var userIdString = validatedAccessToken.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Sub).Value;
-        var userId = int.Parse(userIdString);
+        var userId = userIdString.ParseUserId();
         var actualRefreshToken = await jwtRefreshTokenProvider.GetUserTokenAsync(userId, cancellationToken);
 
         if (!IsRefreshTokenValid(actualRefreshToken, refreshTokenString, validatedAccessToken.Id, now))

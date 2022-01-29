@@ -73,7 +73,7 @@ public class UserPasswordStore : IUserPasswordStore<User>
 
     public async Task<User> FindByIdAsync(string userId, CancellationToken cancellationToken)
     {
-        return await userRepository.FindByIdAsync(int.Parse(userId), cancellationToken);
+        return await userRepository.FindByIdAsync(userId.ParseUserId(), cancellationToken);
     }
 
     public async Task<User> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
