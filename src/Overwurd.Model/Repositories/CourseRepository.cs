@@ -14,12 +14,12 @@ public class CourseRepository : Repository<Course>, ICourseRepository
     public async Task<IImmutableList<Course>> GetUserCoursesAsync(int userId, CancellationToken cancellationToken)
     {
         return (await DbContext.Courses
-                               .Where(x => x.User.Id == userId)
+                               .Where(x => x.UserId == userId)
                                .OrderBy(x => x.CreatedAt)
                                .ToArrayAsync(cancellationToken: cancellationToken))
             .ToImmutableList();
     }
 
     public async Task<PaginationResult<Course>> PaginateUserCoursesAsync(int userId, int page, int pageSize, CancellationToken cancellationToken) =>
-        await PaginateByAsync(x => x.User.Id == userId, page: page, pageSize: pageSize, cancellationToken);
+        await PaginateByAsync(x => x.UserId == userId, page: page, pageSize: pageSize, cancellationToken);
 }
