@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -97,6 +98,28 @@ public class TestReadOnlyCourseRepository : BaseModelDatabaseDependentTestFixtur
         var result = await repository.GetUserCoursesAsync(user.Id, CancellationToken.None);
 
         Assert.That(result, Is.EqualTo(new[] { course1, course2, course3 }).Using(CourseRelationshipAgnosticComparer));
+        Assert.That(context.ChangeTracker.Entries<Course>(), Is.Empty);
+    }
+
+    [Test]
+    public async Task TestPaginateUserCoursesAsync()
+    {
+        var user1 = new User { UserName = "Test User 1" };
+        var course11 = new Course(name: "Course 11", description: "Description 11") { User = user1 };
+        var course12 = new Course(name: "Course 12", description: "Description 12") { User = user1 };
+
+        var user2 = new User { UserName = "Test User 2" };
+        var course21 = new Course(name: "Course 21", description: "Description 21") { User = user2 };
+
+        await StoreCoursesAsync(course11, course12, course21);
+
+        await using var context = new ApplicationDbContext(ContextOptions);
+        var repository = new ReadOnlyCourseRepository(context);
+
+        var actual = await repository.PaginateUserCoursesAsync(user1.Id, page: 1, pageSize: 2, CancellationToken.None);
+        var expected = new PaginationResult<Course>(new[] { course12, course11 }.ToImmutableArray(), TotalCount: 2);
+        Assert.That(actual, Is.EqualTo(expected).Using(PaginationResultComparer));
+
         Assert.That(context.ChangeTracker.Entries<Course>(), Is.Empty);
     }
 }

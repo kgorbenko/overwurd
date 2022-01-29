@@ -20,4 +20,7 @@ public class ReadOnlyCourseRepository : ReadOnlyRepository<Course>, IReadOnlyCou
                                .ToArrayAsync(cancellationToken: cancellationToken))
             .ToImmutableArray();
     }
+
+    public async Task<PaginationResult<Course>> PaginateUserCoursesAsync(int userId, int page, int pageSize, CancellationToken cancellationToken) =>
+        await PaginateByAsync(x => x.User.Id == userId, page: page, pageSize: pageSize, cancellationToken);
 }
