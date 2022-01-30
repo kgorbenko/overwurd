@@ -1,23 +1,21 @@
 import * as React from 'react';
 import { AppBar, Box, Toolbar } from '@mui/material';
-import { Outlet } from 'react-router-dom';
 import { AppBarTitle } from './AppBarTitle';
 
-interface ISignInLayoutProps {
+export interface ISignInLayoutProps {
     homePath: string;
 }
 
-export const SignInLayout: React.FunctionComponent<ISignInLayoutProps> = ({
-    homePath
-}: ISignInLayoutProps) => (
-    <Box>
-        <AppBar position="static" color="primary" enableColorOnDark>
-            <Toolbar>
-                <AppBarTitle enableLink homePath={homePath} title="Overwurd" />
-            </Toolbar>
-        </AppBar>
+export const SignInLayout: React.FunctionComponent<ISignInLayoutProps> =
+    (props: React.PropsWithChildren<ISignInLayoutProps>) => (
         <Box>
-            <Outlet />
+            <AppBar position="static" color="primary" enableColorOnDark>
+                <Toolbar>
+                    <AppBarTitle enableLink homePath={props.homePath} title="Overwurd" />
+                </Toolbar>
+            </AppBar>
+            <Box>
+                {props.children}
+            </Box>
         </Box>
-    </Box>
-);
+    );
