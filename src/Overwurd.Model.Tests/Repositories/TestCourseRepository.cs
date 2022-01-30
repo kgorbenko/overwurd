@@ -116,4 +116,26 @@ public class TestCourseRepository : BaseModelDatabaseDependentTestFixture
         var expected = new PaginationResult<Course>(new[] { course12, course11 }.ToImmutableArray(), TotalCount: 2);
         Assert.That(actual, Is.EqualTo(expected).Using(PaginationResultComparer));
     }
+
+    [Test]
+    public async Task TestGetUserCourseByNameAsync()
+    {
+        var user = new User { UserName = "Test User" };
+        var course1 = new Course("Course 1", "Description") { User = user };
+        var course2 = new Course("Course 2", "Description") { User = user };
+
+        var user2 = new User { UserName = "Test User 2" };
+        var course3 = new Course("Course 2", "Description") { User = user2 };
+
+        await StoreCoursesAsync(course1, course2, course3);
+
+        await using var context = new ApplicationDbContext(ContextOptions);
+        var repository = new CourseRepository(context);
+
+        var nonExistentCourse = await repository.GetUserCourseByNameAsync(user.Id, "Non Existent Name", CancellationToken.None);
+        Assert.That(nonExistentCourse, Is.Null);
+
+        var single = await repository.GetUserCourseByNameAsync(user.Id, "Course 2", CancellationToken.None);
+        Assert.That(single, Is.EqualTo(course2).Using(CourseRelationshipAgnosticComparer));
+    }
 }

@@ -28,4 +28,6 @@ public interface IRepository<T> where T: IEntityWithNumericId
     Task RemoveRangeAsync(IImmutableList<T> entities, CancellationToken cancellationToken = default);
 
     Task<int> CountByAsync(Expression<Func<T, bool>> filter, CancellationToken cancellationToken = default);
+
+    Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
 }

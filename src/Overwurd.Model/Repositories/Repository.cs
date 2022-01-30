@@ -84,4 +84,9 @@ public class Repository<T> : IRepository<T>
     {
         return await dbSet.Where(filter).CountAsync(cancellationToken);
     }
+
+    public async Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
+    {
+        return await dbSet.SingleOrDefaultAsync(predicate, cancellationToken);
+    }
 }

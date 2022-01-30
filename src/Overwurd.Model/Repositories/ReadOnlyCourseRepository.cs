@@ -23,4 +23,7 @@ public class ReadOnlyCourseRepository : ReadOnlyRepository<Course>, IReadOnlyCou
 
     public async Task<PaginationResult<Course>> PaginateUserCoursesAsync(int userId, int page, int pageSize, CancellationToken cancellationToken) =>
         await PaginateByAsync(x => x.UserId == userId, page: page, pageSize: pageSize, cancellationToken);
+
+    public async Task<Course> GetUserCourseByNameAsync(int userId, string courseName, CancellationToken cancellationToken) =>
+        await SingleOrDefaultAsync(x => x.UserId == userId && x.Name == courseName, cancellationToken);
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
@@ -189,6 +190,32 @@ public class TestReadOnlyRepository : BaseModelDatabaseDependentTestFixture
         var actual = await repository.CountByAsync(x => x.CourseId == course.Id);
 
         Assert.That(actual, Is.EqualTo(5));
+        Assert.That(context.ChangeTracker.Entries<Vocabulary>(), Is.Empty);
+    }
+
+    [Test]
+    public async Task TestSingleOrDefault()
+    {
+        var user = new User { UserName = "Test User" };
+        var course = new Course("Course", "Description") { User = user };
+        var vocabulary1 = new Vocabulary("Vocabulary 1", "Description") { Course = course };
+        var vocabulary2 = new Vocabulary("Vocabulary 2", "Description") { Course = course };
+
+        await StoreVocabulariesAsync(vocabulary1, vocabulary2);
+
+        await using var context = new ApplicationDbContext(ContextOptions);
+        var repository = new ReadOnlyRepository<Vocabulary>(context);
+
+        var nonExistentVocabulary = await repository.SingleOrDefaultAsync(x => x.Name == "Non Existent Name");
+        Assert.That(nonExistentVocabulary, Is.Null);
+
+        var single = await repository.SingleOrDefaultAsync(x => x.Name == "Vocabulary 2");
+        Assert.That(single, Is.EqualTo(vocabulary2).Using(VocabularyRelationshipAgnosticComparer));
+
+        Assert.ThrowsAsync<InvalidOperationException>(
+            async () => await repository.SingleOrDefaultAsync(x => x.Description == "Description")
+        );
+
         Assert.That(context.ChangeTracker.Entries<Vocabulary>(), Is.Empty);
     }
 }

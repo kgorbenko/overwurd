@@ -53,4 +53,10 @@ public class ReadOnlyRepository<T> : IReadOnlyRepository<T> where T : class, IEn
     {
         return await dbSet.Where(filter).AsNoTracking().CountAsync(cancellationToken);
     }
+
+    public async Task<T> SingleOrDefaultAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
+    {
+        return await dbSet.AsNoTracking()
+                          .SingleOrDefaultAsync(predicate, cancellationToken);
+    }
 }
