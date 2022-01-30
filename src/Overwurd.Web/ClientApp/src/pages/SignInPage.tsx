@@ -4,6 +4,7 @@ import { Button, TextField, Link } from '@mui/material';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { ISignInResult, useAuth } from '../hooks/UseAuth';
 import { AuthFormProcessor } from '../components/AuthFormProcessor';
+import { AuthRegionRoutes } from '../AuthRegion';
 
 interface ISignInData {
     userName: string;
@@ -59,7 +60,7 @@ export const SignInPage: React.FunctionComponent<ISignInProps> =
                 <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
                     Sign In
                 </Button>
-                <Link component={RouterLink as any} to="/auth/signup" state={{ from: location.state?.from }}>
+                <Link component={RouterLink as any} to={AuthRegionRoutes.signUpRoute} state={{ from: location.state?.from }}>
                     Don't have an account? Sign Up
                 </Link>
             </AuthFormProcessor>

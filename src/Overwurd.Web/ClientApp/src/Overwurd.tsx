@@ -5,10 +5,10 @@ import { NotFound } from './pages/NotFound';
 import { useAuth } from './hooks/UseAuth';
 import { withDisableAsync, withLoadingAsync } from './utils/Misc';
 import { CenteredCircularProgress } from './components/CenteredCircularProgress';
-import { AuthRegion } from './AuthRegion';
-import { LandingRegion } from './LandingRegion';
-import { DashboardRegion } from './DashboardRegion';
-import { SignOutRegion } from './SignOutRegion';
+import { AuthRegion, AuthRegionRoutes } from './AuthRegion';
+import { LandingRegion, LandingRegionRoutes } from './LandingRegion';
+import { DashboardRegion, DashboardRegionRoutes } from './DashboardRegion';
+import { SignOutRegion, SignOutRegionRoutes } from './SignOutRegion';
 
 export const Overwurd: React.FunctionComponent =
     () => {
@@ -42,15 +42,15 @@ export const Overwurd: React.FunctionComponent =
         }, [shouldAutoRefreshToken, auth, auth.canRefreshAccessToken]);
 
         const navigateToSignIn = (options?: NavigateOptions) => {
-            navigate('/auth/signin', options);
+            navigate(AuthRegionRoutes.signInAbsoluteRoute, options);
         }
 
         const navigateToSignOut = (options?: NavigateOptions) => {
-            navigate('/auth/signout', options);
+            navigate(SignOutRegionRoutes.absoluteRoute, options);
         }
 
         const navigateHome = (options?: NavigateOptions) => {
-            navigate('/', options)
+            navigate(LandingRegionRoutes.homeRoute, options)
         }
 
         if (isLoading) {
@@ -59,10 +59,10 @@ export const Overwurd: React.FunctionComponent =
 
         return (
             <Routes>
-                <Route path="/" element={<LandingRegion requireUnauthenticatedProps={{ navigateTo: '/dashboard' }} landingPageProps={{ onSignIn: navigateToSignIn }} />} />
-                <Route path="dashboard/*" element={<DashboardRegion layoutProps={{ onSignOut: navigateToSignOut, homePath: '/dashboard' }} />} />
-                <Route path="auth/*" element={<AuthRegion requireUnauthenticatedProps={{ navigateTo: '/dashboard' }} signInProps={{ defaultRedirectPath: '/dashboard' }} signInLayoutProps={{ homePath: '/' }} />} />
-                <Route path="auth/signOut" element={<SignOutRegion requireAuthenticatedProps={{ navigateTo: '/' }} signOutPageProps={{ onPostSignOut: navigateHome }} />} />
+                <Route path={LandingRegionRoutes.homeRoute} element={<LandingRegion requireUnauthenticatedProps={{ navigateTo: DashboardRegionRoutes.absoluteBaseRoute }} landingPageProps={{ onSignIn: navigateToSignIn }} />} />
+                <Route path={`${DashboardRegionRoutes.baseRoute}/*`} element={<DashboardRegion layoutProps={{ onSignOut: navigateToSignOut, homePath: DashboardRegionRoutes.absoluteBaseRoute }} requireAuthenticatedProps={{ navigateTo: AuthRegionRoutes.signInAbsoluteRoute }} />} />
+                <Route path={`${AuthRegionRoutes.baseRoute}/*`} element={<AuthRegion requireUnauthenticatedProps={{ navigateTo: DashboardRegionRoutes.absoluteBaseRoute }} signInProps={{ defaultRedirectPath: DashboardRegionRoutes.absoluteBaseRoute }} signInLayoutProps={{ homePath: LandingRegionRoutes.homeRoute }} />} />
+                <Route path={SignOutRegionRoutes.baseRoute} element={<SignOutRegion requireAuthenticatedProps={{ navigateTo: LandingRegionRoutes.homeRoute }} signOutPageProps={{ onPostSignOut: navigateHome }} />} />
                 <Route path="*" element={<NotFound />} />
             </Routes>
         );

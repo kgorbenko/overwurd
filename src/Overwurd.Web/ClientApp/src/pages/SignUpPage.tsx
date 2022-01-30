@@ -5,6 +5,7 @@ import { Link as RouterLink, useLocation } from 'react-router-dom';
 import { ISignInResult, useAuth } from '../hooks/UseAuth';
 import { AuthFormProcessor, IValidationResult } from '../components/AuthFormProcessor';
 import { ISignUpParameters } from '../services/AuthService';
+import { AuthRegionRoutes } from '../AuthRegion';
 
 interface ISignUpData {
     userName: string;
@@ -121,7 +122,7 @@ export const SignUpPage: React.FunctionComponent<ISignInProps> =
                 <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
                     Sign Up
                 </Button>
-                <Link component={RouterLink as any} to="/auth/signin" state={{ from: location.state?.from }}>
+                <Link component={RouterLink as any} to={AuthRegionRoutes.signInAbsoluteRoute} state={{ from: location.state?.from }}>
                     Already have an account? Sign in
                 </Link>
             </AuthFormProcessor>

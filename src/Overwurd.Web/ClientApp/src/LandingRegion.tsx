@@ -9,12 +9,16 @@ interface ILandingRegionProps {
     landingPageProps: ILandingPageProps;
 }
 
+export class LandingRegionRoutes {
+    public static readonly homeRoute = '/';
+}
+
 export const LandingRegion: React.FunctionComponent<ILandingRegionProps> =
     (props: React.PropsWithChildren<ILandingRegionProps>) => {
         return (
             <RequireUnauthenticated { ...props.requireUnauthenticatedProps }>
                 <Routes>
-                    <Route path="/" element={<LandingPage { ...props.landingPageProps } />} />
+                    <Route path={LandingRegionRoutes.homeRoute} element={<LandingPage { ...props.landingPageProps } />} />
                     <Route path="*" element={<NotFound />} />
                 </Routes>
             </RequireUnauthenticated>

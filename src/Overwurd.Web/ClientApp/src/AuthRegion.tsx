@@ -12,14 +12,24 @@ interface AuthRegionProps {
     signInProps: ISignInProps;
 }
 
+export class AuthRegionRoutes {
+    public static readonly baseRoute = 'auth';
+
+    public static readonly signInRoute = 'signIn';
+    public static readonly signInAbsoluteRoute = `/${AuthRegionRoutes.baseRoute}/${AuthRegionRoutes.signInRoute}`;
+
+    public static readonly signUpRoute = 'signUp';
+    public static readonly signUpAbsoluteRoute = `/${AuthRegionRoutes.baseRoute}/${AuthRegionRoutes.signUpRoute}`;
+}
+
 export const AuthRegion: React.FunctionComponent<AuthRegionProps> =
     (props: React.PropsWithChildren<AuthRegionProps>) => {
         return (
             <RequireUnauthenticated { ...props.requireUnauthenticatedProps }>
                 <SignInLayout { ...props.signInLayoutProps }>
                     <Routes>
-                        <Route path="signin" element={<SignInPage { ...props.signInProps } />} />
-                        <Route path="signup" element={<SignUpPage { ...props.signInProps } />} />
+                        <Route path={AuthRegionRoutes.signInRoute} element={<SignInPage { ...props.signInProps } />} />
+                        <Route path={AuthRegionRoutes.signUpRoute} element={<SignUpPage { ...props.signInProps } />} />
                         <Route path="*" element={<NotFound />} />
                     </Routes>
                 </SignInLayout>

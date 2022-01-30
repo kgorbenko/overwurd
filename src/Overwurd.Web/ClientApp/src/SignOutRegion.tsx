@@ -9,6 +9,11 @@ export interface ISignOutRegionProps {
     signOutPageProps: ISignOutPageProps;
 }
 
+export class SignOutRegionRoutes {
+    public static readonly baseRoute = 'auth/signOut';
+    public static readonly absoluteRoute = '/auth/signOut';
+}
+
 export const SignOutRegion: React.FunctionComponent<ISignOutRegionProps> =
     (props: ISignOutRegionProps) => {
         return (
