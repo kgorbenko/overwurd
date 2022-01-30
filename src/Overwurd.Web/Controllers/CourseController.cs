@@ -161,9 +161,7 @@ public class CourseController : ControllerBase
         var vocabularyCount = await readOnlyVocabularyRepository.CountCourseVocabulariesAsync(course.Id, cancellationToken);
         if (vocabularyCount > 0)
         {
-            logger.LogInformation("User #{UserId} attempted to remove Course #{CourseId}, but that Course contains some vocabularies", userId, course.Id);
-            ModelState.AddModelError("errors", $"Cannot remove Course #{id} because it contains vocabularies.");
-            return BadRequest(ModelState);
+            return Conflict();
         }
 
         await courseRepository.RemoveAsync(course, cancellationToken);
