@@ -60,7 +60,7 @@ export const SignInPage: React.FunctionComponent<ISignInProps> =
                 <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
                     Sign In
                 </Button>
-                <Link component={RouterLink as any} to={AuthRegionRoutes.signUpRoute} state={{ from: location.state?.from }}>
+                <Link component={RouterLink as any} to={AuthRegionRoutes.signUpAbsoluteRoute} state={{ from: location.state?.from }}>
                     Don't have an account? Sign Up
                 </Link>
             </AuthFormProcessor>

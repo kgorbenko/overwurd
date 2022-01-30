@@ -10,7 +10,7 @@ export interface DashboardRegionProps {
 }
 
 export class DashboardRegionRoutes {
-    public static readonly baseRoute: 'dashboard';
+    public static readonly baseRoute = 'dashboard';
     public static readonly absoluteBaseRoute = '/dashboard';
 }
 

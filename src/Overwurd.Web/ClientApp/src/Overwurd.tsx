@@ -59,10 +59,10 @@ export const Overwurd: React.FunctionComponent =
 
         return (
             <Routes>
-                <Route path={LandingRegionRoutes.homeRoute} element={<LandingRegion requireUnauthenticatedProps={{ navigateTo: DashboardRegionRoutes.absoluteBaseRoute }} landingPageProps={{ onSignIn: navigateToSignIn }} />} />
+                <Route path={`${LandingRegionRoutes.homeRoute}/*`} element={<LandingRegion requireUnauthenticatedProps={{ navigateTo: DashboardRegionRoutes.absoluteBaseRoute }} landingPageProps={{ onSignIn: navigateToSignIn }} />} />
                 <Route path={`${DashboardRegionRoutes.baseRoute}/*`} element={<DashboardRegion layoutProps={{ onSignOut: navigateToSignOut, homePath: DashboardRegionRoutes.absoluteBaseRoute }} requireAuthenticatedProps={{ navigateTo: AuthRegionRoutes.signInAbsoluteRoute }} />} />
                 <Route path={`${AuthRegionRoutes.baseRoute}/*`} element={<AuthRegion requireUnauthenticatedProps={{ navigateTo: DashboardRegionRoutes.absoluteBaseRoute }} signInProps={{ defaultRedirectPath: DashboardRegionRoutes.absoluteBaseRoute }} signInLayoutProps={{ homePath: LandingRegionRoutes.homeRoute }} />} />
-                <Route path={SignOutRegionRoutes.baseRoute} element={<SignOutRegion requireAuthenticatedProps={{ navigateTo: LandingRegionRoutes.homeRoute }} signOutPageProps={{ onPostSignOut: navigateHome }} />} />
+                <Route path={`${SignOutRegionRoutes.baseRoute}/*`} element={<SignOutRegion requireAuthenticatedProps={{ navigateTo: LandingRegionRoutes.homeRoute }} signOutPageProps={{ onPostSignOut: navigateHome }} />} />
                 <Route path="*" element={<NotFound />} />
             </Routes>
         );
