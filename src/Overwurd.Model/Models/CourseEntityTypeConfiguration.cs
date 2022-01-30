@@ -16,11 +16,12 @@ public class CourseEntityTypeConfiguration : IEntityTypeConfiguration<Course>
                .IsRequired();
         builder.Property(x => x.CreatedAt);
 
-        builder.HasIndex(x => new { x.Name, x.Id })
+        builder.HasIndex(x => new { x.Name, x.UserId })
                .IsUnique();
 
         builder.HasOne(x => x.User)
                .WithMany()
+               .HasForeignKey(nameof(Course.UserId))
                .IsRequired()
                .OnDelete(DeleteBehavior.Restrict);
 

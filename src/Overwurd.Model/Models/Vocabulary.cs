@@ -10,12 +10,18 @@ public class Vocabulary : IEntity
 
     public DateTimeOffset CreatedAt { get; [UsedImplicitly] private set; }
 
+    public int CourseId { get; [UsedImplicitly] private set; }
+
     private Course course;
 
     public Course Course
     {
         get => course;
-        set => course = value ?? throw new ArgumentNullException(nameof(value));
+        set
+        {
+            course = value ?? throw new ArgumentNullException(nameof(value));
+            CourseId = course.Id;
+        }
     }
 
     private string name;

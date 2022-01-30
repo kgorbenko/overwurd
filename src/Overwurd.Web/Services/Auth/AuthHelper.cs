@@ -18,7 +18,7 @@ public static class AuthHelper
         var token = tokenHandler.ReadJwtToken(tokenString);
         var userIdString = token.Claims.Single(x => x.Type == userIdClaimType).Value;
 
-        return int.Parse(userIdString);
+        return userIdString.ParseUserId();
     }
 
     public static bool TryGetUserIdFromAccessToken(string tokenString, string userIdClaimType, out int id)

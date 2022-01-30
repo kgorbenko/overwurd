@@ -8,4 +8,8 @@ namespace Overwurd.Model.Repositories;
 public interface ICourseRepository : IRepository<Course>
 {
     Task<IImmutableList<Course>> GetUserCoursesAsync(int userId, CancellationToken cancellationToken);
+
+    Task<PaginationResult<Course>> PaginateUserCoursesAsync(int userId, int page, int pageSize, CancellationToken cancellationToken);
+
+    Task<Course> GetUserCourseByNameAsync(int userId, string courseName, CancellationToken cancellationToken);
 }

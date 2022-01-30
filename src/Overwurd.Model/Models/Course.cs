@@ -11,12 +11,18 @@ public class Course : IEntity
 
     public DateTimeOffset CreatedAt { get; [UsedImplicitly] private set; }
 
+    public int UserId { get; [UsedImplicitly] private set; }
+
     private User user;
 
     public User User
     {
         get => user;
-        set => user = value ?? throw new ArgumentNullException(nameof(value));
+        set
+        {
+            user = value ?? throw new ArgumentNullException(nameof(value));
+            UserId = value.Id;
+        }
     }
 
     private string name;
@@ -62,7 +68,7 @@ public class Course : IEntity
     }
 
     [UsedImplicitly]
-    public ICollection<Vocabulary> Vocabularies { get; private set; }
+    public ICollection<Vocabulary> Vocabularies { get; } = new List<Vocabulary>();
 
     public Course(string name, string description)
     {

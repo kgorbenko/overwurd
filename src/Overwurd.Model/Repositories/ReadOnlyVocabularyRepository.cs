@@ -14,10 +14,13 @@ public class ReadOnlyVocabularyRepository : ReadOnlyRepository<Vocabulary>, IRea
     public async Task<IImmutableList<Vocabulary>> GetCourseVocabulariesAsync(int courseId, CancellationToken cancellationToken)
     {
         return (await DbContext.Vocabularies
-                               .Where(x => x.Course.Id == courseId)
+                               .Where(x => x.CourseId == courseId)
                                .OrderBy(x => x.CreatedAt)
                                .AsNoTracking()
                                .ToArrayAsync(cancellationToken: cancellationToken))
             .ToImmutableList();
     }
+
+    public async Task<int> CountCourseVocabulariesAsync(int courseId, CancellationToken cancellationToken) =>
+        await CountByAsync(x => x.CourseId == courseId, cancellationToken);
 }

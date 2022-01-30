@@ -1,7 +1,9 @@
 using FluentValidation;
+using JetBrains.Annotations;
 
 namespace Overwurd.Web.Validators;
 
+[UsedImplicitly]
 public class RegisterRequestParametersValidator : AbstractValidator<RegisterRequestParameters>
 {
     public RegisterRequestParametersValidator()

@@ -99,4 +99,25 @@ public class TestVocabularyRepository : BaseModelDatabaseDependentTestFixture
 
         Assert.That(result, Is.EqualTo(new[] { vocabulary1, vocabulary2, vocabulary3 }).Using(VocabularyRelationshipAgnosticComparer));
     }
+
+    [Test]
+    public async Task TestCountCourseVocabulariesAsync()
+    {
+        var user = new User { UserName = "Test User" };
+        var course = new Course(name: "Course", description: "Description") { User = user };
+        var vocabulary1 = new Vocabulary(name: "Vocabulary 1", description: "Description 1") { Course = course };
+        var vocabulary2 = new Vocabulary(name: "Vocabulary 2", description: "Description 2") { Course = course };
+        var vocabulary3 = new Vocabulary(name: "Vocabulary 3", description: "Description 3") { Course = course };
+        var vocabulary4 = new Vocabulary(name: "Vocabulary 4", description: "Description 4") { Course = course };
+        var vocabulary5 = new Vocabulary(name: "Vocabulary 5", description: "Description 5") { Course = course };
+
+        await StoreVocabulariesAsync(vocabulary1, vocabulary2, vocabulary3, vocabulary4, vocabulary5);
+
+        await using var context = new ApplicationDbContext(ContextOptions);
+        var repository = new VocabularyRepository(context);
+
+        var result = await repository.CountCourseVocabulariesAsync(course.Id, CancellationToken.None);
+
+        Assert.That(result, Is.EqualTo(5));
+    }
 }

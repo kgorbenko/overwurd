@@ -446,7 +446,7 @@ public class TestJwtAuthService
             "3OTAwLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwMDAiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjUwMDAifQ." +
             "-PdYY6EDx9jykjoTabLtMA3MC-nSBEzEzEUvVoHRCJ4";
 
-        Assert.ThrowsAsync<FormatException>(
+        Assert.ThrowsAsync<InvalidOperationException>(
             async () => await jwtAuthService.RefreshAccessTokenAsync(accessTokenString, "", now, CancellationToken.None)
         );
 

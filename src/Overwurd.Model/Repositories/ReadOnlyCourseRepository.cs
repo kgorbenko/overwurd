@@ -14,10 +14,16 @@ public class ReadOnlyCourseRepository : ReadOnlyRepository<Course>, IReadOnlyCou
     public async Task<IImmutableList<Course>> GetUserCoursesAsync(int userId, CancellationToken cancellationToken)
     {
         return (await DbContext.Courses
-                               .Where(x => x.User.Id == userId)
+                               .Where(x => x.UserId == userId)
                                .OrderBy(x => x.CreatedAt)
                                .AsNoTracking()
                                .ToArrayAsync(cancellationToken: cancellationToken))
             .ToImmutableArray();
     }
+
+    public async Task<PaginationResult<Course>> PaginateUserCoursesAsync(int userId, int page, int pageSize, CancellationToken cancellationToken) =>
+        await PaginateByAsync(x => x.UserId == userId, page: page, pageSize: pageSize, cancellationToken);
+
+    public async Task<Course> GetUserCourseByNameAsync(int userId, string courseName, CancellationToken cancellationToken) =>
+        await SingleOrDefaultAsync(x => x.UserId == userId && x.Name == courseName, cancellationToken);
 }

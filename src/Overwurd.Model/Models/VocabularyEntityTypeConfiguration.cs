@@ -16,11 +16,12 @@ public class VocabularyEntityTypeConfiguration : IEntityTypeConfiguration<Vocabu
                .IsRequired();
         builder.Property(x => x.CreatedAt);
 
-        builder.HasIndex(x => new { x.Name, x.Id })
+        builder.HasIndex(x => new { x.Name, x.CourseId })
                .IsUnique();
 
         builder.HasOne(x => x.Course)
                .WithMany(x => x.Vocabularies)
+               .HasForeignKey(nameof(Vocabulary.CourseId))
                .IsRequired()
                .OnDelete(DeleteBehavior.Restrict);
     }
