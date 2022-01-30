@@ -3,7 +3,7 @@ import * as dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { BrowserRouter } from 'react-router-dom';
 import { AppContextProvider } from './AppContextProvider';
-import { Dashboard } from './Dashboard';
+import { Overwurd } from './Overwurd';
 import { theme } from './Theme';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 
@@ -23,7 +23,7 @@ export const App: React.FunctionComponent = () => {
             <AppContextProvider>
                 <ThemeProvider theme={theme}>
                     <CssBaseline />
-                    <Dashboard />
+                    <Overwurd />
                 </ThemeProvider>
             </AppContextProvider>
         </BrowserRouter>

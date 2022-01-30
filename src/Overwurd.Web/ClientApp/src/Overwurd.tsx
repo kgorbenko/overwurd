@@ -16,7 +16,7 @@ import { Layout } from './components/Layout';
 
 export const Protected = () => <h1>Protected</h1>;
 
-export const Dashboard = () => {
+export const Overwurd = () => {
     const now = useCurrentDateTime(30000);
     const auth = useAuth(now);
     const navigate = useNavigate();

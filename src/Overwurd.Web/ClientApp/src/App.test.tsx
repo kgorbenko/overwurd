@@ -3,7 +3,7 @@ import * as dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { render } from 'react-dom';
 import { findAllByText } from '@testing-library/react';
-import { Dashboard } from './Dashboard';
+import { Overwurd } from './Overwurd';
 import { MemoryRouter } from 'react-router-dom';
 import { AppContextProvider } from './AppContextProvider';
 
@@ -15,7 +15,7 @@ it('renders without crashing', async () => {
     render(
         <MemoryRouter>
             <AppContextProvider>
-                <Dashboard />
+                <Overwurd />
             </AppContextProvider>
         </MemoryRouter>, div);
     const hello = await findAllByText(div, 'Overwurd');
