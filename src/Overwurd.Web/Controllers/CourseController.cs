@@ -6,6 +6,7 @@ using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Logging;
 
 namespace Overwurd.Web.Controllers;
@@ -36,8 +37,6 @@ public class CourseController : ControllerBase
                             [NotNull] IReadOnlyVocabularyRepository readOnlyVocabularyRepository,
                             [NotNull] ILogger<CourseController> logger)
     {
-        if (userManager == null) throw new ArgumentNullException(nameof(userManager));
-        if (readOnlyCourseRepository == null) throw new ArgumentNullException(nameof(readOnlyCourseRepository));
         this.userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         this.courseRepository = courseRepository ?? throw new ArgumentNullException(nameof(courseRepository));
         this.readOnlyCourseRepository = readOnlyCourseRepository ?? throw new ArgumentNullException(nameof(readOnlyCourseRepository));
@@ -46,8 +45,23 @@ public class CourseController : ControllerBase
     }
 
     [HttpGet]
+    [Route("getByName")]
+    public async Task<IActionResult> GetCourseByName([BindRequired] string name, CancellationToken cancellationToken)
+    {
+        var userId = userManager.GetUserId(User).ParseUserId();
+        var course = await readOnlyCourseRepository.GetUserCourseByNameAsync(userId, name, cancellationToken);
+
+        if (course is null)
+        {
+            return NotFound();
+        }
+
+        return Ok(MakeViewModel(course));
+    }
+
+    [HttpGet]
     [Route("{id:int}")]
-    public async Task<IActionResult> GetCourse(int id, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetCourseById([BindRequired] int id, CancellationToken cancellationToken)
     {
         var userId = userManager.GetUserId(User).ParseUserId();
         var course = await readOnlyCourseRepository.FindByIdAsync(id, cancellationToken);
@@ -62,7 +76,8 @@ public class CourseController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> PaginateUserCourses(int page, int pageSize, CancellationToken cancellationToken)
+    [Route("paginate")]
+    public async Task<IActionResult> PaginateUserCourses([BindRequired] int page, [BindRequired] int pageSize, CancellationToken cancellationToken)
     {
         var userId = userManager.GetUserId(User).ParseUserId();
         var paginatedCourses = await readOnlyCourseRepository.PaginateUserCoursesAsync(userId: userId, page: page, pageSize: pageSize, cancellationToken);
@@ -81,7 +96,7 @@ public class CourseController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateCourse([FromBody] CourseParameters parameters, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateCourse([FromBody, BindRequired] CourseParameters parameters, CancellationToken cancellationToken)
     {
         var user = await userManager.GetUserAsync(User);
 
@@ -89,6 +104,12 @@ public class CourseController : ControllerBase
         {
             User = user
         };
+
+        var existingCourse = await readOnlyCourseRepository.GetUserCourseByNameAsync(user.Id, course.Name, cancellationToken);
+        if (existingCourse is not null)
+        {
+            return Conflict();
+        }
 
         await courseRepository.AddAsync(course, cancellationToken);
         logger.LogInformation("User #{UserId} has successfully created Course #{CourseId}", user.Id, course.Id);
@@ -98,7 +119,7 @@ public class CourseController : ControllerBase
 
     [HttpPut]
     [Route("{id:int}")]
-    public async Task<IActionResult> UpdateCourse(int id, [FromBody] CourseParameters parameters, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateCourse([BindRequired] int id, [FromBody, BindRequired] CourseParameters parameters, CancellationToken cancellationToken)
     {
         var userId = userManager.GetUserId(User).ParseUserId();
         var course = await courseRepository.FindByIdAsync(id, cancellationToken);
@@ -107,6 +128,12 @@ public class CourseController : ControllerBase
         {
             logger.LogWarning("User #{UserId} attempted to update Course #{CourseId}, but had not permission", userId, course.Id);
             return NotFound();
+        }
+
+        var existingCourse = await readOnlyCourseRepository.GetUserCourseByNameAsync(userId, course.Name, cancellationToken);
+        if (existingCourse is not null)
+        {
+            return Conflict();
         }
 
         course.Name = parameters.Name;
@@ -120,7 +147,7 @@ public class CourseController : ControllerBase
 
     [HttpDelete]
     [Route("{id:int}")]
-    public async Task<IActionResult> RemoveCourse(int id, CancellationToken cancellationToken)
+    public async Task<IActionResult> RemoveCourse([BindRequired] int id, CancellationToken cancellationToken)
     {
         var userId = userManager.GetUserId(User).ParseUserId();
         var course = await courseRepository.FindByIdAsync(id, cancellationToken);
