@@ -11,6 +11,7 @@ public static class VocabularyComparers
         EqualityComparerBuilder.For<Vocabulary>()
                                .EquateBy(x => x.Id)
                                .ThenEquateBy(x => x.Name)
+                               .ThenEquateBy(x => x.CourseId)
                                .ThenEquateBy(x => x.Description)
                                .ThenEquateBy(x => x.CreatedAt);
 
