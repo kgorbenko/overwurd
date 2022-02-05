@@ -8,6 +8,23 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Overwurd.Model.Tests", "Ove
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Overwurd.Web.Tests", "Overwurd.Web.Tests\Overwurd.Web.Tests.csproj", "{31FB27A4-101C-4610-8FEA-F1A232E1BBCD}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHubWorkflows", "GitHubWorkflows", "{AF2D6018-D8C7-4202-A476-AED48DFA9DD8}"
+	ProjectSection(SolutionItems) = preProject
+		..\.github\workflows\build-and-test-client-side.yml = ..\.github\workflows\build-and-test-client-side.yml
+		..\.github\workflows\build-and-test-dotnet.yml = ..\.github\workflows\build-and-test-dotnet.yml
+		..\.github\workflows\deploy.yml = ..\.github\workflows\deploy.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Root", "Root", "{B4C396B6-BFA6-4017-A2F9-9F9DFE8FD3E5}"
+	ProjectSection(SolutionItems) = preProject
+		.dockerignore = .dockerignore
+		.gitignore = .gitignore
+		Directory.Build.props = Directory.Build.props
+		Dockerfile = Dockerfile
+		dotnet-tools.json = dotnet-tools.json
+		global.json = global.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
