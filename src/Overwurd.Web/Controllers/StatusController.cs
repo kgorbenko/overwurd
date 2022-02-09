@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Overwurd.Web.Controllers;
 
 [UsedImplicitly]
-public record StatusViewModel(string Version, string Environment, string LastMigration);
+public record struct StatusViewModel(string Version, string Environment, string LastMigration);
 
 [ApiController]
 [Authorize]

@@ -10,19 +10,19 @@ using Microsoft.Extensions.Logging;
 namespace Overwurd.Web.Controllers;
 
 [UsedImplicitly]
-public record RegisterRequestParameters(string UserName, string Password, string FirstName, string LastName);
+public record struct RegisterRequestParameters(string UserName, string Password, string FirstName, string LastName);
 
 [UsedImplicitly]
-public record RefreshTokenRequestParameters(string AccessToken, string RefreshToken);
+public record struct RefreshTokenRequestParameters(string AccessToken, string RefreshToken);
 
 [UsedImplicitly]
-public record LoginRequestParameters(string UserName, string Password);
+public record struct LoginRequestParameters(string UserName, string Password);
 
 [UsedImplicitly]
-public record LoginResult(long Id, string UserName, string FirstName, string LastName, string AccessToken, string RefreshToken, DateTimeOffset AccessTokenExpiresAt);
+public record struct LoginResult(long Id, string UserName, string FirstName, string LastName, string AccessToken, string RefreshToken, DateTimeOffset AccessTokenExpiresAt);
 
 [UsedImplicitly]
-public record RefreshTokenResult(string AccessToken, DateTimeOffset ExpiresAt);
+public record struct RefreshTokenResult(string AccessToken, DateTimeOffset ExpiresAt);
 
 [ApiController]
 [AllowAnonymous]
