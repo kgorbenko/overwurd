@@ -25,6 +25,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Root", "Root", "{B4C396B6-B
 		global.json = global.json
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Overwurd.Domain", "Overwurd.Domain\Overwurd.Domain.csproj", "{FE8AD9AB-24B1-4B18-A06E-E7676366CBDE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,5 +49,9 @@ Global
 		{31FB27A4-101C-4610-8FEA-F1A232E1BBCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31FB27A4-101C-4610-8FEA-F1A232E1BBCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31FB27A4-101C-4610-8FEA-F1A232E1BBCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE8AD9AB-24B1-4B18-A06E-E7676366CBDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE8AD9AB-24B1-4B18-A06E-E7676366CBDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE8AD9AB-24B1-4B18-A06E-E7676366CBDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE8AD9AB-24B1-4B18-A06E-E7676366CBDE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
