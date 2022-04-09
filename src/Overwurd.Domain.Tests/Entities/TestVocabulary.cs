@@ -1,8 +1,3 @@
-using System;
-using NUnit.Framework;
-using Overwurd.Domain.Entities;
-using Overwurd.Domain.Tests.Helpers;
-
 namespace Overwurd.Domain.Tests.Entities;
 
 public static class TestVocabulary

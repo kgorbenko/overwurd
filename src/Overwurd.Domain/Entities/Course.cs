@@ -1,6 +1,3 @@
-using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
-
 namespace Overwurd.Domain.Entities;
 
 public class Course : IEntityWithId, IEntityWithCreationTime, IEquatable<Course>

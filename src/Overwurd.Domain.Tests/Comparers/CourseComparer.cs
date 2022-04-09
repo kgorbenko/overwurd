@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using Nito.Comparers;
-using Overwurd.Domain.Entities;
-
 namespace Overwurd.Domain.Tests.Comparers;
 
 public static class CourseComparer

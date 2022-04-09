@@ -1,7 +1,3 @@
-using System.Collections.Immutable;
-using FluentValidation;
-using Overwurd.Domain.Entities.Validation;
-
 namespace Overwurd.Domain.Entities;
 
 public record UserLogin

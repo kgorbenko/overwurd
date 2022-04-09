@@ -1,9 +1,3 @@
-using System;
-using NUnit.Framework;
-using Overwurd.Domain.Entities;
-using Overwurd.Domain.Tests.Comparers;
-using Overwurd.Domain.Tests.Helpers;
-
 namespace Overwurd.Domain.Tests.Entities;
 
 public class TestUser

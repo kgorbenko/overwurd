@@ -1,7 +1,3 @@
-using System;
-using NUnit.Framework;
-using Overwurd.Domain.Entities;
-
 namespace Overwurd.Domain.Tests.Entities;
 
 public static class TestEntityWithIdComparer

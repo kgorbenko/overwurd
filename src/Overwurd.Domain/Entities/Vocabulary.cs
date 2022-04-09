@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Overwurd.Domain.Entities;
 
 public class Vocabulary : IEntityWithId, IEntityWithCreationTime, IEquatable<Vocabulary>

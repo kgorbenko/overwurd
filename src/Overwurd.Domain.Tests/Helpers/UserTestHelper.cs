@@ -1,6 +1,3 @@
-using System;
-using Overwurd.Domain.Entities;
-
 namespace Overwurd.Domain.Tests.Helpers;
 
 public static class UserTestHelper
