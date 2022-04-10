@@ -16,7 +16,7 @@ public static class TestUserPasswordHash
     [TestCaseSource(nameof(GenerateNegativeValidationTestCases))]
     public static void ConstructorThrowsValidationException(string? value, ValidationResult validationResult)
     {
-        Assert.Throws<ValidationException>(
+        Assert.Throws<Domain.Entities.Validation.ValidationException>(
             () => _ = new UserPasswordHash(value!)
         );
     }
