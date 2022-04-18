@@ -179,7 +179,7 @@ public class TestJwtAuthService
     }
 
     [Test]
-    public Task ValidationFailsIfInvalidSignature()
+    public void ValidationFailsIfInvalidSignature()
     {
         var jwtConfiguration = new JwtConfiguration(
             SecurityAlgorithmSignature: SecurityAlgorithms.HmacSha256Signature,
@@ -207,12 +207,10 @@ public class TestJwtAuthService
         Assert.ThrowsAsync<SecurityTokenSignatureKeyNotFoundException>(
             async () => await jwtAuthService.RefreshAccessTokenAsync(accessTokenString, "", date, CancellationToken.None)
         );
-
-        return Task.CompletedTask;
     }
 
     [Test]
-    public Task RefreshTokenValidationFailsIfRefreshTokenIsNotFound()
+    public void RefreshTokenValidationFailsIfRefreshTokenIsNotFound()
     {
         var jwtConfiguration = GetJwtConfiguration();
         var tokenValidationParameters = GetValidationParameters(jwtConfiguration);
@@ -223,7 +221,7 @@ public class TestJwtAuthService
         var jwtAuthService = new JwtAuthService(jwtConfiguration, tokenValidationParameters, claimsIdentityOptions, jwtRefreshTokenProvider, guidProvider);
 
         const int userId = 25;
-        jwtRefreshTokenProvider.GetUserTokenAsync(userId, CancellationToken.None).Returns<JwtRefreshToken>(_ => null);
+        jwtRefreshTokenProvider.GetUserTokenAsync(userId, CancellationToken.None).Returns(_ => Task.FromResult<JwtRefreshToken?>(null));
 
         var now = new DateTimeOffset(year: 2021, month: 2, day: 2, hour: 0, minute: 0, second: 0, TimeSpan.Zero);
         const string accessTokenString =
@@ -240,13 +238,11 @@ public class TestJwtAuthService
         );
 
         Assert.That(exception, Is.Not.Null);
-        Assert.That(exception.Message, Is.EqualTo(MakeInvalidRefreshTokenMessage(userId)));
-
-        return Task.CompletedTask;
+        Assert.That(exception!.Message, Is.EqualTo(MakeInvalidRefreshTokenMessage(userId)));
     }
 
     [Test]
-    public Task RefreshTokenValidationFailsIfRefreshTokenStringIsInvalid()
+    public void RefreshTokenValidationFailsIfRefreshTokenStringIsInvalid()
     {
         var jwtConfiguration = GetJwtConfiguration();
         var tokenValidationParameters = GetValidationParameters(jwtConfiguration);
@@ -282,13 +278,11 @@ public class TestJwtAuthService
         );
 
         Assert.That(exception, Is.Not.Null);
-        Assert.That(exception.Message, Is.EqualTo(MakeInvalidRefreshTokenMessage(userId)));
-
-        return Task.CompletedTask;
+        Assert.That(exception!.Message, Is.EqualTo(MakeInvalidRefreshTokenMessage(userId)));
     }
 
     [Test]
-    public Task RefreshTokenValidationFailsIfAccessTokenIdIsNotValid()
+    public void RefreshTokenValidationFailsIfAccessTokenIdIsNotValid()
     {
         var jwtConfiguration = GetJwtConfiguration();
         var tokenValidationParameters = GetValidationParameters(jwtConfiguration);
@@ -324,13 +318,11 @@ public class TestJwtAuthService
         );
 
         Assert.That(exception, Is.Not.Null);
-        Assert.That(exception.Message, Is.EqualTo(MakeInvalidRefreshTokenMessage(userId)));
-
-        return Task.CompletedTask;
+        Assert.That(exception!.Message, Is.EqualTo(MakeInvalidRefreshTokenMessage(userId)));
     }
 
     [Test]
-    public Task RefreshTokenValidationFailsIfExpired()
+    public void RefreshTokenValidationFailsIfExpired()
     {
         var jwtConfiguration = GetJwtConfiguration();
         var tokenValidationParameters = GetValidationParameters(jwtConfiguration);
@@ -366,13 +358,11 @@ public class TestJwtAuthService
         );
 
         Assert.That(exception, Is.Not.Null);
-        Assert.That(exception.Message, Is.EqualTo(MakeInvalidRefreshTokenMessage(userId)));
-
-        return Task.CompletedTask;
+        Assert.That(exception!.Message, Is.EqualTo(MakeInvalidRefreshTokenMessage(userId)));
     }
 
     [Test]
-    public Task RefreshTokenValidationFailsIfRevoked()
+    public void RefreshTokenValidationFailsIfRevoked()
     {
         var jwtConfiguration = GetJwtConfiguration();
         var tokenValidationParameters = GetValidationParameters(jwtConfiguration);
@@ -408,13 +398,11 @@ public class TestJwtAuthService
         );
 
         Assert.That(exception, Is.Not.Null);
-        Assert.That(exception.Message, Is.EqualTo(MakeInvalidRefreshTokenMessage(userId)));
-
-        return Task.CompletedTask;
+        Assert.That(exception!.Message, Is.EqualTo(MakeInvalidRefreshTokenMessage(userId)));
     }
 
     [Test]
-    public Task AccessTokenSubjectIsRequired()
+    public void AccessTokenSubjectIsRequired()
     {
         var jwtConfiguration = GetJwtConfiguration();
         var tokenValidationParameters = GetValidationParameters(jwtConfiguration);
@@ -436,12 +424,10 @@ public class TestJwtAuthService
         Assert.ThrowsAsync<InvalidOperationException>(
             async () => await jwtAuthService.RefreshAccessTokenAsync(accessTokenString, "", now, CancellationToken.None)
         );
-
-        return Task.CompletedTask;
     }
 
     [Test]
-    public Task AccessTokenSubjectIsNotAnId()
+    public void AccessTokenSubjectIsNotAnId()
     {
         var jwtConfiguration = GetJwtConfiguration();
         var tokenValidationParameters = GetValidationParameters(jwtConfiguration);
@@ -463,7 +449,5 @@ public class TestJwtAuthService
         Assert.ThrowsAsync<InvalidOperationException>(
             async () => await jwtAuthService.RefreshAccessTokenAsync(accessTokenString, "", now, CancellationToken.None)
         );
-
-        return Task.CompletedTask;
     }
 }

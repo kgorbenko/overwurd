@@ -11,8 +11,10 @@ public static class TestVocabulary
         var vocabulary1 = VocabularyTestHelper.CreateVocabularyForCourse(course1, id: 10u);
         var vocabulary2 = VocabularyTestHelper.CreateVocabularyForCourse(course2, id: 10u);
 
-        Assert.IsTrue(vocabulary1.Equals(vocabulary2));
-        Assert.IsTrue(vocabulary1.Equals((object) vocabulary2));
+        #pragma warning disable NUnit2010
+        Assert.That(vocabulary1.Equals(vocabulary2), Is.True);
+        Assert.That(vocabulary1.Equals((object) vocabulary2), Is.True);
+        #pragma warning restore NUnit2010
     }
 
     [Test]
@@ -24,8 +26,10 @@ public static class TestVocabulary
         var vocabulary1 = VocabularyTestHelper.CreateVocabularyForCourse(course1, id: 10u);
         var vocabulary2 = VocabularyTestHelper.CreateVocabularyForCourse(course2, id: 20u);
 
-        Assert.IsFalse(vocabulary1.Equals(vocabulary2));
-        Assert.IsFalse(vocabulary1.Equals((object) vocabulary2));
+        #pragma warning disable NUnit2010
+        Assert.That(vocabulary1.Equals(vocabulary2), Is.False);
+        Assert.That(vocabulary1.Equals((object) vocabulary2), Is.False);
+        #pragma warning restore NUnit2010
     }
 
     [Test]
@@ -34,7 +38,7 @@ public static class TestVocabulary
         var (vocabulary1, _, _) = VocabularyTestHelper.CreateVocabularyWithCourseAndUser(id: 123u);
         var (vocabulary2, _, _) = VocabularyTestHelper.CreateVocabularyWithCourseAndUser(id: 123u);
 
-        Assert.AreEqual(vocabulary1.GetHashCode(), vocabulary2.GetHashCode());
+        Assert.That(vocabulary2.GetHashCode(), Is.EqualTo(vocabulary1.GetHashCode()));
     }
 
     [Test]
@@ -43,7 +47,7 @@ public static class TestVocabulary
         var (vocabulary1, _, _) = VocabularyTestHelper.CreateVocabularyWithCourseAndUser(id: 100u);
         var (vocabulary2, _, _) = VocabularyTestHelper.CreateVocabularyWithCourseAndUser(id: 200u);
 
-        Assert.AreNotEqual(vocabulary1.GetHashCode(), vocabulary2.GetHashCode());
+        Assert.That(vocabulary2.GetHashCode(), Is.Not.EqualTo(vocabulary1.GetHashCode()));
     }
 
     [Test]
@@ -84,10 +88,10 @@ public static class TestVocabulary
             createdAt: new DateTimeOffset(year: 2022, month: 01, day: 01, hour: 00, minute: 00, second: 00, TimeSpan.Zero)
         );
 
-        Assert.AreEqual(vocabulary.Id, 2u);
-        Assert.AreEqual(vocabulary.CourseId, course.Id);
-        Assert.AreEqual(vocabulary.CreatedAt, new DateTimeOffset(year: 2022, month: 01, day: 01, hour: 00, minute: 00, second: 00, TimeSpan.Zero));
-        Assert.AreEqual(vocabulary.Name, new EntityName("Test name"));
-        Assert.AreEqual(vocabulary.Description, new EntityDescription("Test description"));
+        Assert.That(vocabulary.Id, Is.EqualTo(2u));
+        Assert.That(vocabulary.CourseId, Is.EqualTo(course.Id));
+        Assert.That(vocabulary.CreatedAt, Is.EqualTo(new DateTimeOffset(year: 2022, month: 01, day: 01, hour: 00, minute: 00, second: 00, TimeSpan.Zero)));
+        Assert.That(vocabulary.Name, Is.EqualTo(new EntityName("Test name")));
+        Assert.That(vocabulary.Description, Is.EqualTo(new EntityDescription("Test description")));
     }
 }

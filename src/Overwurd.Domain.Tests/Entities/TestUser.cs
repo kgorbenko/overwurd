@@ -1,6 +1,6 @@
 namespace Overwurd.Domain.Tests.Entities;
 
-public class TestUser
+public static class TestUser
 {
     [Test]
     public static void EqualityWithSameIds()
@@ -8,8 +8,10 @@ public class TestUser
         var user1 = UserTestHelper.CreateUser(id: 10);
         var user2 = UserTestHelper.CreateAnotherUser(id: 10);
 
-        Assert.IsTrue(user1.Equals(user2));
-        Assert.IsTrue(user1.Equals((object) user2));
+        #pragma warning disable NUnit2010
+        Assert.That(user1.Equals(user2), Is.True);
+        Assert.That(user1.Equals((object) user2), Is.True);
+        #pragma warning restore NUnit2010
     }
 
     [Test]
@@ -18,8 +20,10 @@ public class TestUser
         var user1 = UserTestHelper.CreateUser(id: 10);
         var user2 = UserTestHelper.CreateAnotherUser(id: 11);
 
-        Assert.IsFalse(user1.Equals(user2));
-        Assert.IsFalse(user1.Equals((object) user2));
+        #pragma warning disable NUnit2010
+        Assert.That(user1.Equals(user2), Is.False);
+        Assert.That(user1.Equals((object) user2), Is.False);
+        #pragma warning restore NUnit2010
     }
 
     [Test]
@@ -28,7 +32,7 @@ public class TestUser
         var user1 = UserTestHelper.CreateUser(id: 123u);
         var user2 = UserTestHelper.CreateAnotherUser(id: 123u);
 
-        Assert.AreEqual(user1.GetHashCode(), user2.GetHashCode());
+        Assert.That(user2.GetHashCode(), Is.EqualTo(user1.GetHashCode()));
     }
 
     [Test]
@@ -37,7 +41,7 @@ public class TestUser
         var user1 = UserTestHelper.CreateUser(id: 123u);
         var user2 = UserTestHelper.CreateAnotherUser(id: 122u);
 
-        Assert.AreNotEqual(user1.GetHashCode(), user2.GetHashCode());
+        Assert.That(user2.GetHashCode(), Is.Not.EqualTo(user1.GetHashCode()));
     }
 
     [Test]
@@ -88,10 +92,10 @@ public class TestUser
             createdAt: new DateTimeOffset(year: 2022, month: 01, day: 01, hour: 00, minute: 00, second: 00, TimeSpan.Zero)
         );
 
-        Assert.AreEqual(user.Id, 1u);
-        Assert.AreEqual(user.CreatedAt, new DateTimeOffset(year: 2022, month: 01, day: 01, hour: 00, minute: 00, second: 00, TimeSpan.Zero));
-        Assert.AreEqual(user.Login, new UserLogin("test-user-login"));
-        Assert.AreEqual(user.PasswordHash, new UserPasswordHash("test-password-hash"));
+        Assert.That(user.Id, Is.EqualTo(1u));
+        Assert.That(user.CreatedAt, Is.EqualTo(new DateTimeOffset(year: 2022, month: 01, day: 01, hour: 00, minute: 00, second: 00, TimeSpan.Zero)));
+        Assert.That(user.Login, Is.EqualTo(new UserLogin("test-user-login")));
+        Assert.That(user.PasswordHash, Is.EqualTo(new UserPasswordHash("test-password-hash")));
         Assert.IsEmpty(user.Courses);
     }
 
@@ -175,6 +179,6 @@ public class TestUser
         Assert.That(user1.Courses, Is.EqualTo(new[] { course }).Using(CourseComparer.Instance));
 
         user1.RemoveCourse(course);
-        Assert.IsEmpty(user1.Courses);
+        Assert.That(user1.Courses, Is.Empty);
     }
 }

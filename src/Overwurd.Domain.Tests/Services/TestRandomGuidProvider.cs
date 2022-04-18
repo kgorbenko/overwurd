@@ -8,7 +8,7 @@ public static class TestRandomGuidProvider
         var guidProvider = new RandomGuidGenerator();
         var guid = guidProvider.Generate();
 
-        Assert.AreNotEqual(guid, Guid.Empty);
+        Assert.That(Guid.Empty, Is.Not.EqualTo(guid));
     }
 
     [Test]
@@ -18,6 +18,6 @@ public static class TestRandomGuidProvider
         var guid1 = generator.Generate();
         var guid2 = generator.Generate();
 
-        Assert.AreNotEqual(guid1, guid2);
+        Assert.That(guid2, Is.Not.EqualTo(guid1));
     }
 }

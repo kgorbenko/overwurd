@@ -1,5 +1,3 @@
-using Overwurd.Domain.Services.Authentication;
-
 namespace Overwurd.Domain.Tests.Services.Authentication;
 
 public static class TestParseUserIdHelper
@@ -25,6 +23,6 @@ public static class TestParseUserIdHelper
     {
         var result = ParseUserIdHelper.Parse(value);
 
-        Assert.AreEqual(result, expected);
+        Assert.That(expected, Is.EqualTo(result));
     }
 }

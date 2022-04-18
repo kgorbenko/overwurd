@@ -9,8 +9,10 @@ public static class TestCourse
         var course1 = CourseTestHelper.CreateCourseForUser(user1, id: 10u);
         var course2 = CourseTestHelper.CreateCourseForUser(user2, id: 10u);
 
-        Assert.IsTrue(course1.Equals(course2));
-        Assert.IsTrue(course1.Equals((object) course2));
+        #pragma warning disable NUnit2010
+        Assert.That(course1.Equals(course2), Is.True);
+        Assert.That(course1.Equals((object) course2), Is.True);
+        #pragma warning restore NUnit2010
     }
 
     [Test]
@@ -20,8 +22,10 @@ public static class TestCourse
         var course1 = CourseTestHelper.CreateCourseForUser(user1, id: 10u);
         var course2 = CourseTestHelper.CreateCourseForUser(user2, id: 20u);
 
-        Assert.IsFalse(course1.Equals(course2));
-        Assert.IsFalse(course1.Equals((object) course2));
+        #pragma warning disable NUnit2010
+        Assert.That(course1.Equals(course2), Is.False);
+        Assert.That(course1.Equals((object) course2), Is.False);
+        #pragma warning restore NUnit2010
     }
 
     [Test]
@@ -30,7 +34,7 @@ public static class TestCourse
         var (course1, _) = CourseTestHelper.CreateCourseWithUser(id: 123u);
         var (course2, _) = CourseTestHelper.CreateCourseWithUser(id: 123u);
 
-        Assert.AreEqual(course1.GetHashCode(), course2.GetHashCode());
+        Assert.That(course2.GetHashCode(), Is.EqualTo(course1.GetHashCode()));
     }
 
     [Test]
@@ -39,7 +43,7 @@ public static class TestCourse
         var (course1, _) = CourseTestHelper.CreateCourseWithUser(id: 100u);
         var (course2, _) = CourseTestHelper.CreateCourseWithUser(id: 200u);
 
-        Assert.AreNotEqual(course1.GetHashCode(), course2.GetHashCode());
+        Assert.That(course2.GetHashCode(), Is.Not.EqualTo(course1.GetHashCode()));
     }
 
     [Test]
@@ -79,12 +83,12 @@ public static class TestCourse
             createdAt: new DateTimeOffset(year: 2022, month: 01, day: 01, hour: 00, minute: 00, second: 00, TimeSpan.Zero)
         );
 
-        Assert.AreEqual(course.Id, 1u);
-        Assert.AreEqual(course.UserId, user.Id);
-        Assert.AreEqual(course.CreatedAt, new DateTimeOffset(year: 2022, month: 01, day: 01, hour: 00, minute: 00, second: 00, TimeSpan.Zero));
-        Assert.AreEqual(course.Name, new EntityName("Test name"));
-        Assert.AreEqual(course.Description, new EntityDescription("Test description"));
-        Assert.IsEmpty(course.Vocabularies);
+        Assert.That(course.Id, Is.EqualTo(1u));
+        Assert.That(course.UserId, Is.EqualTo(user.Id));
+        Assert.That(course.CreatedAt, Is.EqualTo(new DateTimeOffset(year: 2022, month: 01, day: 01, hour: 00, minute: 00, second: 00, TimeSpan.Zero)));
+        Assert.That(course.Name, Is.EqualTo(new EntityName("Test name")));
+        Assert.That(course.Description, Is.EqualTo(new EntityDescription("Test description")));
+        Assert.That(course.Vocabularies, Is.Empty);
     }
 
     [Test]
@@ -175,6 +179,6 @@ public static class TestCourse
         Assert.That(course.Vocabularies, Is.EqualTo(new[] { vocabulary }).Using(VocabularyComparer.Instance));
 
         course.RemoveVocabulary(vocabulary);
-        Assert.IsEmpty(course.Vocabularies);
+        Assert.That(course.Vocabularies, Is.Empty);
     }
 }
