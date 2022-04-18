@@ -58,9 +58,7 @@ public class JwtAuthService : IJwtAuthService
         var userId = ParseUserIdHelper.Parse(userIdString);
         var actualRefreshToken = await jwtRefreshTokenProvider.GetUserTokenAsync(userId, cancellationToken);
 
-        var isRefreshTokenValid = IsRefreshTokenValid(actualRefreshToken, refreshTokenString, validatedAccessToken.Id, now);
-
-        if (actualRefreshToken is null || !isRefreshTokenValid)
+        if (actualRefreshToken is null || !IsRefreshTokenValid(actualRefreshToken, refreshTokenString, validatedAccessToken.Id, now))
         {
             throw new InvalidOperationException(
                 $"Provided by user #{userId} refresh token is not valid. Refresh token should not be expired or revoked, " +
@@ -107,7 +105,7 @@ public class JwtAuthService : IJwtAuthService
         return allClaims.Where(IsUserClaim).ToArray();
     }
 
-    private static bool IsRefreshTokenValid(JwtRefreshToken? actualToken,
+    private static bool IsRefreshTokenValid(JwtRefreshToken actualToken,
                                             string providedTokenString,
                                             string accessTokenId,
                                             DateTimeOffset now)
