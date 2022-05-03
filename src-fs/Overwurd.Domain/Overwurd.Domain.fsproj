@@ -5,7 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Library.fs"/>
+    <Compile Include="Common\Validation.fs" />
+    <Compile Include="Course.fs" />
   </ItemGroup>
 
 </Project>
