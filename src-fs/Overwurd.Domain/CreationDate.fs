@@ -1,4 +1,4 @@
-﻿namespace Overwurd.Domain.Common.Consistency
+﻿namespace Overwurd.Domain
 
 open System
 

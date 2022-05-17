@@ -7,9 +7,10 @@
 
   <ItemGroup>
     <Content Include="appsettings.tests.json" CopyToOutputDirectory="Always" />
-    <Compile Include="Domain.fs" />
-    <Compile Include="Database.fs" />
-    <Compile Include="DomainPersister.fs" />
+    <Compile Include="Common\Database.fs" />
+    <Compile Include="Common\Utils.fs" />
+    <Compile Include="Domain\Snapshot.fs" />
+    <Compile Include="Domain\DomainPersister.fs" />
     <Compile Include="Course.fs" />
   </ItemGroup>
 

@@ -1,15 +1,29 @@
 ﻿namespace Overwurd.Domain
 
+open System
+
+type UserId =
+    UserId of int
+
+type Login =
+    private Login of string
+
+type PasswordHash =
+    private PasswordHash of string
+
+type User =
+    { Id: UserId
+      CreatedAt: CreationDate
+      Login: Login
+      PasswordHash: PasswordHash }
+
+type UserCreationParametersForPersistence =
+    { CreatedAt: DateTime
+      Login: string
+      NormalizedLogin: string
+      PasswordHash: string }
+
 module User =
-
-    type UserId =
-        UserId of int
-
-    type Login =
-        private Login of string
-
-    type PasswordHash =
-        private PasswordHash of string
 
     module UserId =
 
@@ -64,18 +78,3 @@ module User =
         let unwrap (passwordHash: PasswordHash): string =
             match passwordHash with
             | PasswordHash value -> value
-
-    open System
-    open Overwurd.Domain.Common.Consistency
-
-    type User =
-        { Id: UserId
-          CreatedAt: CreationDate
-          Login: Login
-          PasswordHash: PasswordHash }
-
-    type UserCreationParametersForPersistence =
-        { CreatedAt: DateTime
-          Login: string
-          NormalizedLogin: string
-          PasswordHash: string }
