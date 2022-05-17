@@ -6,6 +6,8 @@
 
   <ItemGroup>
     <Compile Include="Common\Validation.fs" />
+    <Compile Include="Common\Consistency.fs" />
+    <Compile Include="User.fs" />
     <Compile Include="Course.fs" />
   </ItemGroup>
 

@@ -1,83 +1,54 @@
 ﻿namespace Overwurd.Infrastructure
 
 open System
-open System.Linq.Expressions
 open Dapper
-open Dapper.FluentMap
-open Dapper.FluentMap.Conventions
-open Dapper.FluentMap.Mapping
+open Overwurd.Domain.Common.Consistency
+open Overwurd.Domain.User
 
 module Course =
 
     open System.Threading
     open System.Threading.Tasks
 
-    open Overwurd.Infrastructure.Common
+    open Overwurd.Infrastructure.Database
     open Overwurd.Domain.Course
 
     type CoursePersistentModel = {
         Id: int
         UserId: int
-        CreatedAt: DateTimeOffset
+        CreatedAt: DateTime
         Name: string
         Description: string option
     }
 
     let toDomain (model: CoursePersistentModel): Course =
         { Id = CourseId model.Id
-          UserId = model.UserId
-          CreatedAt = model.CreatedAt
-          Name = Name.create model.Name
-          Description = Description.create model.Description }
+          UserId = UserId model.UserId
+          CreatedAt = CreationDate.create model.CreatedAt
+          Name = CourseName.create model.Name
+          Description = CourseDescription.create model.Description }
 
-    let getAllCoursesAsync (cancellationToken: CancellationToken)
-                           (session: Session)
-                           : Course list Task =
+    let getUserCoursesAsync (userId: int)
+                            (cancellationToken: CancellationToken)
+                            (session: Session)
+                            : Course list Task =
         task {
             let sql = """
-SELECT "Id",
+select "Id",
        "UserId",
        "CreatedAt",
        "Name",
        "Description"
-  FROM "overwurd"."Courses"
+  from "overwurd"."Courses"
+ where "UserId" = @UserId
+ order by "Id" desc
 """
 
-            let command = CommandDefinition (
-                commandText = sql,
-                    transaction = session.Transaction,
-                        cancellationToken = cancellationToken
-            )
-
+            let parameters = {| UserId = userId |}
+            let command = Utils.makeSqlCommandWithParameters sql parameters session.Transaction cancellationToken
             let! result = session.Connection.QueryAsync<CoursePersistentModel>(command)
 
             return result
                 |> Seq.map toDomain
                 |> List.ofSeq
-        }
-
-    let getCourseByNameAsync (session: Session)
-                             (cancellationToken: CancellationToken)
-                             (courseName: Name.CourseName)
-                             : Course option Task =
-        task {
-            let sql = """
-SELECT Id,
-       CreatedAt,
-       Name,
-       Description
-  from overwurd.Courses
- where Name = @Name
-"""
-
-            let parameters = {| Name = courseName |}
-            let command = CommandDefinition (
-                commandText = sql,
-                    parameters = parameters,
-                        transaction = session.Transaction,
-                            cancellationToken = cancellationToken
-            )
-
-            let! result = session.Connection.QuerySingleAsync<CoursePersistentModel option>(command)
-            return result |> Option.map toDomain
         }

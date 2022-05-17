@@ -5,16 +5,10 @@ open System.IO
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Cors.Infrastructure
 open Microsoft.AspNetCore.Hosting
-open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
-open Npgsql
-
-open Overwurd.Domain.Course
-open Overwurd.Infrastructure.Common
-open Overwurd.Infrastructure.Course
 
 let webApp =
     choose [
