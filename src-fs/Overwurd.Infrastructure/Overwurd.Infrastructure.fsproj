@@ -10,8 +10,8 @@
     <Content Include="Migrations\V1_0_0_0__UsersAndCoursesTables.sql" />
     <Compile Include="Database\Dapper.fs" />
     <Compile Include="Database\Database.fs" />
-    <Compile Include="User.fs" />
-    <Compile Include="Course.fs" />
+    <Compile Include="UserStore.fs" />
+    <Compile Include="CourseStore.fs" />
   </ItemGroup>
 
   <ItemGroup>

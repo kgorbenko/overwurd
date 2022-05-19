@@ -1,4 +1,4 @@
-﻿module Overwurd.Infrastructure.Tests.User
+﻿module Overwurd.Infrastructure.Tests.UserStore
 
 open System
 open System.Threading
@@ -23,7 +23,7 @@ let ``No user should be found by Id in empty database`` () =
     task {
         do! prepareDatabaseAsync |> withConnectionAsync
 
-        let! actual = User.getUserByIdAsync 1 CancellationToken.None |> withConnectionAsync
+        let! actual = UserStore.getUserByIdAsync 1 CancellationToken.None |> withConnectionAsync
 
         actual |> should equal None
     }
@@ -39,7 +39,7 @@ let ``Finds single User by Id`` () =
         let snapshot = DomainSnapshot.create () |> DomainSnapshot.appendUser user
         do! DomainPersister.persistSnapshotAsync snapshot |> withConnectionAsync
 
-        let! actual = User.getUserByIdAsync (unwrap user.Id) CancellationToken.None |> withConnectionAsync
+        let! actual = UserStore.getUserByIdAsync (unwrap user.Id) CancellationToken.None |> withConnectionAsync
 
         let expected: User option =
             Some { Id = user.Id.Value
@@ -55,7 +55,7 @@ let ``No user should be found by Login in empty database`` () =
     task {
         do! prepareDatabaseAsync |> withConnectionAsync
 
-        let! actual = User.getUserByLoginAsync "TestLogin123" CancellationToken.None |> withConnectionAsync
+        let! actual = UserStore.getUserByLoginAsync "TestLogin123" CancellationToken.None |> withConnectionAsync
 
         actual |> should equal None
     }
@@ -72,7 +72,7 @@ let ``Finds single User by Login`` () =
         let snapshot = DomainSnapshot.create () |> DomainSnapshot.appendUser user
         do! DomainPersister.persistSnapshotAsync snapshot |> withConnectionAsync
 
-        let! actual = User.getUserByLoginAsync login CancellationToken.None |> withConnectionAsync
+        let! actual = UserStore.getUserByLoginAsync login CancellationToken.None |> withConnectionAsync
 
         let expected: User option =
             Some { Id = user.Id.Value
@@ -96,7 +96,7 @@ let ``Creates User`` () =
               NormalizedLogin = "testlogin123"
               PasswordHash = "1" }
 
-        let! createdId = User.createUserAsync parameters CancellationToken.None |> withConnectionAsync
+        let! createdId = UserStore.createUserAsync parameters CancellationToken.None |> withConnectionAsync
 
         let! actual = Database.getAllUsersAsync |> withConnectionAsync
 

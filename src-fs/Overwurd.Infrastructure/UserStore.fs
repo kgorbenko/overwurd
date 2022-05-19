@@ -14,7 +14,7 @@ type internal UserPersistentModel =
       NormalizedLogin: string
       Password: string }
 
-module User =
+module UserStore =
 
     let private toDomain (model: UserPersistentModel): User =
         { Id = UserId model.Id

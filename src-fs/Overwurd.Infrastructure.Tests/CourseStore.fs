@@ -1,4 +1,4 @@
-﻿module Overwurd.Infrastructure.Tests.Course
+﻿module Overwurd.Infrastructure.Tests.CourseStore
 
 open System
 open System.Threading
@@ -28,7 +28,7 @@ let ``User has no courses`` () =
         let snapshot = DomainSnapshot.create () |> DomainSnapshot.appendUser user
         do! DomainPersister.persistSnapshotAsync snapshot |> withConnectionAsync
 
-        let! courses = Course.getUserCoursesAsync (unwrap user.Id) CancellationToken.None |> withConnectionAsync
+        let! courses = CourseStore.getUserCoursesAsync (unwrap user.Id) CancellationToken.None |> withConnectionAsync
 
         courses |> should be Empty
     }
@@ -45,7 +45,7 @@ let ``Single course`` () =
         let snapshot = DomainSnapshot.create () |> DomainSnapshot.appendUser user
         do! DomainPersister.persistSnapshotAsync snapshot |> withConnectionAsync
 
-        let! result = Course.getUserCoursesAsync (unwrap user.Id) CancellationToken.None |> withConnectionAsync
+        let! result = CourseStore.getUserCoursesAsync (unwrap user.Id) CancellationToken.None |> withConnectionAsync
 
         let actual: Course list =
             [ { Id = course.Id.Value
