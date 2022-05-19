@@ -1,9 +1,10 @@
-﻿module Overwurd.Infrastructure.Tests.Common.Database
+﻿module internal Overwurd.Infrastructure.Tests.Common.Database
 
 open Dapper
 open System.Threading.Tasks
 
 open Overwurd.Domain
+open Overwurd.Infrastructure
 open Overwurd.Infrastructure.Database
 
 let clearAsync (session: Session): unit Task =
@@ -16,6 +17,25 @@ truncate "overwurd"."Users" restart identity cascade;
         let! _ = session.Connection.ExecuteAsync command
 
         ()
+    }
+
+let getAllUsersAsync (session: Session): UserPersistentModel list Task =
+    task {
+        let sql = """
+select
+    "Id",
+    "CreatedAt",
+    "Login",
+    "NormalizedLogin",
+    "Password"
+from "overwurd"."Users"
+"""
+
+        let command = CommandDefinition(commandText = sql, transaction = session.Transaction)
+        let! result = session.Connection.QueryAsync<UserPersistentModel>(command)
+
+        return result
+            |> List.ofSeq
     }
 
 let createUserAsync (parameters: UserCreationParametersForPersistence)

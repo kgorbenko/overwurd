@@ -4,6 +4,7 @@ open Dapper
 open System
 open System.Data
 open System.Threading
+open System.Threading.Tasks
 
 type OptionHandler<'T>() =
     inherit SqlMapper.TypeHandler<option<'T>>()
@@ -22,11 +23,7 @@ type OptionHandler<'T>() =
         else Some (value :?> 'T)
 
 let registerTypeHandlers () =
-    SqlMapper.AddTypeHandler (OptionHandler<Guid>())
-    SqlMapper.AddTypeHandler (OptionHandler<int64>())
-    SqlMapper.AddTypeHandler (OptionHandler<int>())
     SqlMapper.AddTypeHandler (OptionHandler<string>())
-    SqlMapper.AddTypeHandler (OptionHandler<DateTimeOffset>())
     ()
 
 let makeSqlCommand (sql: string)
@@ -50,3 +47,31 @@ let makeSqlCommandWithParameters (sql: string)
                 transaction = transaction,
                     cancellationToken = cancellationToken
     )
+
+let queryAsync<'a> (command: CommandDefinition) (connection: IDbConnection): 'a list Task =
+    task {
+        let! result = connection.QueryAsync<'a>(command)
+        return result |> List.ofSeq
+    }
+
+let findAsync<'a> (command: CommandDefinition) (connection: IDbConnection): 'a option Task =
+    task {
+        let! result = queryAsync<'a> command connection
+
+        return
+            match result with
+            | [] -> None
+            | [x] -> Some x
+            | _ -> raise (InvalidOperationException "Found more than one element")
+    }
+
+let querySingleAsync<'a> (command: CommandDefinition) (connection: IDbConnection): 'a Task =
+    task {
+        let! result = queryAsync<'a> command connection
+
+        return
+            match result with
+            | [] -> raise (InvalidOperationException "Sequence contains no elements")
+            | [x] -> x
+            | _ -> raise (InvalidOperationException "Sequence contains more than one element")
+    }

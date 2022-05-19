@@ -43,9 +43,9 @@ order by "Id" desc
 
         let parameters = {| UserId = userId |}
         let command = makeSqlCommandWithParameters sql parameters session.Transaction cancellationToken
-        let! result = session.Connection.QueryAsync<CoursePersistentModel>(command)
+        let! result = session.Connection |> queryAsync<CoursePersistentModel> command
 
         return result
-        |> Seq.map toDomain
-        |> List.ofSeq
+            |> Seq.map toDomain
+            |> List.ofSeq
     }

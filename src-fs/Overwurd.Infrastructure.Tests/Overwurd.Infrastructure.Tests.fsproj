@@ -11,6 +11,7 @@
     <Compile Include="Common\Utils.fs" />
     <Compile Include="Domain\Snapshot.fs" />
     <Compile Include="Domain\DomainPersister.fs" />
+    <Compile Include="User.fs" />
     <Compile Include="Course.fs" />
   </ItemGroup>
 
