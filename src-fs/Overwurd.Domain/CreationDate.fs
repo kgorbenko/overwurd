@@ -1,6 +1,7 @@
 ﻿namespace Overwurd.Domain
 
 open System
+open Overwurd.Domain.Common.Utils
 
 type CreationDate =
     private CreationDate of DateTime
@@ -8,10 +9,8 @@ type CreationDate =
 module CreationDate =
 
     let create (date: DateTime): CreationDate =
-        match date.Kind with
-        | DateTimeKind.Utc -> CreationDate date
-        | _ -> raise (InvalidOperationException "Only UTC dates are allowed for CreatedAt fields.")
+        date |> ensureUtc |> CreationDate
 
     let unwrap (date: CreationDate): DateTime =
         match date with
-        | CreationDate date -> date
+        | CreationDate d -> d
