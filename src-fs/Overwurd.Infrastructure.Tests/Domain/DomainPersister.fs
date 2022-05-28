@@ -5,6 +5,7 @@ open System.Threading.Tasks
 open Overwurd.Domain
 open Overwurd.Domain.Course
 open Overwurd.Domain.User
+open Overwurd.Domain.Jwt
 open Overwurd.Infrastructure.Tests.Common
 open Overwurd.Infrastructure.Tests.Domain
 open Overwurd.Infrastructure.Database
@@ -30,6 +31,26 @@ let private persistCourseAsync (course: CourseSnapshot)
         course.Id <- Some courseId
     }
 
+let private persistRefreshTokenAsync (token: JwtRefreshTokenSnapshot)
+                                     (userId: UserId)
+                                     (session: Session)
+                                     : unit Task =
+    task {
+        ensureTransient token.Id
+
+        let tokenCreationParameters: JwtRefreshTokenCreationParametersForPersistence =
+            { AccessTokenId = JwtAccessTokenId.unwrap token.AccessTokenId
+              Value = token.Value
+              UserId = UserId.unwrap userId
+              CreatedAt = CreationDate.unwrap token.CreatedAt
+              RefreshedAt = token.RefreshedAt |> Option.map RefreshDate.unwrap
+              ExpiresAt = ExpiryDate.unwrap token.ExpiresAt
+              IsRevoked = token.IsRevoked }
+
+        let! tokenId = Database.createRefreshTokenAsync tokenCreationParameters session
+        token.Id <- Some tokenId
+    }
+
 let private persistUserAsync (user: UserSnapshot)
                              (session: Session)
                              : unit Task =
@@ -47,6 +68,9 @@ let private persistUserAsync (user: UserSnapshot)
 
         for course in user.Courses do
             do! persistCourseAsync course userId session
+
+        for token in user.JwtRefreshTokens do
+            do! persistRefreshTokenAsync token userId session
     }
 
 let persistSnapshotAsync (snapshot: DomainSnapshot)

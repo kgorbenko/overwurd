@@ -92,3 +92,41 @@ insert into "overwurd"."Courses" (
 
         return (CourseId id)
     }
+
+let createRefreshTokenAsync (creationParameters: JwtRefreshTokenCreationParametersForPersistence)
+                            (session: Session)
+                            : JwtRefreshTokenId Task =
+    task {
+        let sql = """
+insert into "overwurd"."JwtRefreshTokens" (
+    "AccessTokenId",
+    "Value",
+    "UserId",
+    "CreatedAt",
+    "RefreshedAt",
+    "ExpiresAt",
+    "IsRevoked"
+) values (
+    @AccessTokenId,
+    @Value,
+    @UserId,
+    @CreatedAt,
+    @RefreshedAt,
+    @ExpiresAt,
+    @IsRevoked
+) returning "Id"
+"""
+
+        let parameters =
+            {| AccessTokenId = creationParameters.AccessTokenId
+               Value = creationParameters.Value
+               UserId = creationParameters.UserId
+               CreatedAt = creationParameters.CreatedAt
+               RefreshedAt = creationParameters.RefreshedAt
+               ExpiresAt = creationParameters.ExpiresAt
+               IsRevoked = creationParameters.IsRevoked |}
+        let command = CommandDefinition(commandText = sql, parameters = parameters, transaction = session.Transaction)
+        let! id = session.Connection.QuerySingleAsync<int> command
+
+        return (JwtRefreshTokenId id)
+    }

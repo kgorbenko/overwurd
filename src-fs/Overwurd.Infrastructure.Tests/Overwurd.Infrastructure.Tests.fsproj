@@ -13,6 +13,7 @@
     <Compile Include="Domain\DomainPersister.fs" />
     <Compile Include="UserStore.fs" />
     <Compile Include="CourseStore.fs" />
+    <Compile Include="JwtRefreshTokenStore.fs" />
   </ItemGroup>
 
   <ItemGroup>

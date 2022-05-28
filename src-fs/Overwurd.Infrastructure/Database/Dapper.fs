@@ -24,6 +24,7 @@ type OptionHandler<'T>() =
 
 let registerTypeHandlers () =
     SqlMapper.AddTypeHandler (OptionHandler<string>())
+    SqlMapper.AddTypeHandler (OptionHandler<DateTime>())
     ()
 
 let makeSqlCommand (sql: string)
@@ -47,6 +48,12 @@ let makeSqlCommandWithParameters (sql: string)
                 transaction = transaction,
                     cancellationToken = cancellationToken
     )
+
+let executeAsync (command: CommandDefinition) (connection: IDbConnection): unit Task =
+    task {
+        let! _ = connection.ExecuteAsync(command)
+        ()
+    }
 
 let queryAsync<'a> (command: CommandDefinition) (connection: IDbConnection): 'a list Task =
     task {

@@ -8,10 +8,12 @@
   <ItemGroup>
     <Compile Include="AssemblyProperties.fs" />
     <Content Include="Migrations\V1_0_0_0__UsersAndCoursesTables.sql" />
+    <Content Include="Migrations\V1_0_0_1__JwtRefreshTokenTable.sql" />
     <Compile Include="Database\Dapper.fs" />
     <Compile Include="Database\Database.fs" />
     <Compile Include="UserStore.fs" />
     <Compile Include="CourseStore.fs" />
+    <Compile Include="JwtRefreshTokenStore.fs" />
   </ItemGroup>
 
   <ItemGroup>
