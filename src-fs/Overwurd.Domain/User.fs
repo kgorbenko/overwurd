@@ -1,6 +1,7 @@
 ﻿namespace Overwurd.Domain
 
 open System
+open Overwurd.Domain.Common.Utils
 
 type UserId =
     UserId of int
@@ -30,6 +31,11 @@ module User =
         let unwrap (userId: UserId): int =
             match userId with
             | UserId value -> value
+
+        let tryParse (userId: string): UserId option =
+            userId
+            |> tryParseInt
+            |> Option.map UserId
 
     module Login =
 
