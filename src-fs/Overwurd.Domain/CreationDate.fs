@@ -1,16 +1,15 @@
 ﻿namespace Overwurd.Domain
 
 open System
-open Overwurd.Domain.Common.Utils
 
 type CreationDate =
-    private CreationDate of DateTime
+    private CreationDate of UtcDateTime
 
 module CreationDate =
 
     let create (date: DateTime): CreationDate =
-        date |> ensureUtc |> CreationDate
+        date |> UtcDateTime.create |> CreationDate
 
     let unwrap (date: CreationDate): DateTime =
         match date with
-        | CreationDate d -> d
+        | CreationDate utcValue -> UtcDateTime.unwrap utcValue

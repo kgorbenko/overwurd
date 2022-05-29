@@ -1,16 +1,15 @@
 ﻿namespace Overwurd.Domain
 
 open System
-open Overwurd.Domain.Common.Utils
 
 type ExpiryDate =
-    private ExpiryDate of DateTime
+    private ExpiryDate of UtcDateTime
 
 module ExpiryDate =
 
     let create (date: DateTime): ExpiryDate =
-        date |> ensureUtc |> ExpiryDate
+        date |> UtcDateTime.create |> ExpiryDate
 
     let unwrap (date: ExpiryDate): DateTime =
         match date with
-        | ExpiryDate d -> d
+        | ExpiryDate utcValue -> UtcDateTime.unwrap utcValue

@@ -1,17 +1,16 @@
 ﻿namespace Overwurd.Domain
 
 open System
-open Overwurd.Domain.Common.Utils
 
 type RefreshDate =
-    private RefreshDate of DateTime
+    private RefreshDate of UtcDateTime
 
 module RefreshDate =
 
     let create (date: DateTime): RefreshDate =
-        date |> ensureUtc |> RefreshDate
+        date |> UtcDateTime.create |> RefreshDate
 
     let unwrap (date: RefreshDate): DateTime =
         match date with
-        | RefreshDate d -> d
+        | RefreshDate utcValue -> UtcDateTime.unwrap utcValue
 
