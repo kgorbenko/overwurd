@@ -4,6 +4,7 @@ open Dapper
 open System.Threading.Tasks
 
 open Overwurd.Domain
+open Overwurd.Domain.User
 open Overwurd.Infrastructure
 open Overwurd.Infrastructure.Database
 
@@ -27,7 +28,8 @@ select
     "CreatedAt",
     "Login",
     "NormalizedLogin",
-    "Password"
+    "PasswordHash",
+    "PasswordSalt"
 from "overwurd"."Users"
 """
 
@@ -38,7 +40,7 @@ from "overwurd"."Users"
             |> List.ofSeq
     }
 
-let createUserAsync (parameters: UserCreationParametersForPersistence)
+let createUserAsync (creationParameters: UserCreationParametersForPersistence)
                     (session: Session)
                     : UserId Task =
     task {
@@ -47,15 +49,23 @@ insert into "overwurd"."Users" (
     "CreatedAt",
     "Login",
     "NormalizedLogin",
-    "Password"
+    "PasswordHash",
+    "PasswordSalt"
 ) values (
     @CreatedAt,
     @Login,
     @NormalizedLogin,
-    @PasswordHash
+    @PasswordHash,
+    @PasswordSalt
 ) returning "Id"
 """
-
+        let parameters =
+            {| CreatedAt = CreationDate.unwrap creationParameters.CreatedAt
+               Login = Login.unwrap creationParameters.Login
+               NormalizedLogin = NormalizedLogin.unwrap creationParameters.NormalizedLogin
+               PasswordHash = creationParameters.PasswordHash
+               PasswordSalt = creationParameters.PasswordSalt |}
+               
         let command = CommandDefinition(commandText = sql, parameters = parameters, transaction = session.Transaction)
         let! id = session.Connection.QuerySingleAsync<int> command
 

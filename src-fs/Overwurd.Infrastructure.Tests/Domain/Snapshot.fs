@@ -12,7 +12,9 @@ and UserSnapshot =
     { mutable Id: UserId option
       CreatedAt: CreationDate
       Login: Login
+      NormalizedLogin: NormalizedLogin
       PasswordHash: PasswordHash
+      PasswordSalt: PasswordSalt
       Courses: CourseSnapshot list
       JwtRefreshTokens: JwtRefreshTokenSnapshot list }
 and CourseSnapshot =
@@ -43,42 +45,62 @@ module DomainSnapshot =
 module Building =
 
     let makeUserWithPasswordAndCourses (login: string) (passwordHash: string) (courses: CourseSnapshot list) (createdAt: DateTime): UserSnapshot =
+        let login = Login.create login
+        
         { Id = None
           CreatedAt = CreationDate.create createdAt
-          Login = Login.create login
-          PasswordHash = PasswordHash.create passwordHash
+          Login = login
+          NormalizedLogin = NormalizedLogin.create login
+          PasswordHash = passwordHash
+          PasswordSalt = "W7IHpCImV90XHULk"
           Courses = courses
           JwtRefreshTokens = [] }
 
     let makeUserWithPassword (login: string) (passwordHash: string) (createdAt: DateTime): UserSnapshot =
+        let login = Login.create login
+        
         { Id = None
           CreatedAt = CreationDate.create createdAt
-          Login = Login.create login
-          PasswordHash = PasswordHash.create passwordHash
+          Login = login
+          NormalizedLogin = NormalizedLogin.create login
+          PasswordHash = passwordHash
+          PasswordSalt = "W7IHpCImV90XHULk"
           Courses = []
           JwtRefreshTokens = [] }
 
     let makeUserWithCoursesAndPredefinedPassword (login: string) (courses: CourseSnapshot list) (createdAt: DateTime): UserSnapshot =
+        let login = Login.create login
+        
         { Id = None
           CreatedAt = CreationDate.create createdAt
-          Login = Login.create login
-          PasswordHash = PasswordHash.create "123456"
+          Login = login
+          NormalizedLogin = NormalizedLogin.create login
+          PasswordHash = "117136275353e02cc95d6bb3b38d824a"
+          PasswordSalt = "W7IHpCImV90XHULk"
           Courses = courses
           JwtRefreshTokens = [] }
 
     let makeUserWithRefreshTokens (login: string) (tokens: JwtRefreshTokenSnapshot list) (createdAt: DateTime): UserSnapshot =
+        let login = Login.create login
+        
         { Id = None
           CreatedAt = CreationDate.create createdAt
-          Login = Login.create login
-          PasswordHash = PasswordHash.create "123456"
+          Login = login
+          NormalizedLogin = NormalizedLogin.create login
+          PasswordHash = "117136275353e02cc95d6bb3b38d824a"
+          PasswordSalt = "W7IHpCImV90XHULk"
           Courses = []
           JwtRefreshTokens = tokens }
 
     let makeUser (login: string) (createdAt: DateTime): UserSnapshot =
+        let login = Login.create login
+        
         { Id = None
           CreatedAt = CreationDate.create createdAt
-          Login = Login.create login
-          PasswordHash = PasswordHash.create "123456"
+          Login = login
+          NormalizedLogin = NormalizedLogin.create login
+          PasswordHash = "117136275353e02cc95d6bb3b38d824a"
+          PasswordSalt = "W7IHpCImV90XHULk"
           Courses = []
           JwtRefreshTokens = [] }
 

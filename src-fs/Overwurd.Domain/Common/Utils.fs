@@ -1,6 +1,7 @@
 ﻿module internal Overwurd.Domain.Common.Utils
 
 open System
+open System.Text
 open System.Threading.Tasks
 
 let ensureUtc (dateTime: DateTime): DateTime =
@@ -12,6 +13,12 @@ let tryParseInt (value: string): int Option =
     match Int32.TryParse value with
     | true, value -> Some value
     | false, _ -> None
+    
+let toUpperCase (value: string): string =
+    value.ToUpperInvariant()
+
+let toByteArray (value: string): byte array =
+    Encoding.UTF8.GetBytes value
 
 module AsyncResult =
 

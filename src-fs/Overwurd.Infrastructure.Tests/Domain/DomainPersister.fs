@@ -58,10 +58,11 @@ let private persistUserAsync (user: UserSnapshot)
         ensureTransient user.Id
 
         let userCreationParameters =
-            { CreatedAt = CreationDate.unwrap user.CreatedAt
-              Login = Login.unwrap user.Login
-              NormalizedLogin = (Login.unwrap user.Login).ToLowerInvariant()
-              PasswordHash = PasswordHash.unwrap user.PasswordHash }
+            { CreatedAt = user.CreatedAt
+              Login = user.Login
+              NormalizedLogin = user.NormalizedLogin
+              PasswordHash = user.PasswordHash
+              PasswordSalt = user.PasswordSalt}
 
         let! userId = Database.createUserAsync userCreationParameters session
         user.Id <- Some userId

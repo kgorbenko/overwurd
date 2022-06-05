@@ -5,7 +5,8 @@ create table "overwurd"."Users" (
     "CreatedAt" timestamp with time zone not null,
     "Login" text not null,
     "NormalizedLogin" text not null,
-    "Password" text not null,
+    "PasswordHash" text not null,
+    "PasswordSalt" text not null,
 
     constraint "PK_Users" primary key ("Id")
 );

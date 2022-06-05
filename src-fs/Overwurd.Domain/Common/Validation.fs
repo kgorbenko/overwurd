@@ -32,3 +32,11 @@ let (|HasInvalidCharacters|_|) (validCharacters: char Set) (str: string): char l
     |> function
         | [] -> None
         | invalidCharacters -> Some invalidCharacters
+
+let (|UpperOrLowerCharactersAreMissing|_|) (str: string): unit option =
+    let hasUpperCharacters = str |> Seq.exists Char.IsUpper
+    let hasLowerCharacters = str |> Seq.exists Char.IsLower
+    
+    if not <| (hasUpperCharacters && hasLowerCharacters)
+        then Some ()
+        else None

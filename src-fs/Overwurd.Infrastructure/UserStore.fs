@@ -4,6 +4,7 @@ open System
 open System.Threading
 open System.Threading.Tasks
 open Overwurd.Domain
+open Overwurd.Domain.User
 open Overwurd.Infrastructure.Database
 open Overwurd.Infrastructure.Database.Dapper
 
@@ -12,17 +13,19 @@ type internal UserPersistentModel =
       CreatedAt: DateTime
       Login: string
       NormalizedLogin: string
-      Password: string }
+      PasswordHash: string
+      PasswordSalt: string }
 
 module UserStore =
 
     let private toDomain (model: UserPersistentModel): User =
         { Id = UserId model.Id
           CreatedAt = CreationDate.create model.CreatedAt
-          Login = User.Login.create model.Login
-          PasswordHash = User.PasswordHash.create model.Password }
+          Login = Login.create model.Login
+          PasswordHash = model.PasswordHash
+          PasswordSalt = model.PasswordSalt }
 
-    let getUserByIdAsync (userId: int)
+    let getUserByIdAsync (userId: UserId)
                          (cancellationToken: CancellationToken)
                          (session: Session)
                          : User option Task =
@@ -33,12 +36,13 @@ select
     "CreatedAt",
     "Login",
     "NormalizedLogin",
-    "Password"
+    "PasswordHash",
+    "PasswordSalt"
 from "overwurd"."Users"
 where "Id" = @Id
 """
 
-            let parameters = {| Id = userId |}
+            let parameters = {| Id = UserId.unwrap userId |}
             let command = makeSqlCommandWithParameters sql parameters session.Transaction cancellationToken
             let! result = session.Connection |> findAsync<UserPersistentModel> command
 
@@ -46,10 +50,10 @@ where "Id" = @Id
                 |> Option.map toDomain
         }
 
-    let getUserByLoginAsync (login: string)
-                            (cancellationToken: CancellationToken)
-                            (session: Session)
-                            : User option Task =
+    let getUserByNormalizedLoginAsync (normalizedLogin: string)
+                                      (cancellationToken: CancellationToken)
+                                      (session: Session)
+                                      : User option Task =
         task {
             let sql = """
 select
@@ -57,12 +61,13 @@ select
     "CreatedAt",
     "Login",
     "NormalizedLogin",
-    "Password"
+    "PasswordHash",
+    "PasswordSalt"
 from "overwurd"."Users"
-where "Login" = @Login
+where "NormalizedLogin" = @NormalizedLogin
 """
 
-            let parameters = {| Login = login |}
+            let parameters = {| NormalizedLogin = normalizedLogin |}
             let command = makeSqlCommandWithParameters sql parameters session.Transaction cancellationToken
             let! result = session.Connection |> findAsync<UserPersistentModel> command
 
@@ -80,20 +85,22 @@ insert into "overwurd"."Users" (
     "CreatedAt",
     "Login",
     "NormalizedLogin",
-    "Password"
+    "PasswordHash",
+    "PasswordSalt"
 ) values (
     @CreatedAt,
     @Login,
     @NormalizedLogin,
-    @Password
+    @PasswordHash,
+    @PasswordSalt
 ) returning "Id"
 """
             let parameters =
-                {| CreatedAt = parameters.CreatedAt
-                   Login = parameters.Login
-                   NormalizedLogin = parameters.NormalizedLogin
-                   Password = parameters.PasswordHash |}
-
+                {| CreatedAt = CreationDate.unwrap parameters.CreatedAt
+                   Login = Login.unwrap parameters.Login
+                   NormalizedLogin = NormalizedLogin.unwrap parameters.NormalizedLogin
+                   PasswordHash = parameters.PasswordHash
+                   PasswordSalt = parameters.PasswordSalt |}
 
             let command = makeSqlCommandWithParameters sql parameters session.Transaction cancellationToken
             return! session.Connection |> querySingleAsync<int> command
