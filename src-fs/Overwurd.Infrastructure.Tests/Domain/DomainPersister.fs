@@ -3,9 +3,7 @@
 open System.Threading.Tasks
 
 open Overwurd.Domain
-open Overwurd.Domain.Course
 open Overwurd.Domain.User
-open Overwurd.Domain.Jwt
 open Overwurd.Infrastructure.Tests.Common
 open Overwurd.Infrastructure.Tests.Domain
 open Overwurd.Infrastructure.Database
@@ -23,9 +21,9 @@ let private persistCourseAsync (course: CourseSnapshot)
         ensureTransient course.Id
 
         let courseCreationParameters =
-            { CreatedAt = CreationDate.unwrap course.CreatedAt
-              Name = CourseName.unwrap course.Name
-              Description = course.Description |> Option.map CourseDescription.unwrap }
+            { CreatedAt = course.CreatedAt
+              Name = course.Name
+              Description = course.Description }
 
         let! courseId = Database.createCourseAsync courseCreationParameters (UserId.unwrap userId) session
         course.Id <- Some courseId
@@ -39,12 +37,12 @@ let private persistRefreshTokenAsync (token: JwtRefreshTokenSnapshot)
         ensureTransient token.Id
 
         let tokenCreationParameters: JwtRefreshTokenCreationParametersForPersistence =
-            { AccessTokenId = JwtAccessTokenId.unwrap token.AccessTokenId
+            { AccessTokenId = token.AccessTokenId
               Value = token.Value
-              UserId = UserId.unwrap userId
-              CreatedAt = CreationDate.unwrap token.CreatedAt
-              RefreshedAt = token.RefreshedAt |> Option.map RefreshDate.unwrap
-              ExpiresAt = ExpiryDate.unwrap token.ExpiresAt
+              UserId = userId
+              CreatedAt = token.CreatedAt
+              RefreshedAt = token.RefreshedAt
+              ExpiresAt = token.ExpiresAt
               IsRevoked = token.IsRevoked }
 
         let! tokenId = Database.createRefreshTokenAsync tokenCreationParameters session

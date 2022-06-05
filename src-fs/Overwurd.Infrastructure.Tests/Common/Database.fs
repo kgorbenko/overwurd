@@ -4,7 +4,9 @@ open Dapper
 open System.Threading.Tasks
 
 open Overwurd.Domain
+open Overwurd.Domain.Jwt
 open Overwurd.Domain.User
+open Overwurd.Domain.Course
 open Overwurd.Infrastructure
 open Overwurd.Infrastructure.Database
 
@@ -36,6 +38,28 @@ from "overwurd"."Users"
         let command = CommandDefinition(commandText = sql, transaction = session.Transaction)
         let! result = session.Connection.QueryAsync<UserPersistentModel>(command)
 
+        return result
+            |> List.ofSeq
+    }
+
+let getAllRefreshTokensAsync (session: Session): JwtRefreshTokenPersistentModel list Task =
+    task {
+        let sql = """
+select
+    "Id",
+    "AccessTokenId",
+    "Value",
+    "UserId",
+    "CreatedAt",
+    "RefreshedAt",
+    "ExpiresAt",
+    "IsRevoked"
+  from "overwurd"."JwtRefreshTokens"
+"""
+    
+        let command = CommandDefinition(commandText = sql, transaction = session.Transaction)
+        let! result = session.Connection.QueryAsync<JwtRefreshTokenPersistentModel> command
+        
         return result
             |> List.ofSeq
     }
@@ -92,10 +116,10 @@ insert into "overwurd"."Courses" (
 """
 
         let parameters =
-            {| CreatedAt = creationParameters.CreatedAt
+            {| CreatedAt = CreationDate.unwrap creationParameters.CreatedAt
                UserId = userId
-               Name = creationParameters.Name
-               Description = creationParameters.Description |}
+               Name = CourseName.unwrap creationParameters.Name
+               Description = creationParameters.Description |> Option.map CourseDescription.unwrap |}
 
         let command = CommandDefinition(commandText = sql, parameters = parameters, transaction = session.Transaction)
         let! id = session.Connection.QuerySingleAsync<int> command
@@ -128,12 +152,12 @@ insert into "overwurd"."JwtRefreshTokens" (
 """
 
         let parameters =
-            {| AccessTokenId = creationParameters.AccessTokenId
+            {| AccessTokenId = JwtAccessTokenId.unwrap creationParameters.AccessTokenId
                Value = creationParameters.Value
-               UserId = creationParameters.UserId
-               CreatedAt = creationParameters.CreatedAt
-               RefreshedAt = creationParameters.RefreshedAt
-               ExpiresAt = creationParameters.ExpiresAt
+               UserId = UserId.unwrap creationParameters.UserId
+               CreatedAt = CreationDate.unwrap creationParameters.CreatedAt
+               RefreshedAt = creationParameters.RefreshedAt |> Option.map RefreshDate.unwrap
+               ExpiresAt = ExpiryDate.unwrap creationParameters.ExpiresAt
                IsRevoked = creationParameters.IsRevoked |}
         let command = CommandDefinition(commandText = sql, parameters = parameters, transaction = session.Transaction)
         let! id = session.Connection.QuerySingleAsync<int> command

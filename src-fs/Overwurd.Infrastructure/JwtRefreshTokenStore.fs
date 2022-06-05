@@ -5,6 +5,8 @@ open System.Threading
 open System.Threading.Tasks
 
 open Overwurd.Domain
+open Overwurd.Domain.User
+open Overwurd.Domain.Jwt
 open Overwurd.Infrastructure.Database
 open Overwurd.Infrastructure.Database.Dapper
 
@@ -31,7 +33,7 @@ module JwtRefreshTokenStore =
           ExpiresAt = ExpiryDate.create model.ExpiresAt
           IsRevoked = model.IsRevoked }
 
-    let getUserRefreshTokensAsync (userId: int)
+    let getUserRefreshTokensAsync (userId: UserId)
                                   (cancellationToken: CancellationToken)
                                   (session: Session)
                                   : JwtRefreshToken list Task =
@@ -50,7 +52,7 @@ select
  where "UserId" = @UserId
 """
 
-            let parameters = {| UserId = userId |}
+            let parameters = {| UserId = UserId.unwrap userId |}
             let command = makeSqlCommandWithParameters sql parameters session.Transaction cancellationToken
             let! result = session.Connection |> queryAsync<JwtRefreshTokenPersistentModel> command
 
@@ -58,7 +60,7 @@ select
                 |> List.map toDomain
         }
 
-    let removeRefreshTokensAsync (refreshTokenIdsToRemove: int list)
+    let removeRefreshTokensAsync (refreshTokenIdsToRemove: JwtRefreshTokenId list)
                                  (cancellationToken: CancellationToken)
                                  (session: Session)
                                  : unit Task =
@@ -68,7 +70,7 @@ delete from "overwurd"."JwtRefreshTokens"
  where "Id" in @TokenIdsToRemove
 """
 
-            let parameters = {| TokenIdsToRemove = refreshTokenIdsToRemove |}
+            let parameters = {| TokenIdsToRemove = refreshTokenIdsToRemove |> List.map JwtRefreshTokenId.unwrap |}
             let command = makeSqlCommandWithParameters sql parameters session.Transaction cancellationToken
             do! session.Connection |> executeAsync command
         }
@@ -99,15 +101,66 @@ insert into "overwurd"."JwtRefreshTokens" (
 """
 
             let parameters =
-                {| AccessTokenId = parameters.AccessTokenId
+                {| AccessTokenId = JwtAccessTokenId.unwrap parameters.AccessTokenId
                    Value = parameters.Value
-                   UserId = parameters.UserId
-                   CreatedAt = parameters.CreatedAt
-                   RefreshedAt = parameters.RefreshedAt
-                   ExpiresAt = parameters.ExpiresAt
+                   UserId = UserId.unwrap parameters.UserId
+                   CreatedAt = CreationDate.unwrap parameters.CreatedAt
+                   RefreshedAt = parameters.RefreshedAt |> Option.map RefreshDate.unwrap
+                   ExpiresAt = ExpiryDate.unwrap parameters.ExpiresAt
                    IsRevoked = parameters.IsRevoked |}
             let command = makeSqlCommandWithParameters sql parameters session.Transaction cancellationToken
             let! id = session.Connection |> querySingleAsync<int> command
 
             return JwtRefreshTokenId id
+        }
+    
+    let getRefreshTokenByUserAndAccessTokenAsync (userId: UserId)
+                                                 (accessTokenId: JwtAccessTokenId)
+                                                 (cancellationToken: CancellationToken)
+                                                 (session: Session)
+                                                 : JwtRefreshToken option Task =
+        task {
+            let sql = """
+select
+    "Id",
+    "AccessTokenId",
+    "Value",
+    "UserId",
+    "CreatedAt",
+    "RefreshedAt",
+    "ExpiresAt",
+    "IsRevoked"
+  from "overwurd"."JwtRefreshTokens"
+ where "UserId" = @UserId and "AccessTokenId" = @AccessTokenId
+"""
+
+            let parameters =
+                {| UserId = UserId.unwrap userId
+                   AccessTokenId = JwtAccessTokenId.unwrap accessTokenId |}
+            let command = makeSqlCommandWithParameters sql parameters session.Transaction cancellationToken
+            let! result = session.Connection |> findAsync<JwtRefreshTokenPersistentModel> command
+            
+            return result |> Option.map toDomain
+        }
+    
+    let updateRefreshTokenAsync (tokenId: JwtRefreshTokenId)
+                                (updateParameters: JwtRefreshTokenUpdateParametersForPersistence)
+                                (cancellationToken: CancellationToken)
+                                (session: Session)
+                                : unit Task =
+        task {
+            let sql = """
+update "overwurd"."JwtRefreshTokens"
+   set
+    "AccessTokenId" = @AccessTokenId,
+    "RefreshedAt" = @RefreshedAt
+ where "Id" = @Id
+"""
+
+            let parameters =
+                {| Id = JwtRefreshTokenId.unwrap tokenId
+                   AccessTokenId = JwtAccessTokenId.unwrap updateParameters.AccessTokenId
+                   RefreshedAt = RefreshDate.unwrap updateParameters.RefreshedAt |}
+            let command = makeSqlCommandWithParameters sql parameters session.Transaction cancellationToken
+            do! session.Connection |> executeAsync command
         }

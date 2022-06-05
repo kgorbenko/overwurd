@@ -1,7 +1,16 @@
 ﻿namespace Overwurd.Domain
 
-open System
+open Overwurd.Domain
 
+type CourseId =
+    CourseId of int
+
+type CourseName =
+    private CourseName of string
+
+type CourseDescription =
+    private CourseDescription of string
+    
 type Course =
     { Id: CourseId
       UserId: UserId
@@ -9,19 +18,10 @@ type Course =
       Name: CourseName
       Description: CourseDescription option }
 
-and CourseId =
-    CourseId of int
-
-and CourseName =
-    private CourseName of string
-
-and CourseDescription =
-    private CourseDescription of string
-
 type CourseCreationParametersForPersistence =
-    { CreatedAt: DateTime
-      Name: string
-      Description: string option }
+    { CreatedAt: CreationDate
+      Name: CourseName
+      Description: CourseDescription option }
 
 module Course =
 

@@ -6,15 +6,14 @@ open NUnit.Framework
 open FsUnit
 
 open Overwurd.Domain
-open Overwurd.Domain.User
 open Overwurd.Infrastructure
 open Overwurd.Infrastructure.Tests.Domain
 open Overwurd.Infrastructure.Tests.Domain.Building
 open Overwurd.Infrastructure.Tests.Common.Utils
 
-let unwrap (userId: UserId option): int =
+let unwrap (userId: UserId option): UserId =
     match userId with
-    | Some id -> UserId.unwrap id
+    | Some id -> id
     | None -> failwith "Entity is expected to be persisted, but has no Id."
 
 [<Test>]
@@ -45,14 +44,14 @@ let ``Single course`` () =
         let snapshot = DomainSnapshot.create () |> DomainSnapshot.appendUser user
         do! DomainPersister.persistSnapshotAsync snapshot |> withConnectionAsync
 
-        let! result = CourseStore.getUserCoursesAsync (unwrap user.Id) CancellationToken.None |> withConnectionAsync
+        let! actual = CourseStore.getUserCoursesAsync (unwrap user.Id) CancellationToken.None |> withConnectionAsync
 
-        let actual: Course list =
+        let expected: Course list =
             [ { Id = course.Id.Value
                 UserId = user.Id.Value
                 CreatedAt = course.CreatedAt
                 Name = course.Name
                 Description = course.Description } ]
 
-        result |> should equal actual
+        actual |> should equal expected
     }

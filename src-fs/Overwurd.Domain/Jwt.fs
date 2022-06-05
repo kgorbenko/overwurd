@@ -48,17 +48,17 @@ type ClaimsIdentityOptions =
       SecurityStampClaimType: string }
 
 type JwtRefreshTokenCreationParametersForPersistence =
-    { AccessTokenId: Guid
+    { AccessTokenId: JwtAccessTokenId
       Value: Guid
-      UserId: int
-      CreatedAt: DateTime
-      RefreshedAt: DateTime option
-      ExpiresAt: DateTime
+      UserId: UserId
+      CreatedAt: CreationDate
+      RefreshedAt: RefreshDate option
+      ExpiresAt: ExpiryDate
       IsRevoked: bool }
 
 type JwtRefreshTokenUpdateParametersForPersistence =
-    { AccessTokenId: Guid
-      RefreshedAt: DateTime }
+    { AccessTokenId: JwtAccessTokenId
+      RefreshedAt: RefreshDate }
 
 type RefreshAccessTokenError =
     | AccessTokenValidationError of ErrorMessage: string
@@ -174,12 +174,12 @@ module Jwt =
             let refreshTokenValue = generateGuid ()
             let expiryDate = nowUnwrapped.AddDays configuration.RefreshTokenExpirationInDays
             let refreshTokenCreationParameters =
-                { AccessTokenId = tokenId
-                  UserId = UserId.unwrap userId
+                { AccessTokenId = JwtAccessTokenId tokenId
+                  UserId = userId
                   Value = refreshTokenValue
-                  CreatedAt = nowUnwrapped
+                  CreatedAt = CreationDate.create nowUnwrapped
                   RefreshedAt = None
-                  ExpiresAt = expiryDate
+                  ExpiresAt = ExpiryDate.create expiryDate
                   IsRevoked = false }
 
             let! _ = insertTokenAsync refreshTokenCreationParameters
@@ -315,8 +315,8 @@ module Jwt =
             let newAccessTokenEncrypted = tokenHandler.WriteToken newAccessToken
 
             let refreshTokenUpdateParameters =
-                { AccessTokenId = newAccessTokenId
-                  RefreshedAt = now }
+                { AccessTokenId = JwtAccessTokenId newAccessTokenId
+                  RefreshedAt = RefreshDate.create now }
 
             let refreshToken = validationResult.RefreshToken.Value
             do! updateRefreshTokenAsync refreshToken.Id refreshTokenUpdateParameters

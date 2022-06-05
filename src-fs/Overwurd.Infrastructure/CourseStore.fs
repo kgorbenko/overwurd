@@ -6,6 +6,7 @@ open System.Threading.Tasks
 
 open Overwurd.Domain
 open Overwurd.Domain.Course
+open Overwurd.Domain.User
 open Overwurd.Infrastructure.Database
 open Overwurd.Infrastructure.Database.Dapper
 
@@ -26,13 +27,14 @@ module CourseStore =
           Name = CourseName.create model.Name
           Description = CourseDescription.create model.Description }
 
-    let getUserCoursesAsync (userId: int)
+    let getUserCoursesAsync (userId: UserId)
                             (cancellationToken: CancellationToken)
                             (session: Session)
                             : Course list Task =
         task {
             let sql = """
-select "Id",
+select
+   "Id",
    "UserId",
    "CreatedAt",
    "Name",
@@ -42,7 +44,7 @@ where "UserId" = @UserId
 order by "Id" desc
 """
 
-            let parameters = {| UserId = userId |}
+            let parameters = {| UserId = UserId.unwrap userId |}
             let command = makeSqlCommandWithParameters sql parameters session.Transaction cancellationToken
             let! result = session.Connection |> queryAsync<CoursePersistentModel> command
 
