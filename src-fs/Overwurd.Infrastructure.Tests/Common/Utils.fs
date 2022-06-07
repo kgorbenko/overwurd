@@ -5,7 +5,6 @@ open NUnit.Framework
 open System.Threading.Tasks
 
 open Overwurd.Infrastructure.Database
-open Overwurd.Infrastructure.Database.Database
 open Overwurd.Infrastructure.Tests.Common.Database
 
 let private getConnectionString () =
@@ -21,7 +20,7 @@ let private getConnectionString () =
 let withConnectionAsync (queryAsync: Session -> 'a Task): 'a Task =
     task {
         let connectionString = getConnectionString ()
-        return! withConnectionAsync queryAsync connectionString
+        return! Connection.withConnectionAsync connectionString queryAsync
     }
 
 let prepareDatabaseAsync (session: Session): unit Task =

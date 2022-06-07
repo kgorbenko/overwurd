@@ -8,8 +8,7 @@ type Session =
     { Connection: IDbConnection
       Transaction: IDbTransaction }
 
-
-module Database =
+module Connection =
 
     let private makeConnectionAsync (queryAsync: Session -> 'a Task)
                                     (connectionString: string)
@@ -27,10 +26,9 @@ module Database =
             return result
         }
 
-    let withConnectionAsync (queryAsync: Session -> 'a Task)
-                            (connectionString: string)
+    let withConnectionAsync (connectionString: string)
+                            (queryAsync: Session -> 'a Task)
                             : 'a Task =
         task {
-            do Dapper.registerTypeHandlers ()
             return! makeConnectionAsync queryAsync connectionString
         }
