@@ -10,6 +10,13 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Overwurd.Infrastructure.Tes
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Overwurd.Domain.Tests", "Overwurd.Domain.Tests\Overwurd.Domain.Tests.fsproj", "{A81294D8-8D61-42AD-A85A-56C189E27EBC}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Root", "Root", "{D8BDA63D-814B-4EB4-AAF7-CB32B3BD6D48}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		Directory.Build.props = Directory.Build.props
+		dotnet-tools.json = dotnet-tools.json
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
