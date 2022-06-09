@@ -7,8 +7,8 @@ type CreationDate =
 
 module CreationDate =
 
-    let create (date: DateTime): CreationDate =
-        date |> UtcDateTime.create |> CreationDate
+    let create (date: UtcDateTime): CreationDate =
+        date |> CreationDate
 
     let unwrap (date: CreationDate): DateTime =
         match date with

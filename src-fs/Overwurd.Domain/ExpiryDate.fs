@@ -7,8 +7,8 @@ type ExpiryDate =
 
 module ExpiryDate =
 
-    let create (date: DateTime): ExpiryDate =
-        date |> UtcDateTime.create |> ExpiryDate
+    let create (date: UtcDateTime): ExpiryDate =
+        date |> ExpiryDate
 
     let unwrap (date: ExpiryDate): DateTime =
         match date with

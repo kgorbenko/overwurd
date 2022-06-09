@@ -7,8 +7,8 @@ type RefreshDate =
 
 module RefreshDate =
 
-    let create (date: DateTime): RefreshDate =
-        date |> UtcDateTime.create |> RefreshDate
+    let create (date: UtcDateTime): RefreshDate =
+        date |> RefreshDate
 
     let unwrap (date: RefreshDate): DateTime =
         match date with

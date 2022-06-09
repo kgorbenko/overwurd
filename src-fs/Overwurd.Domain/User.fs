@@ -47,6 +47,9 @@ type UserCreationParametersForPersistence =
       PasswordHash: PasswordHash
       PasswordSalt: PasswordSalt }
 
+type FindUserByIdAsync =
+    UserId -> User option Task
+
 type FindByNormalizedLoginAsync =
     NormalizedLogin -> User option Task
 
@@ -79,19 +82,23 @@ module User =
             let minLength = 8
             let maxLength = 30
 
-            match login with
-            | NullOrWhiteSpace -> Error "Login cannot be empty."
-            | LacksLength minLength -> Error $"Login cannot be shorter than {minLength} characters."
-            | ExceedsMaxLength maxLength -> Error $"Login cannot be longer than {maxLength} characters."
-            | HasInvalidCharacters allowedCharacters _ -> Error "Valid characters are lowercase and uppercase Latin letters, digits, '-', '.' and '_'."
-            | _ -> Ok
+            let rules =
+                [ isNullOrWhiteSpace, "Login cannot be empty."
+                  lacksLength minLength, $"Login cannot be shorter than {minLength} characters."
+                  exceedsMaxLength maxLength, $"Login cannot be longer than {maxLength} characters."
+                  hasInvalidCharacters allowedCharacters, "Valid characters are lowercase and uppercase Latin letters, digits, '-', '.' and '_'." ]
+            
+            validate rules login
 
         let create (login: string): Login =
             login
             |> validate
             |> function
                 | Ok -> Login login
-                | Error message -> raise (ValidationException message)
+                | Error messages -> raise (ValidationException messages)
+            
+        let internal createBypassingValidation (login: string) =
+            Login login
 
         let unwrap (login: Login): string =
             match login with
@@ -116,18 +123,22 @@ module User =
         let validate (password: string): ValidationResult =
             let minLength = 8
             
-            match password with
-            | NullOrWhiteSpace -> Error "Password cannot be empty."
-            | LacksLength minLength -> Error $"Password should be at least {minLength} characters length."
-            | UpperOrLowerCharactersAreMissing -> Error "Password should contain both uppercase and lowercase characters."
-            | _ -> Ok
+            let rules =
+                [ isNullOrWhiteSpace, "Password cannot be empty.";
+                  lacksLength minLength, $"Password should be at least {minLength} characters length.";
+                  bothUpperAndLowerCharactersPresent, "Password should contain both uppercase and lowercase characters." ]
+
+            validate rules password
         
         let create (password: string): Password =
             password
             |> validate
             |> function
                 | Ok -> Password password
-                | Error message -> raise (ValidationException message)
+                | Error messages -> raise (ValidationException messages)
+        
+        let internal createBypassingValidation (password: string): Password =
+            Password password
         
         let unwrap (password: Password): string =
             match password with
@@ -167,10 +178,10 @@ module User =
                       Salt = salt }
             }
         
-        let verifyAsync (password: Password) (currentHash: PasswordHashAndSalt): bool Task =
+        let verifyAsync (password: string) (currentHash: PasswordHashAndSalt): bool Task =
             task {
                 let saltBytes = currentHash.Salt |> toByteArray
-                let! hash = hashAsync (Password.unwrap password) saltBytes hashLength
+                let! hash = hashAsync password saltBytes hashLength
                 
                 return currentHash.Hash = hash
             }

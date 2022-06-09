@@ -37,11 +37,12 @@ module Course =
 
         let validate (name: string): ValidationResult =
             let maxLength = 60
-
-            match name with
-            | NullOrWhiteSpace -> Error "Name cannot be empty."
-            | ExceedsMaxLength maxLength -> Error $"Name cannot be longer than {maxLength} characters."
-            | _ -> Ok
+            
+            let rules =
+                [ isNullOrWhiteSpace, "Name cannot be empty."
+                  exceedsMaxLength maxLength, $"Name cannot be longer than {maxLength} characters." ]
+            
+            validate rules name
 
         let create (name: string): CourseName =
             validate name
@@ -60,13 +61,13 @@ module Course =
         let validate (description: string option): ValidationResult =
             let maxLength = 255
 
+            let rules =
+                [ isNullOrWhiteSpace, "Description cannot be empty."
+                  exceedsMaxLength maxLength, $"Description cannot be longer than {maxLength} characters." ]
+
             match description with
             | None -> Ok
-            | Some d ->
-                match d with
-                | NullOrWhiteSpace -> Error "Description cannot be empty."
-                | ExceedsMaxLength maxLength -> Error $"Description cannot be longer than {maxLength} characters."
-                | _ -> Ok
+            | Some d -> validate rules d
 
         let create (description: string option): CourseDescription option =
             description

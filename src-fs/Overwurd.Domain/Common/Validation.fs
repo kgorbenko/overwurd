@@ -6,37 +6,46 @@ type ValidationErrorMessage = string
 
 type ValidationResult =
     | Ok
-    | Error of ValidationErrorMessage
+    | Error of ValidationErrorMessage list
 
-exception ValidationException of string
+exception ValidationException of string list
 
-let (|NullOrWhiteSpace|_|) (str: string): unit option =
-    if String.IsNullOrWhiteSpace(str)
-        then Some ()
-        else None
+let isNullOrWhiteSpace (str: string): bool =
+    String.IsNullOrWhiteSpace(str)
 
-let (|LacksLength|_|) (minLength: int) (str: string): unit option =
-    if str.Length < minLength
-        then Some ()
-        else None
+let lacksLength (minLength: int) (str: string): bool =
+    str.Length < minLength
 
-let (|ExceedsMaxLength|_|) (maxLength: int) (str: string): unit option =
-    if str.Length > maxLength
-        then Some ()
-        else None
+let exceedsMaxLength (maxLength: int) (str: string): bool =
+    str.Length > maxLength
 
-let (|HasInvalidCharacters|_|) (validCharacters: char Set) (str: string): char list option =
+let getInvalidCharacters (validCharacters: char Set) (str: string): char list =
     str
     |> List.ofSeq
     |> List.filter (validCharacters.Contains >> not)
-    |> function
-        | [] -> None
-        | invalidCharacters -> Some invalidCharacters
 
-let (|UpperOrLowerCharactersAreMissing|_|) (str: string): unit option =
+let hasInvalidCharacters (validCharacters: char Set) (str: string): bool =
+    getInvalidCharacters validCharacters str
+    |> List.isEmpty
+    |> not
+
+let bothUpperAndLowerCharactersPresent (str: string): bool =
     let hasUpperCharacters = str |> Seq.exists Char.IsUpper
     let hasLowerCharacters = str |> Seq.exists Char.IsLower
     
-    if not <| (hasUpperCharacters && hasLowerCharacters)
-        then Some ()
-        else None
+    hasUpperCharacters && hasLowerCharacters
+    
+let getValidationErrors (ruleMessages: (('a -> bool) * ValidationErrorMessage) list)
+                        (value: 'a): ValidationErrorMessage list =
+    seq {
+        for ruleMessage in ruleMessages do
+            let rule, message = ruleMessage
+            if rule value then
+                yield message
+    } |> List.ofSeq
+
+let validate ruleMessages value =
+    getValidationErrors ruleMessages value
+    |> function
+        | [] -> Ok
+        | messages -> Error messages

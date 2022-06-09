@@ -14,6 +14,7 @@
     <Compile Include="User.fs" />
     <Compile Include="Jwt.fs" />
     <Compile Include="Course.fs" />
+    <Compile Include="Auth.fs" />
   </ItemGroup>
 
   <ItemGroup>
