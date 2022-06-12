@@ -27,10 +27,6 @@ type JwtRefreshToken =
       ExpiresAt: UtcDateTime
       IsRevoked: bool }
 
-type JwtTokensPair =
-    { AccessTokenValue: string
-      RefreshTokenValue: string }
-
 type JwtConfiguration =
     { TokensConfiguration: JwtTokensConfiguration
       ClaimsOptions: ClaimsOptions
@@ -92,6 +88,15 @@ type JwtDependencies =
     { GenerateGuid: GenerateGuid
       JwtConfiguration: JwtConfiguration
       RefreshTokensPersister: JwtRefreshTokensPersister }
+
+type JwtTokensPair =
+    { AccessTokenValue: string
+      RefreshTokenValue: string }
+
+type GeneratedTokens =
+    { Tokens: JwtTokensPair
+      AccessTokenExpiresAt: UtcDateTime
+      RefreshTokenExpiresAt: UtcDateTime }
 
 type RefreshedTokens =
     { UserId: UserId
@@ -337,7 +342,7 @@ module Jwt =
                                 (userId: UserId)
                                 (claims: Claim list)
                                 (now: UtcDateTime)
-                                : JwtTokensPair Task =
+                                : GeneratedTokens Task =
         task {
             let nowUnwrapped = UtcDateTime.unwrap now
             let tokensConfiguration = dependencies.JwtConfiguration.TokensConfiguration
@@ -363,14 +368,14 @@ module Jwt =
                 do! removeRefreshTokensAsync (tokenIdsToRemove |> Set.toList)
 
             let refreshTokenValue = dependencies.GenerateGuid ()
-            let expiryDate = nowUnwrapped.AddDays tokensConfiguration.RefreshTokenExpirationInDays
+            let refreshTokenExpiryDate = nowUnwrapped.AddDays tokensConfiguration.RefreshTokenExpirationInDays |> UtcDateTime.create
             let refreshTokenCreationParameters =
                 { AccessTokenId = JwtAccessTokenId tokenId
                   UserId = userId
                   Value = refreshTokenValue
                   CreatedAt = now
                   RefreshedAt = None
-                  ExpiresAt = UtcDateTime.create expiryDate
+                  ExpiresAt = refreshTokenExpiryDate
                   IsRevoked = false }
 
             let createRefreshTokensAsync =
@@ -379,9 +384,14 @@ module Jwt =
                     .CreateRefreshTokenAsync
             let! _ = createRefreshTokensAsync refreshTokenCreationParameters
 
-            return
-                { AccessTokenValue = jwtTokenEncrypted
-                  RefreshTokenValue = refreshTokenValue.ToString() }
+            let generatedTokens: GeneratedTokens =
+                { Tokens =
+                    { AccessTokenValue = jwtTokenEncrypted
+                      RefreshTokenValue = refreshTokenValue.ToString() }
+                  AccessTokenExpiresAt = jwtToken.ValidTo.ToUniversalTime() |> UtcDateTime.create
+                  RefreshTokenExpiresAt = refreshTokenExpiryDate }
+
+            return generatedTokens
         }
 
     let refreshAccessTokenAsync (dependencies: JwtDependencies)

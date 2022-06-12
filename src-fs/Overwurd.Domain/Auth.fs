@@ -19,7 +19,11 @@ type RefreshDependencies =
       UserPersister: UserPersister
       RefreshTokensPersister: JwtRefreshTokensPersister }
 
-type RefreshedTokensData =
+type Credentials =
+    { Login: string
+      Password: string }
+
+type TokensData =
     { User: User
       Tokens: JwtTokensPair
       AccessTokenExpiresAt: UtcDateTime
@@ -94,7 +98,7 @@ module Auth =
     let private generateTokensAsync (dependencies: SignUpDependencies)
                                     (now: UtcDateTime)
                                     (user: User)
-                                    : Result<JwtTokensPair, SignUpResult> Task =
+                                    : Result<TokensData, SignUpResult> Task =
         task {
             let claims =
                 [ Claim(dependencies.JwtConfiguration.ClaimsOptions.UserIdClaimType, (UserId.unwrap user.Id).ToString())
@@ -107,12 +111,16 @@ module Auth =
                       RefreshTokensPersister = dependencies.RefreshTokensPersister}
                 generateTokensPairAsync dependencies user.Id claims now
             
-            return Result.Ok tokensPair
+            return Result.Ok
+                { User = user
+                  Tokens = tokensPair.Tokens
+                  AccessTokenExpiresAt = tokensPair.AccessTokenExpiresAt
+                  RefreshTokenExpiresAt = tokensPair.RefreshTokenExpiresAt }
         }
-    
+
     let private getUserAsync (dependencies: RefreshDependencies)
                              (data: RefreshedTokens)
-                             : Result<RefreshedTokensData, RefreshAccessTokenError> Task =
+                             : Result<TokensData, RefreshAccessTokenError> Task =
         task {
             let! userOption = dependencies.UserPersister.FindUserByIdAsync data.UserId
 
@@ -132,7 +140,7 @@ module Auth =
                     (now: UtcDateTime)
                     (loginRaw: string)
                     (passwordRaw: string)
-                    : Result<JwtTokensPair, SignUpResult> Task =
+                    : Result<TokensData, SignUpResult> Task =
         task {
             return!
                 validate loginRaw passwordRaw
@@ -144,7 +152,7 @@ module Auth =
     let refreshAsync (dependencies: RefreshDependencies)
                      (tokenValuesPair: JwtTokensPair)
                      (now: UtcDateTime)
-                     : Result<RefreshedTokensData, RefreshAccessTokenError> Task =
+                     : Result<TokensData, RefreshAccessTokenError> Task =
         task {
             let refreshDependencies =
                 { GenerateGuid = dependencies.GenerateGuid
