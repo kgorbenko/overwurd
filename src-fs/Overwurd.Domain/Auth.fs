@@ -3,9 +3,15 @@
 open System
 open System.Security.Claims
 open System.Threading.Tasks
+
 open Overwurd.Domain
 open Overwurd.Domain.Common.Validation
-open Overwurd.Domain.Common.Utils
+
+type SignUpDependencies =
+    { GenerateGuid: GenerateGuid
+      UserPersister: UserPersister
+      JwtConfiguration: JwtConfiguration
+      RefreshTokensPersister: JwtRefreshTokensPersister }
 
 type SignUpResult =
     | Success
@@ -15,7 +21,8 @@ type SignUpResult =
 module Auth =
 
     open Overwurd.Domain.User
-    
+    open Overwurd.Domain.Common.Utils
+
     let private validate (loginRaw: string)
                          (passwordRaw: string)
                          : Result<Login * Password, SignUpResult> =
@@ -35,19 +42,21 @@ module Auth =
             |> ValidationError
             |> Result.Error
     
-    let private createUserAsync (findByNormalizedLoginAsync: FindByNormalizedLoginAsync)
-                                (createUserAsync: CreateUserAsync)
+    let private createUserAsync (dependencies: SignUpDependencies)
                                 (now: UtcDateTime)
                                 (credentials: Login * Password)
                                 : Result<UserId, SignUpResult> Task =
         task {
             let login, password = credentials
-            let creationParameters: UserCreationParameters =
-                { CreatedAt = CreationDate.create now
-                  Login = login
-                  Password = password }
-            
-            let! creationResult = User.createUserAsync findByNormalizedLoginAsync createUserAsync creationParameters
+
+            let! creationResult =
+                let createUserDependencies: CreateUserDependencies =
+                    { UserPersister = dependencies.UserPersister }
+                let creationParameters: UserCreationParameters =
+                    { CreatedAt = now
+                      Login = login
+                      Password = password }
+                createUserAsync createUserDependencies creationParameters
             
             match creationResult with
             | Result.Ok userId ->
@@ -56,11 +65,11 @@ module Auth =
                 return Result.Error LoginIsOccupied
         }
     
-    let private getUserById (getUserByIdAsync: FindUserByIdAsync)
+    let private getUserById (dependencies: SignUpDependencies)
                             (userId: UserId)
                             : Result<User, SignUpResult> Task =
         task {
-            let! user = getUserByIdAsync userId
+            let! user = dependencies.UserPersister.FindUserByIdAsync userId
             
             match user with
             | Some user ->
@@ -69,42 +78,26 @@ module Auth =
                 return raise (InvalidOperationException $"Could not find user by Id (#{UserId.unwrap userId}) after creation")
         }
     
-    let private generateTokensAsync (generateGuid: GenerateGuid)
-                                    (getUserRefreshTokensAsync: GetUserRefreshTokensAsync)
-                                    (removeRefreshTokensAsync: RemoveRefreshTokensAsync)
-                                    (createRefreshTokenAsync: CreateRefreshTokenAsync)
-                                    (claimsIdentityOptions: ClaimsIdentityOptions)
-                                    (configuration: JwtConfiguration)
+    let private generateTokensAsync (dependencies: SignUpDependencies)
                                     (now: UtcDateTime)
                                     (user: User)
                                     : Result<JwtTokensPair, SignUpResult> Task =
         task {
             let claims =
-                [ Claim(claimsIdentityOptions.UserIdClaimType, (UserId.unwrap user.Id).ToString())
-                  Claim(claimsIdentityOptions.UserNameClaimType, Login.unwrap user.Login) ]
+                [ Claim(dependencies.JwtConfiguration.ClaimsOptions.UserIdClaimType, (UserId.unwrap user.Id).ToString())
+                  Claim(dependencies.JwtConfiguration.ClaimsOptions.UserNameClaimType, Login.unwrap user.Login) ]
             
             let! tokensPair =
-                Jwt.generateTokensAsync generateGuid
-                                        getUserRefreshTokensAsync
-                                        removeRefreshTokensAsync
-                                        createRefreshTokenAsync
-                                        configuration
-                                        user.Id
-                                        claims
-                                        now
+                let dependencies: JwtDependencies =
+                    { GenerateGuid = dependencies.GenerateGuid
+                      JwtConfiguration = dependencies.JwtConfiguration
+                      RefreshTokensPersister = dependencies.RefreshTokensPersister }
+                Jwt.generateTokensPairAsync dependencies user.Id claims now
             
             return Result.Ok tokensPair
         }
     
-    let signUpAsync (findByNormalizedLoginAsync: FindByNormalizedLoginAsync)
-                    (createUserInternalAsync: CreateUserAsync)
-                    (getUserByIdAsync: FindUserByIdAsync)
-                    (generateGuid: GenerateGuid)
-                    (getUserRefreshTokensAsync: GetUserRefreshTokensAsync)
-                    (removeRefreshTokensAsync: RemoveRefreshTokensAsync)
-                    (createRefreshTokenAsync: CreateRefreshTokenAsync)
-                    (configuration: JwtConfiguration)
-                    (claimsIdentityOptions: ClaimsIdentityOptions)
+    let signUpAsync (dependencies: SignUpDependencies)
                     (now: UtcDateTime)
                     (loginRaw: string)
                     (passwordRaw: string)
@@ -112,9 +105,7 @@ module Auth =
         task {
             return!
                 validate loginRaw passwordRaw
-                |> AsyncResult.asynchronouslyBind (createUserAsync findByNormalizedLoginAsync createUserInternalAsync now)
-                |> AsyncResult.asynchronouslyBindTask (getUserById getUserByIdAsync)
-                |> AsyncResult.asynchronouslyBindTask (generateTokensAsync generateGuid getUserRefreshTokensAsync removeRefreshTokensAsync createRefreshTokenAsync claimsIdentityOptions configuration now)
+                |> AsyncResult.asynchronouslyBind (createUserAsync dependencies now)
+                |> AsyncResult.asynchronouslyBindTask (getUserById dependencies)
+                |> AsyncResult.asynchronouslyBindTask (generateTokensAsync dependencies now)
         }
-    
-    let signInAsync () =v 

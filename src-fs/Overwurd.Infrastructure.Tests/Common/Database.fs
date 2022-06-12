@@ -84,7 +84,7 @@ insert into "overwurd"."Users" (
 ) returning "Id"
 """
         let parameters =
-            {| CreatedAt = CreationDate.unwrap creationParameters.CreatedAt
+            {| CreatedAt = UtcDateTime.unwrap creationParameters.CreatedAt
                Login = Login.unwrap creationParameters.Login
                NormalizedLogin = NormalizedLogin.unwrap creationParameters.NormalizedLogin
                PasswordHash = creationParameters.PasswordHash
@@ -116,7 +116,7 @@ insert into "overwurd"."Courses" (
 """
 
         let parameters =
-            {| CreatedAt = CreationDate.unwrap creationParameters.CreatedAt
+            {| CreatedAt = UtcDateTime.unwrap creationParameters.CreatedAt
                UserId = userId
                Name = CourseName.unwrap creationParameters.Name
                Description = creationParameters.Description |> Option.map CourseDescription.unwrap |}
@@ -155,9 +155,9 @@ insert into "overwurd"."JwtRefreshTokens" (
             {| AccessTokenId = JwtAccessTokenId.unwrap creationParameters.AccessTokenId
                Value = creationParameters.Value
                UserId = UserId.unwrap creationParameters.UserId
-               CreatedAt = CreationDate.unwrap creationParameters.CreatedAt
-               RefreshedAt = creationParameters.RefreshedAt |> Option.map RefreshDate.unwrap
-               ExpiresAt = ExpiryDate.unwrap creationParameters.ExpiresAt
+               CreatedAt = UtcDateTime.unwrap creationParameters.CreatedAt
+               RefreshedAt = creationParameters.RefreshedAt |> Option.map UtcDateTime.unwrap
+               ExpiresAt = UtcDateTime.unwrap creationParameters.ExpiresAt
                IsRevoked = creationParameters.IsRevoked |}
         let command = CommandDefinition(commandText = sql, parameters = parameters, transaction = session.Transaction)
         let! id = session.Connection.QuerySingleAsync<int> command

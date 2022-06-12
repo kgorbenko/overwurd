@@ -20,7 +20,7 @@ module UserStore =
 
     let private toDomain (model: UserPersistentModel): User =
         { Id = UserId model.Id
-          CreatedAt = CreationDate.create model.CreatedAt
+          CreatedAt = UtcDateTime.create model.CreatedAt
           Login = Login.create model.Login
           PasswordHash = model.PasswordHash
           PasswordSalt = model.PasswordSalt }
@@ -96,7 +96,7 @@ insert into "overwurd"."Users" (
 ) returning "Id"
 """
             let parameters =
-                {| CreatedAt = CreationDate.unwrap parameters.CreatedAt
+                {| CreatedAt = UtcDateTime.unwrap parameters.CreatedAt
                    Login = Login.unwrap parameters.Login
                    NormalizedLogin = NormalizedLogin.unwrap parameters.NormalizedLogin
                    PasswordHash = parameters.PasswordHash

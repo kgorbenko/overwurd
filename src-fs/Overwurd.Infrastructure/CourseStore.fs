@@ -23,7 +23,7 @@ module CourseStore =
     let private toDomain (model: CoursePersistentModel): Course =
         { Id = CourseId model.Id
           UserId = UserId model.UserId
-          CreatedAt = CreationDate.create model.CreatedAt
+          CreatedAt = UtcDateTime.create model.CreatedAt
           Name = CourseName.create model.Name
           Description = CourseDescription.create model.Description }
 

@@ -10,7 +10,7 @@ type DomainSnapshot =
     { mutable Users: UserSnapshot list }
 and UserSnapshot =
     { mutable Id: UserId option
-      CreatedAt: CreationDate
+      CreatedAt: UtcDateTime
       Login: Login
       NormalizedLogin: NormalizedLogin
       PasswordHash: PasswordHash
@@ -19,16 +19,16 @@ and UserSnapshot =
       JwtRefreshTokens: JwtRefreshTokenSnapshot list }
 and CourseSnapshot =
     { mutable Id: CourseId option
-      CreatedAt: CreationDate
+      CreatedAt: UtcDateTime
       Name: CourseName
       Description: CourseDescription option }
 and JwtRefreshTokenSnapshot =
     { mutable Id: JwtRefreshTokenId option
       AccessTokenId: JwtAccessTokenId
       Value: Guid
-      CreatedAt: CreationDate
-      RefreshedAt: RefreshDate option
-      ExpiresAt: ExpiryDate
+      CreatedAt: UtcDateTime
+      RefreshedAt: UtcDateTime option
+      ExpiresAt: UtcDateTime
       IsRevoked: bool }
 
 module DomainSnapshot =
@@ -48,7 +48,7 @@ module Building =
         let login = Login.create login
         
         { Id = None
-          CreatedAt = CreationDate.create createdAt
+          CreatedAt = UtcDateTime.create createdAt
           Login = login
           NormalizedLogin = NormalizedLogin.create login
           PasswordHash = passwordHash
@@ -60,7 +60,7 @@ module Building =
         let login = Login.create login
         
         { Id = None
-          CreatedAt = CreationDate.create createdAt
+          CreatedAt = UtcDateTime.create createdAt
           Login = login
           NormalizedLogin = NormalizedLogin.create login
           PasswordHash = passwordHash
@@ -72,7 +72,7 @@ module Building =
         let login = Login.create login
         
         { Id = None
-          CreatedAt = CreationDate.create createdAt
+          CreatedAt = UtcDateTime.create createdAt
           Login = login
           NormalizedLogin = NormalizedLogin.create login
           PasswordHash = "117136275353e02cc95d6bb3b38d824a"
@@ -84,7 +84,7 @@ module Building =
         let login = Login.create login
         
         { Id = None
-          CreatedAt = CreationDate.create createdAt
+          CreatedAt = UtcDateTime.create createdAt
           Login = login
           NormalizedLogin = NormalizedLogin.create login
           PasswordHash = "117136275353e02cc95d6bb3b38d824a"
@@ -96,7 +96,7 @@ module Building =
         let login = Login.create login
         
         { Id = None
-          CreatedAt = CreationDate.create createdAt
+          CreatedAt = UtcDateTime.create createdAt
           Login = login
           NormalizedLogin = NormalizedLogin.create login
           PasswordHash = "117136275353e02cc95d6bb3b38d824a"
@@ -106,13 +106,13 @@ module Building =
 
     let makeCourseWithDescription (name: string) (description: string option) (createdAt: DateTime): CourseSnapshot =
         { Id = None
-          CreatedAt = CreationDate.create createdAt
+          CreatedAt = UtcDateTime.create createdAt
           Name = CourseName.create name
           Description = CourseDescription.create description }
 
     let makeCourse (name: string) (createdAt: DateTime): CourseSnapshot =
         { Id = None
-          CreatedAt = CreationDate.create createdAt
+          CreatedAt = UtcDateTime.create createdAt
           Name = CourseName.create name
           Description = None }
 
@@ -120,7 +120,7 @@ module Building =
         { Id = None
           AccessTokenId = JwtAccessTokenId (Guid.NewGuid())
           Value = Guid.NewGuid()
-          CreatedAt = CreationDate.create createdAt
+          CreatedAt = UtcDateTime.create createdAt
           RefreshedAt = None
-          ExpiresAt = ExpiryDate.create (createdAt.AddMinutes 5)
+          ExpiresAt = UtcDateTime.create (createdAt.AddMinutes 5)
           IsRevoked = false }

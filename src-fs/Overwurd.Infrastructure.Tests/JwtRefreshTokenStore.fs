@@ -8,7 +8,6 @@ open FsUnit
 open Overwurd.Domain
 open Overwurd.Domain.Jwt
 open Overwurd.Domain.User
-open Overwurd.Domain.CreationDate
 open Overwurd.Infrastructure
 open Overwurd.Infrastructure.Tests.Domain
 open Overwurd.Infrastructure.Tests.Common
@@ -73,9 +72,9 @@ let ``Getting User tokens when token has a refresh date`` () =
             { Id = None
               AccessTokenId = JwtAccessTokenId (Guid.NewGuid())
               Value = Guid.NewGuid()
-              CreatedAt = CreationDate.create date
-              RefreshedAt = Some(RefreshDate.create refreshDate)
-              ExpiresAt = ExpiryDate.create (date.AddMinutes 5)
+              CreatedAt = UtcDateTime.create date
+              RefreshedAt = Some(UtcDateTime.create refreshDate)
+              ExpiresAt = UtcDateTime.create (date.AddMinutes 5)
               IsRevoked = false }
         let user = makeUserWithRefreshTokens "TestLogin123" [token] date
 
@@ -186,7 +185,7 @@ let ``Update Refresh Token`` () =
         let refreshDate = DateTime(year = 2022, month = 1, day = 3, hour = 0, minute = 0, second = 0, kind = DateTimeKind.Utc)
         let updateParameters =
             { AccessTokenId = Guid.NewGuid() |> JwtAccessTokenId
-              RefreshedAt = RefreshDate.create refreshDate }
+              RefreshedAt = UtcDateTime.create refreshDate }
         
         do! JwtRefreshTokenStore.updateRefreshTokenAsync token.Id.Value updateParameters CancellationToken.None |> withConnectionAsync
         
@@ -195,9 +194,9 @@ let ``Update Refresh Token`` () =
                 AccessTokenId = JwtAccessTokenId.unwrap updateParameters.AccessTokenId
                 Value = token.Value
                 UserId = UserId.unwrap user.Id.Value
-                CreatedAt = CreationDate.unwrap token.CreatedAt
-                RefreshedAt = RefreshDate.unwrap updateParameters.RefreshedAt |> Some
-                ExpiresAt = ExpiryDate.unwrap token.ExpiresAt
+                CreatedAt = UtcDateTime.unwrap token.CreatedAt
+                RefreshedAt = UtcDateTime.unwrap updateParameters.RefreshedAt |> Some
+                ExpiresAt = UtcDateTime.unwrap token.ExpiresAt
                 IsRevoked = token.IsRevoked } ]
             
         let! actualTokens = Database.getAllRefreshTokensAsync |> withConnectionAsync

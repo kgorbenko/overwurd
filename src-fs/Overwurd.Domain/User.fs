@@ -30,18 +30,18 @@ type private PasswordHashAndSalt =
 
 type User =
     { Id: UserId
-      CreatedAt: CreationDate
+      CreatedAt: UtcDateTime
       Login: Login
       PasswordHash: PasswordHash
       PasswordSalt: PasswordSalt }
 
 type UserCreationParameters =
-    { CreatedAt: CreationDate
+    { CreatedAt: UtcDateTime
       Login: Login
       Password: Password }
     
 type UserCreationParametersForPersistence =
-    { CreatedAt: CreationDate
+    { CreatedAt: UtcDateTime
       Login: Login
       NormalizedLogin: NormalizedLogin
       PasswordHash: PasswordHash
@@ -50,11 +50,19 @@ type UserCreationParametersForPersistence =
 type FindUserByIdAsync =
     UserId -> User option Task
 
-type FindByNormalizedLoginAsync =
+type FindUserByNormalizedLoginAsync =
     NormalizedLogin -> User option Task
 
 type CreateUserAsync =
     UserCreationParametersForPersistence -> UserId Task
+    
+type UserPersister =
+    { FindUserByIdAsync: FindUserByIdAsync
+      FindUserByNormalizedLoginAsync: FindUserByNormalizedLoginAsync
+      CreateUserAsync: CreateUserAsync }
+
+type CreateUserDependencies =
+    { UserPersister: UserPersister }
 
 type UserCreationResultError =
     | LoginIsOccupied
@@ -186,13 +194,12 @@ module User =
                 return currentHash.Hash = hash
             }
     
-    let createUserAsync (findByNormalizedLoginAsync: FindByNormalizedLoginAsync)
-                        (createUserAsync: CreateUserAsync)
+    let createUserAsync (dependencies: CreateUserDependencies)
                         (parameters: UserCreationParameters)
                         : Result<UserId, UserCreationResultError> Task =
         task {
             let normalizedLogin = parameters.Login |> NormalizedLogin.create
-            let! existingUser = findByNormalizedLoginAsync normalizedLogin
+            let! existingUser = dependencies.UserPersister.FindUserByNormalizedLoginAsync normalizedLogin
             
             match existingUser with
             | Some _ ->
@@ -207,7 +214,7 @@ module User =
                       PasswordHash = hashAndSalt.Hash
                       PasswordSalt = hashAndSalt.Salt }
                 
-                let! userId = createUserAsync parametersForPersistence
+                let! userId = dependencies.UserPersister.CreateUserAsync parametersForPersistence
                 
                 return Ok userId
         }

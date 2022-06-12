@@ -8,9 +8,6 @@
     <Compile Include="Common\Utils.fs" />
     <Compile Include="Common\Validation.fs" />
     <Compile Include="UtcDateTime.fs" />
-    <Compile Include="CreationDate.fs" />
-    <Compile Include="ExpiryDate.fs" />
-    <Compile Include="RefreshDate.fs" />
     <Compile Include="User.fs" />
     <Compile Include="Jwt.fs" />
     <Compile Include="Course.fs" />

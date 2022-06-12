@@ -94,7 +94,7 @@ let ``Creates User`` () =
 
         let login = Login.create "TestLogin123"
         let parameters: UserCreationParametersForPersistence =
-            { CreatedAt = CreationDate.create date
+            { CreatedAt = UtcDateTime.create date
               Login = login
               NormalizedLogin = NormalizedLogin.create login
               PasswordHash = "1"
@@ -106,7 +106,7 @@ let ``Creates User`` () =
 
         let expected: UserPersistentModel list =
             [ { Id = createdId
-                CreatedAt = CreationDate.unwrap parameters.CreatedAt
+                CreatedAt = UtcDateTime.unwrap parameters.CreatedAt
                 Login = Login.unwrap parameters.Login
                 NormalizedLogin = NormalizedLogin.unwrap parameters.NormalizedLogin
                 PasswordHash = parameters.PasswordHash

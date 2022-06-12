@@ -14,12 +14,12 @@ type CourseDescription =
 type Course =
     { Id: CourseId
       UserId: UserId
-      CreatedAt: CreationDate
+      CreatedAt: UtcDateTime
       Name: CourseName
       Description: CourseDescription option }
 
 type CourseCreationParametersForPersistence =
-    { CreatedAt: CreationDate
+    { CreatedAt: UtcDateTime
       Name: CourseName
       Description: CourseDescription option }
 

@@ -28,9 +28,9 @@ module JwtRefreshTokenStore =
           AccessTokenId = JwtAccessTokenId model.AccessTokenId
           Value = model.Value
           UserId = UserId model.Id
-          CreatedAt = CreationDate.create model.CreatedAt
-          RefreshedAt = model.RefreshedAt |> Option.map RefreshDate.create
-          ExpiresAt = ExpiryDate.create model.ExpiresAt
+          CreatedAt = UtcDateTime.create model.CreatedAt
+          RefreshedAt = model.RefreshedAt |> Option.map UtcDateTime.create
+          ExpiresAt = UtcDateTime.create model.ExpiresAt
           IsRevoked = model.IsRevoked }
 
     let getUserRefreshTokensAsync (userId: UserId)
@@ -104,9 +104,9 @@ insert into "overwurd"."JwtRefreshTokens" (
                 {| AccessTokenId = JwtAccessTokenId.unwrap parameters.AccessTokenId
                    Value = parameters.Value
                    UserId = UserId.unwrap parameters.UserId
-                   CreatedAt = CreationDate.unwrap parameters.CreatedAt
-                   RefreshedAt = parameters.RefreshedAt |> Option.map RefreshDate.unwrap
-                   ExpiresAt = ExpiryDate.unwrap parameters.ExpiresAt
+                   CreatedAt = UtcDateTime.unwrap parameters.CreatedAt
+                   RefreshedAt = parameters.RefreshedAt |> Option.map UtcDateTime.unwrap
+                   ExpiresAt = UtcDateTime.unwrap parameters.ExpiresAt
                    IsRevoked = parameters.IsRevoked |}
             let command = makeSqlCommandWithParameters sql parameters session.Transaction cancellationToken
             let! id = session.Connection |> querySingleAsync<int> command
@@ -160,7 +160,7 @@ update "overwurd"."JwtRefreshTokens"
             let parameters =
                 {| Id = JwtRefreshTokenId.unwrap tokenId
                    AccessTokenId = JwtAccessTokenId.unwrap updateParameters.AccessTokenId
-                   RefreshedAt = RefreshDate.unwrap updateParameters.RefreshedAt |}
+                   RefreshedAt = UtcDateTime.unwrap updateParameters.RefreshedAt |}
             let command = makeSqlCommandWithParameters sql parameters session.Transaction cancellationToken
             do! session.Connection |> executeAsync command
         }
