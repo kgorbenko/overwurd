@@ -29,8 +29,7 @@ type TokensData =
       AccessTokenExpiresAt: UtcDateTime
       RefreshTokenExpiresAt: UtcDateTime }
 
-type SignUpResult =
-    | Success
+type SignUpError =
     | ValidationError of ValidationErrorMessage list
     | LoginIsOccupied
 
@@ -42,7 +41,7 @@ module Auth =
 
     let private validate (loginRaw: string)
                          (passwordRaw: string)
-                         : Result<Login * Password, SignUpResult> =
+                         : Result<Login * Password, SignUpError> =
         let loginValidationResult = Login.validate loginRaw
         let passwordValidationResult = Password.validate passwordRaw
         
@@ -62,7 +61,7 @@ module Auth =
     let private createUserAsync (dependencies: SignUpDependencies)
                                 (now: UtcDateTime)
                                 (credentials: Login * Password)
-                                : Result<UserId, SignUpResult> Task =
+                                : Result<UserId, SignUpError> Task =
         task {
             let login, password = credentials
 
@@ -84,7 +83,7 @@ module Auth =
     
     let private getUserById (dependencies: SignUpDependencies)
                             (userId: UserId)
-                            : Result<User, SignUpResult> Task =
+                            : Result<User, SignUpError> Task =
         task {
             let! user = dependencies.UserPersister.FindUserByIdAsync userId
             
@@ -98,7 +97,7 @@ module Auth =
     let private generateTokensAsync (dependencies: SignUpDependencies)
                                     (now: UtcDateTime)
                                     (user: User)
-                                    : Result<TokensData, SignUpResult> Task =
+                                    : Result<TokensData, SignUpError> Task =
         task {
             let claims =
                 [ Claim(dependencies.JwtConfiguration.ClaimsOptions.UserIdClaimType, (UserId.unwrap user.Id).ToString())
@@ -135,12 +134,12 @@ module Auth =
             | None ->
                 return raise (InvalidOperationException $"Could not find user by Id (#{UserId.unwrap data.UserId}) after tokens refresh")
         }
-    
+
     let signUpAsync (dependencies: SignUpDependencies)
                     (now: UtcDateTime)
                     (loginRaw: string)
                     (passwordRaw: string)
-                    : Result<TokensData, SignUpResult> Task =
+                    : Result<TokensData, SignUpError> Task =
         task {
             return!
                 validate loginRaw passwordRaw
