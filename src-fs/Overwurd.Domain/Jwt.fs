@@ -88,13 +88,16 @@ type JwtRefreshTokensPersister =
       UpdateRefreshTokenAsync: UpdateRefreshTokenAsync
       RemoveRefreshTokensAsync: RemoveRefreshTokensAsync }
 
-type GenerateTokensPairAsync =
-    UserId -> Claim list -> UtcDateTime -> JwtTokensPair Task
-
 type JwtDependencies =
     { GenerateGuid: GenerateGuid
       JwtConfiguration: JwtConfiguration
       RefreshTokensPersister: JwtRefreshTokensPersister }
+
+type RefreshedTokens =
+    { UserId: UserId
+      Tokens: JwtTokensPair
+      AccessTokenExpiresAt: UtcDateTime
+      RefreshTokenExpiresAt: UtcDateTime }
 
 type RefreshAccessTokenError =
     | AccessTokenValidationError of ErrorMessage: string
@@ -165,57 +168,6 @@ module Jwt =
             else []
 
         expiredTokenIds @ excessiveTokenIds |> Set
-
-    let generateTokensPairAsync (dependencies: JwtDependencies)
-                                (userId: UserId)
-                                (claims: Claim list)
-                                (now: UtcDateTime)
-                                : JwtTokensPair Task =
-        task {
-            let nowUnwrapped = UtcDateTime.unwrap now
-            let tokensConfiguration = dependencies.JwtConfiguration.TokensConfiguration
-
-            let tokenHandler = JwtSecurityTokenHandler ()
-            let tokenId = dependencies.GenerateGuid ()
-            let jwtToken = createAccessToken dependencies.JwtConfiguration tokenId (UserId.unwrap userId) claims nowUnwrapped
-            let jwtTokenEncrypted = tokenHandler.WriteToken jwtToken
-
-            let getUserRefreshTokensAsync =
-                dependencies
-                    .RefreshTokensPersister
-                    .GetUserRefreshTokensAsync
-            let! userRefreshTokens = getUserRefreshTokensAsync userId
-            let tokenIdsToRemove = getTokenIdsToRemove tokensConfiguration.MaxTokensPerUser nowUnwrapped userRefreshTokens
-
-            let removeRefreshTokensAsync =
-                dependencies
-                    .RefreshTokensPersister
-                    .RemoveRefreshTokensAsync
-            
-            if not <| Set.isEmpty tokenIdsToRemove then
-                do! removeRefreshTokensAsync (tokenIdsToRemove |> Set.toList)
-
-            let refreshTokenValue = dependencies.GenerateGuid ()
-            let expiryDate = nowUnwrapped.AddDays tokensConfiguration.RefreshTokenExpirationInDays
-            let refreshTokenCreationParameters =
-                { AccessTokenId = JwtAccessTokenId tokenId
-                  UserId = userId
-                  Value = refreshTokenValue
-                  CreatedAt = now
-                  RefreshedAt = None
-                  ExpiresAt = UtcDateTime.create expiryDate
-                  IsRevoked = false }
-
-            let createRefreshTokensAsync =
-                dependencies
-                    .RefreshTokensPersister
-                    .CreateRefreshTokenAsync
-            let! _ = createRefreshTokensAsync refreshTokenCreationParameters
-
-            return
-                { AccessTokenValue = jwtTokenEncrypted
-                  RefreshTokenValue = refreshTokenValue.ToString() }
-        }
 
     type private AccessTokenDecryptionResult =
         { AccessTokenDecrypted: JwtSecurityToken }
@@ -302,10 +254,10 @@ module Jwt =
           RefreshToken: RefreshToken
           ValidationResult: ValidationResult }
 
-    let private validateRefreshToken (providedTokenValue: string)
-                                     (now: UtcDateTime)
-                                     (refreshTokenResult: RefreshTokenResult)
-                                     : Result<RefreshTokenValidationResult, RefreshAccessTokenError> =
+    let private validateRefreshTokenAsync (providedTokenValue: string)
+                                          (now: UtcDateTime)
+                                          (refreshTokenResult: RefreshTokenResult)
+                                          : Result<RefreshTokenValidationResult, RefreshAccessTokenError> =
         let refreshToken = refreshTokenResult.RefreshToken.Value
         let doesTokenValueMatchToProvided = refreshToken.Value.ToString() = providedTokenValue
         let isNotExpired = refreshToken.ExpiresAt > now
@@ -321,10 +273,22 @@ module Jwt =
         else
             Error RefreshTokenNotValid
 
-    let private updateTokens (dependencies: JwtDependencies)
-                             (now: UtcDateTime)
-                             (validationResult: RefreshTokenValidationResult)
-                             : Result<JwtTokensPair, RefreshAccessTokenError> Task =
+    type private UpdateResult =
+        { Tokens: JwtTokensPair
+          AccessTokenExpiresAt: UtcDateTime
+          RefreshTokenExpiresAt: UtcDateTime }
+    
+    type private UpdateTokensResult =
+        { DecryptionResult: AccessTokenDecryptionResult
+          ParsingResult: ParsingResult
+          RefreshToken: RefreshToken
+          ValidationResult: ValidationResult
+          UpdateResult: UpdateResult }
+
+    let private updateTokensAsync (dependencies: JwtDependencies)
+                                  (now: UtcDateTime)
+                                  (validationResult: RefreshTokenValidationResult)
+                                  : Result<UpdateTokensResult, RefreshAccessTokenError> Task =
         task {
             let getUserClaims (claims: Claim list) =
                 let userClaimTypes =
@@ -357,21 +321,85 @@ module Jwt =
             do! updateRefreshTokenAsync refreshToken.Id refreshTokenUpdateParameters
 
             return
-                Ok { AccessTokenValue = newAccessTokenEncrypted
-                     RefreshTokenValue = refreshToken.Value.ToString() }
+                Ok { DecryptionResult = validationResult.DecryptionResult
+                     ParsingResult = validationResult.ParsingResult
+                     RefreshToken = validationResult.RefreshToken
+                     ValidationResult = validationResult.ValidationResult
+                     UpdateResult =
+                         { Tokens =
+                               { AccessTokenValue = newAccessTokenEncrypted
+                                 RefreshTokenValue = refreshToken.Value.ToString() }
+                           AccessTokenExpiresAt = UtcDateTime.create (newAccessToken.ValidTo.ToUniversalTime())
+                           RefreshTokenExpiresAt = refreshToken.ExpiresAt } }
+        }
+
+    let generateTokensPairAsync (dependencies: JwtDependencies)
+                                (userId: UserId)
+                                (claims: Claim list)
+                                (now: UtcDateTime)
+                                : JwtTokensPair Task =
+        task {
+            let nowUnwrapped = UtcDateTime.unwrap now
+            let tokensConfiguration = dependencies.JwtConfiguration.TokensConfiguration
+
+            let tokenHandler = JwtSecurityTokenHandler ()
+            let tokenId = dependencies.GenerateGuid ()
+            let jwtToken = createAccessToken dependencies.JwtConfiguration tokenId (UserId.unwrap userId) claims nowUnwrapped
+            let jwtTokenEncrypted = tokenHandler.WriteToken jwtToken
+
+            let getUserRefreshTokensAsync =
+                dependencies
+                    .RefreshTokensPersister
+                    .GetUserRefreshTokensAsync
+            let! userRefreshTokens = getUserRefreshTokensAsync userId
+            let tokenIdsToRemove = getTokenIdsToRemove tokensConfiguration.MaxTokensPerUser nowUnwrapped userRefreshTokens
+
+            let removeRefreshTokensAsync =
+                dependencies
+                    .RefreshTokensPersister
+                    .RemoveRefreshTokensAsync
+            
+            if not <| Set.isEmpty tokenIdsToRemove then
+                do! removeRefreshTokensAsync (tokenIdsToRemove |> Set.toList)
+
+            let refreshTokenValue = dependencies.GenerateGuid ()
+            let expiryDate = nowUnwrapped.AddDays tokensConfiguration.RefreshTokenExpirationInDays
+            let refreshTokenCreationParameters =
+                { AccessTokenId = JwtAccessTokenId tokenId
+                  UserId = userId
+                  Value = refreshTokenValue
+                  CreatedAt = now
+                  RefreshedAt = None
+                  ExpiresAt = UtcDateTime.create expiryDate
+                  IsRevoked = false }
+
+            let createRefreshTokensAsync =
+                dependencies
+                    .RefreshTokensPersister
+                    .CreateRefreshTokenAsync
+            let! _ = createRefreshTokensAsync refreshTokenCreationParameters
+
+            return
+                { AccessTokenValue = jwtTokenEncrypted
+                  RefreshTokenValue = refreshTokenValue.ToString() }
         }
 
     let refreshAccessTokenAsync (dependencies: JwtDependencies)
-                                (accessTokenEncrypted: string)
-                                (refreshTokenValue: string)
+                                (tokenValues: JwtTokensPair)
                                 (now: UtcDateTime)
-                                : Result<JwtTokensPair, RefreshAccessTokenError> Task =
+                                : Result<RefreshedTokens, RefreshAccessTokenError> Task =
         task {
             return!
-                accessTokenEncrypted
+                tokenValues.AccessTokenValue
                 |> decryptAccessTokenAsync dependencies
                 |> AsyncResult.synchronouslyBindTask parseUserIdAndAccessTokenId
                 |> AsyncResult.asynchronouslyBindTask (getActualRefreshTokenAsync dependencies)
-                |> AsyncResult.synchronouslyBindTask (validateRefreshToken refreshTokenValue now)
-                |> AsyncResult.asynchronouslyBindTask (updateTokens dependencies now)
+                |> AsyncResult.synchronouslyBindTask (validateRefreshTokenAsync tokenValues.RefreshTokenValue now)
+                |> AsyncResult.asynchronouslyBindTask (updateTokensAsync dependencies now)
+                |> AsyncResult.synchronouslyBindTask
+                       (fun x ->
+                            Ok { UserId = x.ParsingResult.UserId
+                                 Tokens = x.UpdateResult.Tokens
+                                 AccessTokenExpiresAt = x.UpdateResult.AccessTokenExpiresAt
+                                 RefreshTokenExpiresAt = x.UpdateResult.RefreshTokenExpiresAt })
         }

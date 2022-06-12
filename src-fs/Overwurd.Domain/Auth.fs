@@ -9,9 +9,21 @@ open Overwurd.Domain.Common.Validation
 
 type SignUpDependencies =
     { GenerateGuid: GenerateGuid
-      UserPersister: UserPersister
       JwtConfiguration: JwtConfiguration
+      UserPersister: UserPersister
       RefreshTokensPersister: JwtRefreshTokensPersister }
+
+type RefreshDependencies =
+    { GenerateGuid: GenerateGuid
+      JwtConfiguration: JwtConfiguration
+      UserPersister: UserPersister
+      RefreshTokensPersister: JwtRefreshTokensPersister }
+
+type RefreshedTokensData =
+    { User: User
+      Tokens: JwtTokensPair
+      AccessTokenExpiresAt: UtcDateTime
+      RefreshTokenExpiresAt: UtcDateTime }
 
 type SignUpResult =
     | Success
@@ -20,6 +32,7 @@ type SignUpResult =
 
 module Auth =
 
+    open Overwurd.Domain.Jwt
     open Overwurd.Domain.User
     open Overwurd.Domain.Common.Utils
 
@@ -91,10 +104,28 @@ module Auth =
                 let dependencies: JwtDependencies =
                     { GenerateGuid = dependencies.GenerateGuid
                       JwtConfiguration = dependencies.JwtConfiguration
-                      RefreshTokensPersister = dependencies.RefreshTokensPersister }
-                Jwt.generateTokensPairAsync dependencies user.Id claims now
+                      RefreshTokensPersister = dependencies.RefreshTokensPersister}
+                generateTokensPairAsync dependencies user.Id claims now
             
             return Result.Ok tokensPair
+        }
+    
+    let private getUserAsync (dependencies: RefreshDependencies)
+                             (data: RefreshedTokens)
+                             : Result<RefreshedTokensData, RefreshAccessTokenError> Task =
+        task {
+            let! userOption = dependencies.UserPersister.FindUserByIdAsync data.UserId
+
+            match userOption with
+            | Some user ->
+                return
+                    Result.Ok
+                        { User = user
+                          Tokens = data.Tokens
+                          AccessTokenExpiresAt = data.AccessTokenExpiresAt
+                          RefreshTokenExpiresAt = data.RefreshTokenExpiresAt }
+            | None ->
+                return raise (InvalidOperationException $"Could not find user by Id (#{UserId.unwrap data.UserId}) after tokens refresh")
         }
     
     let signUpAsync (dependencies: SignUpDependencies)
@@ -108,4 +139,19 @@ module Auth =
                 |> AsyncResult.asynchronouslyBind (createUserAsync dependencies now)
                 |> AsyncResult.asynchronouslyBindTask (getUserById dependencies)
                 |> AsyncResult.asynchronouslyBindTask (generateTokensAsync dependencies now)
+        }
+    
+    let refreshAsync (dependencies: RefreshDependencies)
+                     (tokenValuesPair: JwtTokensPair)
+                     (now: UtcDateTime)
+                     : Result<RefreshedTokensData, RefreshAccessTokenError> Task =
+        task {
+            let refreshDependencies =
+                { GenerateGuid = dependencies.GenerateGuid
+                  JwtConfiguration = dependencies.JwtConfiguration
+                  RefreshTokensPersister = dependencies.RefreshTokensPersister }
+
+            return!
+                refreshAccessTokenAsync refreshDependencies tokenValuesPair now
+                |> AsyncResult.asynchronouslyBindTask (getUserAsync dependencies)
         }
