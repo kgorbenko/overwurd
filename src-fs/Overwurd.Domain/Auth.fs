@@ -7,13 +7,7 @@ open System.Threading.Tasks
 open Overwurd.Domain
 open Overwurd.Domain.Common.Validation
 
-type SignUpDependencies =
-    { GenerateGuid: GenerateGuid
-      JwtConfiguration: JwtConfiguration
-      UserPersister: UserPersister
-      RefreshTokensPersister: JwtRefreshTokensPersister }
-
-type RefreshDependencies =
+type AuthDependencies =
     { GenerateGuid: GenerateGuid
       JwtConfiguration: JwtConfiguration
       UserPersister: UserPersister
@@ -32,6 +26,10 @@ type TokensData =
 type SignUpError =
     | ValidationError of ValidationErrorMessage list
     | LoginIsOccupied
+
+type SignInError =
+    | UserDoesNotExist
+    | InvalidPassword
 
 module Auth =
 
@@ -58,7 +56,7 @@ module Auth =
             |> ValidationError
             |> Result.Error
     
-    let private createUserAsync (dependencies: SignUpDependencies)
+    let private createUserAsync (dependencies: AuthDependencies)
                                 (now: UtcDateTime)
                                 (credentials: Login * Password)
                                 : Result<UserId, SignUpError> Task =
@@ -81,7 +79,7 @@ module Auth =
                 return Result.Error LoginIsOccupied
         }
     
-    let private getUserById (dependencies: SignUpDependencies)
+    let private getUserById (dependencies: AuthDependencies)
                             (userId: UserId)
                             : Result<User, SignUpError> Task =
         task {
@@ -94,10 +92,10 @@ module Auth =
                 return raise (InvalidOperationException $"Could not find user by Id (#{UserId.unwrap userId}) after creation")
         }
     
-    let private generateTokensAsync (dependencies: SignUpDependencies)
+    let private generateTokensAsync (dependencies: AuthDependencies)
                                     (now: UtcDateTime)
                                     (user: User)
-                                    : Result<TokensData, SignUpError> Task =
+                                    : Result<TokensData, 'error> Task =
         task {
             let claims =
                 [ Claim(dependencies.JwtConfiguration.ClaimsOptions.UserIdClaimType, (UserId.unwrap user.Id).ToString())
@@ -117,9 +115,9 @@ module Auth =
                   RefreshTokenExpiresAt = tokensPair.RefreshTokenExpiresAt }
         }
 
-    let private getUserAsync (dependencies: RefreshDependencies)
-                             (data: RefreshedTokens)
-                             : Result<TokensData, RefreshAccessTokenError> Task =
+    let private getUserByTokensAsync (dependencies: AuthDependencies)
+                                     (data: RefreshedTokens)
+                                     : Result<TokensData, RefreshAccessTokenError> Task =
         task {
             let! userOption = dependencies.UserPersister.FindUserByIdAsync data.UserId
 
@@ -134,8 +132,40 @@ module Auth =
             | None ->
                 return raise (InvalidOperationException $"Could not find user by Id (#{UserId.unwrap data.UserId}) after tokens refresh")
         }
+    
+    let private findUserByLogin (dependencies: AuthDependencies)
+                                (credentials: Credentials)
+                                : Result<User, SignInError> Task =
+        task {
+            let normalizedLogin =
+                credentials.Login
+                |> Login.createBypassingValidation
+                |> NormalizedLogin.create
 
-    let signUpAsync (dependencies: SignUpDependencies)
+            let! userOption = dependencies.UserPersister.FindUserByNormalizedLoginAsync normalizedLogin
+            
+            match userOption with
+            | None ->
+                return Result.Error UserDoesNotExist
+            | Some user ->
+                return Result.Ok user
+        }
+    
+    let private verifyPasswordAsync (dependencies: AuthDependencies)
+                                    (credentials: Credentials)
+                                    (user: User)
+                                    : Result<User, SignInError> Task =
+        task {
+            let verifyDependencies: VerifyPasswordDependencies =
+                { UserPersister = dependencies.UserPersister }
+            let! isPasswordValid = verifyPasswordAsync verifyDependencies user credentials.Password
+            
+            return if isPasswordValid
+                then Result.Ok user
+                else Result.Error InvalidPassword
+        }
+
+    let signUpAsync (dependencies: AuthDependencies)
                     (now: UtcDateTime)
                     (loginRaw: string)
                     (passwordRaw: string)
@@ -147,8 +177,8 @@ module Auth =
                 |> AsyncResult.asynchronouslyBindTask (getUserById dependencies)
                 |> AsyncResult.asynchronouslyBindTask (generateTokensAsync dependencies now)
         }
-    
-    let refreshAsync (dependencies: RefreshDependencies)
+
+    let refreshAsync (dependencies: AuthDependencies)
                      (tokenValuesPair: JwtTokensPair)
                      (now: UtcDateTime)
                      : Result<TokensData, RefreshAccessTokenError> Task =
@@ -160,5 +190,16 @@ module Auth =
 
             return!
                 refreshAccessTokenAsync refreshDependencies tokenValuesPair now
-                |> AsyncResult.asynchronouslyBindTask (getUserAsync dependencies)
+                |> AsyncResult.asynchronouslyBindTask (getUserByTokensAsync dependencies)
+        }
+    
+    let signInAsync (dependencies: AuthDependencies)
+                    (credentials: Credentials)
+                    (now: UtcDateTime)
+                    : Result<TokensData, SignInError> Task =
+        task {
+            return!
+                findUserByLogin dependencies credentials
+                |> AsyncResult.asynchronouslyBindTask (verifyPasswordAsync dependencies credentials)
+                |> AsyncResult.asynchronouslyBindTask (generateTokensAsync dependencies now)
         }

@@ -24,7 +24,7 @@ type PasswordHash = string
 
 type PasswordSalt = string
 
-type private PasswordHashAndSalt =
+type PasswordHashAndSalt =
     { Hash: PasswordHash
       Salt: PasswordSalt }
 
@@ -55,13 +55,20 @@ type FindUserByNormalizedLoginAsync =
 
 type CreateUserAsync =
     UserCreationParametersForPersistence -> UserId Task
+
+type FindUserPasswordHashAndSalt =
+    UserId -> PasswordHashAndSalt option Task
     
 type UserPersister =
     { FindUserByIdAsync: FindUserByIdAsync
       FindUserByNormalizedLoginAsync: FindUserByNormalizedLoginAsync
+      FindUserPasswordHashAndSalt: FindUserPasswordHashAndSalt
       CreateUserAsync: CreateUserAsync }
 
 type CreateUserDependencies =
+    { UserPersister: UserPersister }
+
+type VerifyPasswordDependencies =
     { UserPersister: UserPersister }
 
 type UserCreationResultError =
@@ -217,4 +224,20 @@ module User =
                 let! userId = dependencies.UserPersister.CreateUserAsync parametersForPersistence
                 
                 return Ok userId
+        }
+    
+    let verifyPasswordAsync (dependencies: VerifyPasswordDependencies)
+                            (user: User)
+                            (password: string)
+                            : bool Task =
+        task {
+            let findUserPasswordHashAndSalt =
+                dependencies
+                    .UserPersister
+                    .FindUserPasswordHashAndSalt
+            let! passwordHashAndSaltOption = findUserPasswordHashAndSalt user.Id
+            
+            match passwordHashAndSaltOption with
+            | None -> return! raise (InvalidOperationException "")
+            | Some hashAndSalt -> return! (PasswordHash.verifyAsync password hashAndSalt)
         }
