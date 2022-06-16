@@ -65,10 +65,7 @@ type UserPersister =
       FindUserPasswordHashAndSalt: FindUserPasswordHashAndSalt
       CreateUserAsync: CreateUserAsync }
 
-type CreateUserDependencies =
-    { UserPersister: UserPersister }
-
-type VerifyPasswordDependencies =
+type UserActionsDependencies =
     { UserPersister: UserPersister }
 
 type UserCreationResultError =
@@ -201,7 +198,7 @@ module User =
                 return currentHash.Hash = hash
             }
     
-    let createUserAsync (dependencies: CreateUserDependencies)
+    let createUserAsync (dependencies: UserActionsDependencies)
                         (parameters: UserCreationParameters)
                         : Result<UserId, UserCreationResultError> Task =
         task {
@@ -226,7 +223,7 @@ module User =
                 return Ok userId
         }
     
-    let verifyPasswordAsync (dependencies: VerifyPasswordDependencies)
+    let verifyPasswordAsync (dependencies: UserActionsDependencies)
                             (user: User)
                             (password: string)
                             : bool Task =

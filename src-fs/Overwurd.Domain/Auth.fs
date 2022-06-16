@@ -36,6 +36,11 @@ module Auth =
     open Overwurd.Domain.Jwt
     open Overwurd.Domain.User
     open Overwurd.Domain.Common.Utils
+    
+    let private makeUserActionsDependencies
+        (authDependencies: AuthDependencies)
+        : UserActionsDependencies =
+            { UserPersister = authDependencies.UserPersister }
 
     let private validate (loginRaw: string)
                          (passwordRaw: string)
@@ -64,13 +69,12 @@ module Auth =
             let login, password = credentials
 
             let! creationResult =
-                let createUserDependencies: CreateUserDependencies =
-                    { UserPersister = dependencies.UserPersister }
+                let userActionsDependencies = makeUserActionsDependencies dependencies
                 let creationParameters: UserCreationParameters =
                     { CreatedAt = now
                       Login = login
                       Password = password }
-                createUserAsync createUserDependencies creationParameters
+                createUserAsync userActionsDependencies creationParameters
             
             match creationResult with
             | Result.Ok userId ->
@@ -156,8 +160,7 @@ module Auth =
                                     (user: User)
                                     : Result<User, SignInError> Task =
         task {
-            let verifyDependencies: VerifyPasswordDependencies =
-                { UserPersister = dependencies.UserPersister }
+            let verifyDependencies = makeUserActionsDependencies dependencies
             let! isPasswordValid = verifyPasswordAsync verifyDependencies user credentials.Password
             
             return if isPasswordValid
