@@ -99,7 +99,7 @@ module User =
                   lacksLength minLength, $"Login cannot be shorter than {minLength} characters."
                   exceedsMaxLength maxLength, $"Login cannot be longer than {maxLength} characters."
                   hasInvalidCharacters allowedCharacters, "Valid characters are lowercase and uppercase Latin letters, digits, '-', '.' and '_'." ]
-            
+
             validate rules login
 
         let create (login: string): Login =
@@ -108,50 +108,50 @@ module User =
             |> function
                 | Success -> Login login
                 | Fail messages -> raise (ValidationException messages)
-            
+
         let internal createBypassingValidation (login: string) =
             Login login
 
         let unwrap (login: Login): string =
             match login with
             | Login value -> value
-    
+
     module NormalizedLogin =
-        
+
         let create (login: Login): NormalizedLogin =
             login
             |> Login.unwrap
             |> toUpperCase
             |> NormalizedLogin
-            
+
         let unwrap (login: NormalizedLogin): string =
             match login with
             | NormalizedLogin value -> value
 
     module Password =
-        
+
         open Overwurd.Domain.Common.Validation
-        
+
         let validate (password: string): ValidationResult =
             let minLength = 8
-            
+
             let rules =
                 [ isNullOrWhiteSpace, "Password cannot be empty.";
                   lacksLength minLength, $"Password should be at least {minLength} characters length.";
                   bothUpperAndLowerCharactersPresent, "Password should contain both uppercase and lowercase characters." ]
 
             validate rules password
-        
+
         let create (password: string): Password =
             password
             |> validate
             |> function
                 | Success -> Password password
                 | Fail messages -> raise (ValidationException messages)
-        
+
         let internal createBypassingValidation (password: string): Password =
             Password password
-        
+
         let unwrap (password: Password): string =
             match password with
             | Password value -> value
@@ -160,11 +160,11 @@ module User =
 
         let private saltLength = 16
         let private hashLength = 64
-        
+
         let private hashAsync (password: string) (saltBytes: byte array) (hashLength: int): string Task =
             task {
                 let passwordBytes = password |> toByteArray
-                
+
                 use argon2 = new Argon2id(passwordBytes)
                 argon2.Salt <- saltBytes
                 argon2.DegreeOfParallelism <- 1
@@ -174,7 +174,7 @@ module User =
                 let! hashBytes = argon2.GetBytesAsync hashLength
                 return Convert.ToBase64String hashBytes
             }
-        
+
         let generateAsync (password: Password): PasswordHashAndSalt Task =
             task {
                 let generateSalt saltLength =
@@ -189,7 +189,7 @@ module User =
                     { Hash = hash
                       Salt = salt }
             }
-        
+
         let verifyAsync (password: string) (currentHash: PasswordHashAndSalt): bool Task =
             task {
                 let saltBytes = currentHash.Salt |> toByteArray
@@ -197,29 +197,39 @@ module User =
                 
                 return currentHash.Hash = hash
             }
-    
+
     let createUserAsync (dependencies: UserActionsDependencies)
                         (parameters: UserCreationParameters)
                         : Result<UserId, UserCreationResultError> Task =
         task {
             let normalizedLogin = parameters.Login |> NormalizedLogin.create
-            let! existingUser = dependencies.UserPersister.FindUserByNormalizedLoginAsync normalizedLogin
-            
+            let! existingUser =
+                let findUserByNormalizedLoginAsync =
+                    dependencies
+                        .UserPersister
+                        .FindUserByNormalizedLoginAsync
+                findUserByNormalizedLoginAsync normalizedLogin
+
             match existingUser with
             | Some _ ->
                 return Error LoginIsOccupied
             | None ->
                 let! hashAndSalt = PasswordHash.generateAsync parameters.Password
-                
+
                 let parametersForPersistence =
                     { CreatedAt = parameters.CreatedAt
                       Login = parameters.Login
                       NormalizedLogin = normalizedLogin
                       PasswordHash = hashAndSalt.Hash
                       PasswordSalt = hashAndSalt.Salt }
-                
-                let! userId = dependencies.UserPersister.CreateUserAsync parametersForPersistence
-                
+
+                let! userId =
+                    let createUserAsync =
+                        dependencies
+                            .UserPersister
+                            .CreateUserAsync
+                    createUserAsync parametersForPersistence
+
                 return Ok userId
         }
     
@@ -228,12 +238,13 @@ module User =
                             (password: string)
                             : bool Task =
         task {
-            let findUserPasswordHashAndSalt =
-                dependencies
-                    .UserPersister
-                    .FindUserPasswordHashAndSalt
-            let! passwordHashAndSaltOption = findUserPasswordHashAndSalt user.Id
-            
+            let! passwordHashAndSaltOption =
+                let findUserPasswordHashAndSalt =
+                    dependencies
+                        .UserPersister
+                        .FindUserPasswordHashAndSalt
+                findUserPasswordHashAndSalt user.Id
+
             match passwordHashAndSaltOption with
             | None -> return! raise (InvalidOperationException "")
             | Some hashAndSalt -> return! (PasswordHash.verifyAsync password hashAndSalt)
