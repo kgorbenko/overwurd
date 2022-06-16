@@ -106,8 +106,8 @@ module User =
             login
             |> validate
             |> function
-                | Ok -> Login login
-                | Error messages -> raise (ValidationException messages)
+                | Success -> Login login
+                | Fail messages -> raise (ValidationException messages)
             
         let internal createBypassingValidation (login: string) =
             Login login
@@ -146,8 +146,8 @@ module User =
             password
             |> validate
             |> function
-                | Ok -> Password password
-                | Error messages -> raise (ValidationException messages)
+                | Success -> Password password
+                | Fail messages -> raise (ValidationException messages)
         
         let internal createBypassingValidation (password: string): Password =
             Password password

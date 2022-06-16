@@ -5,8 +5,8 @@ open System
 type ValidationErrorMessage = string
 
 type ValidationResult =
-    | Ok
-    | Error of ValidationErrorMessage list
+    | Success
+    | Fail of ValidationErrorMessage list
 
 exception ValidationException of string list
 
@@ -47,5 +47,5 @@ let getValidationErrors (ruleMessages: (('a -> bool) * ValidationErrorMessage) l
 let validate ruleMessages value =
     getValidationErrors ruleMessages value
     |> function
-        | [] -> Ok
-        | messages -> Error messages
+        | [] -> Success
+        | messages -> Fail messages

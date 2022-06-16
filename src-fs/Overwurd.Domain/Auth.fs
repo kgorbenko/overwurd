@@ -49,17 +49,17 @@ module Auth =
         let passwordValidationResult = Password.validate passwordRaw
         
         match loginValidationResult, passwordValidationResult with
-        | Ok, Ok ->
-            Result.Ok (Login.create loginRaw, Password.create passwordRaw)
+        | Success, Success ->
+            Ok (Login.create loginRaw, Password.create passwordRaw)
         | result1, result2 ->
             [ result1; result2 ]
             |> List.choose (fun x ->
                 match x with
-                | Ok -> None
-                | Error messages -> Some messages)
+                | Success -> None
+                | Fail messages -> Some messages)
             |> List.concat
             |> ValidationError
-            |> Result.Error
+            |> Error
     
     let private createUserAsync (dependencies: AuthDependencies)
                                 (now: UtcDateTime)
@@ -77,10 +77,10 @@ module Auth =
                 createUserAsync userActionsDependencies creationParameters
             
             match creationResult with
-            | Result.Ok userId ->
-                return Result.Ok userId
-            | Result.Error UserCreationResultError.LoginIsOccupied ->
-                return Result.Error LoginIsOccupied
+            | Ok userId ->
+                return Ok userId
+            | Error UserCreationResultError.LoginIsOccupied ->
+                return Error LoginIsOccupied
         }
     
     let private getUserById (dependencies: AuthDependencies)
@@ -91,7 +91,7 @@ module Auth =
             
             match user with
             | Some user ->
-                return Result.Ok user
+                return Ok user
             | None ->
                 return raise (InvalidOperationException $"Could not find user by Id (#{UserId.unwrap userId}) after creation")
         }
@@ -112,7 +112,7 @@ module Auth =
                       RefreshTokensPersister = dependencies.RefreshTokensPersister}
                 generateTokensPairAsync dependencies user.Id claims now
             
-            return Result.Ok
+            return Ok
                 { User = user
                   Tokens = tokensPair.Tokens
                   AccessTokenExpiresAt = tokensPair.AccessTokenExpiresAt
@@ -128,7 +128,7 @@ module Auth =
             match userOption with
             | Some user ->
                 return
-                    Result.Ok
+                    Ok
                         { User = user
                           Tokens = data.Tokens
                           AccessTokenExpiresAt = data.AccessTokenExpiresAt
@@ -150,9 +150,9 @@ module Auth =
             
             match userOption with
             | None ->
-                return Result.Error UserDoesNotExist
+                return Error UserDoesNotExist
             | Some user ->
-                return Result.Ok user
+                return Ok user
         }
     
     let private verifyPasswordAsync (dependencies: AuthDependencies)
@@ -164,8 +164,8 @@ module Auth =
             let! isPasswordValid = verifyPasswordAsync verifyDependencies user credentials.Password
             
             return if isPasswordValid
-                then Result.Ok user
-                else Result.Error InvalidPassword
+                then Ok user
+                else Error InvalidPassword
         }
 
     let signUpAsync (dependencies: AuthDependencies)

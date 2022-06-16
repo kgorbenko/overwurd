@@ -47,8 +47,8 @@ module Course =
         let create (name: string): CourseName =
             validate name
             |> function
-                | Ok -> CourseName name
-                | Error message -> raise (ValidationException message)
+                | Success -> CourseName name
+                | Fail message -> raise (ValidationException message)
 
         let unwrap (name: CourseName): string =
             match name with
@@ -66,18 +66,18 @@ module Course =
                   exceedsMaxLength maxLength, $"Description cannot be longer than {maxLength} characters." ]
 
             match description with
-            | None -> Ok
+            | None -> Success
             | Some d -> validate rules d
 
         let create (description: string option): CourseDescription option =
             description
             |> validate
             |> function
-                | Ok ->
+                | Success ->
                     match description with
                     | Some d -> CourseDescription d |> Some
                     | None -> None
-                | Error message -> raise (ValidationException message)
+                | Fail message -> raise (ValidationException message)
 
         let unwrap (description: CourseDescription): string =
             match description with
