@@ -7,11 +7,21 @@
   <ItemGroup>
     <Compile Include="Common\Utils.fs" />
     <Compile Include="Common\Validation.fs" />
+    <Compile Include="Common\Persistence.fs" />
     <Compile Include="UtcDateTime.fs" />
-    <Compile Include="User.fs" />
-    <Compile Include="Jwt.fs" />
-    <Compile Include="Course.fs" />
-    <Compile Include="Auth.fs" />
+    <Compile Include="Users\Types.fs" />
+    <Compile Include="Users\Storage.fs" />
+    <Compile Include="Users\Entities.fs" />
+    <Compile Include="Users\Actions.fs" />
+    <Compile Include="Courses\Types.fs" />
+    <Compile Include="Courses\Storage.fs" />
+    <Compile Include="Courses\Entities.fs" />
+    <Compile Include="Jwt\Types.fs" />
+    <Compile Include="Jwt\Storage.fs" />
+    <Compile Include="Jwt\Entities.fs" />
+    <Compile Include="Jwt\Actions.fs" />
+    <Compile Include="Features\Authentication\Types.fs" />
+    <Compile Include="Features\Authentication\Workflows.fs" />
   </ItemGroup>
 
   <ItemGroup>
