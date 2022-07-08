@@ -1,37 +1,26 @@
 ﻿module Overwurd.Web.Handlers.Status
 
 open Giraffe.Core
-open Giraffe.Routing
-open System.Reflection
 open Microsoft.AspNetCore.Http
 
-open Overwurd.Infrastructure.Database
+open Overwurd.Web.Handlers.Common
 open Overwurd.Web.Common.Utils
+open Overwurd.Web.DomainIntegration.Status
 
 type ApplicationStatus =
     { ApplicationVersion: string
       DatabaseVersion: string }
 
-let private handleStatus: HttpHandler =
+let status: HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
-            let appVersion =
-                Assembly.GetExecutingAssembly()
-                        .GetName()
-                        .Version
-                        
-            let! dbVersion =
-                StatusStore.getDatabaseVersionAsync
+            let! status =
+                getApplicationStatus
                 |> withConnectionAsync ctx
-            
-            let status =
-                { ApplicationVersion = appVersion.ToString()
-                  DatabaseVersion = dbVersion.ToString() }
-                
-            return! json status next ctx
-        }
 
-let handle: HttpHandler =
-    choose [
-        GET >=> route "/api/status" >=> handleStatus
-    ]
+            let jsonStatus =
+                { ApplicationVersion = status.ApplicationVersion.ToString()
+                  DatabaseVersion = status.DatabaseVersion.ToString() }
+            
+            return! json jsonStatus finish ctx
+        }

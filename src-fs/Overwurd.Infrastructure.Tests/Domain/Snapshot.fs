@@ -3,8 +3,11 @@
 open System
 
 open Overwurd.Domain
-open Overwurd.Domain.User
-open Overwurd.Domain.Course
+open Overwurd.Domain.Users
+open Overwurd.Domain.Users.Entities
+open Overwurd.Domain.Courses
+open Overwurd.Domain.Courses.Entities
+open Overwurd.Domain.Jwt
 
 type DomainSnapshot =
     { mutable Users: UserSnapshot list }

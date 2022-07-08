@@ -1,17 +1,18 @@
-﻿module Overwurd.Infrastructure.Tests.UserStore
+﻿module Overwurd.Infrastructure.Tests.UserStorage
 
 open System
-open System.Threading
 open NUnit.Framework
 open FsUnit
 
 open Overwurd.Domain
-open Overwurd.Domain.User
+open Overwurd.Domain.Users
+open Overwurd.Domain.Users.Entities
 open Overwurd.Infrastructure
 open Overwurd.Infrastructure.Tests.Domain
 open Overwurd.Infrastructure.Tests.Domain.Building
 open Overwurd.Infrastructure.Tests.Common
 open Overwurd.Infrastructure.Tests.Common.Utils
+open Overwurd.Infrastructure.UserStorage
 
 let unwrap (userId: UserId option): UserId =
     match userId with
@@ -23,7 +24,7 @@ let ``No user should be found by Id in empty database`` () =
     task {
         do! prepareDatabaseAsync |> withConnectionAsync
 
-        let! actual = UserStore.getUserByIdAsync (UserId 1) CancellationToken.None |> withConnectionAsync
+        let! actual = findUserByIdAsync (UserId 1) |> withConnectionAsync
 
         actual |> should equal None
     }
@@ -39,7 +40,7 @@ let ``Finds single User by Id`` () =
         let snapshot = DomainSnapshot.create () |> DomainSnapshot.appendUser user
         do! DomainPersister.persistSnapshotAsync snapshot |> withConnectionAsync
 
-        let! actual = UserStore.getUserByIdAsync (unwrap user.Id) CancellationToken.None |> withConnectionAsync
+        let! actual = findUserByIdAsync (unwrap user.Id) |> withConnectionAsync
 
         let expected: User option =
             Some { Id = user.Id.Value
@@ -56,7 +57,12 @@ let ``No user should be found by Login in empty database`` () =
     task {
         do! prepareDatabaseAsync |> withConnectionAsync
 
-        let! actual = UserStore.getUserByNormalizedLoginAsync "TestLogin123" CancellationToken.None |> withConnectionAsync
+        let login =
+            "TestLogin123"
+            |> Login.create
+            |> NormalizedLogin.create
+
+        let! actual = findUserByNormalizedLoginAsync login |> withConnectionAsync
 
         actual |> should equal None
     }
@@ -73,7 +79,7 @@ let ``Finds single User by Login`` () =
         let snapshot = DomainSnapshot.create () |> DomainSnapshot.appendUser user
         do! DomainPersister.persistSnapshotAsync snapshot |> withConnectionAsync
 
-        let! actual = UserStore.getUserByNormalizedLoginAsync "TESTLOGIN123" CancellationToken.None |> withConnectionAsync
+        let! actual = findUserByNormalizedLoginAsync user.NormalizedLogin |> withConnectionAsync
 
         let expected: User option =
             Some { Id = user.Id.Value
@@ -100,12 +106,12 @@ let ``Creates User`` () =
               PasswordHash = "1"
               PasswordSalt = "Some salt"}
 
-        let! createdId = UserStore.createUserAsync parameters CancellationToken.None |> withConnectionAsync
+        let! createdId = createUserAsync parameters |> withConnectionAsync
 
         let! actual = Database.getAllUsersAsync |> withConnectionAsync
 
         let expected: UserPersistentModel list =
-            [ { Id = createdId
+            [ { Id = UserId.unwrap createdId
                 CreatedAt = UtcDateTime.unwrap parameters.CreatedAt
                 Login = Login.unwrap parameters.Login
                 NormalizedLogin = NormalizedLogin.unwrap parameters.NormalizedLogin

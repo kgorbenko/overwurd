@@ -11,9 +11,8 @@
     <Compile Include="Common\Utils.fs" />
     <Compile Include="Domain\Snapshot.fs" />
     <Compile Include="Domain\DomainPersister.fs" />
-    <Compile Include="UserStore.fs" />
-    <Compile Include="CourseStore.fs" />
-    <Compile Include="JwtRefreshTokenStore.fs" />
+    <Compile Include="UserStorage.fs" />
+    <Compile Include="JwtRefreshTokenStorage.fs" />
   </ItemGroup>
 
   <ItemGroup>

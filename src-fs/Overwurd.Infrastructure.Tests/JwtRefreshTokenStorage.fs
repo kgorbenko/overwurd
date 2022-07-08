@@ -1,18 +1,20 @@
-﻿module Overwurd.Infrastructure.Tests.JwtRefreshTokenStore
+﻿module Overwurd.Infrastructure.Tests.JwtStorage
 
 open System
-open System.Threading
 open NUnit.Framework
 open FsUnit
 
 open Overwurd.Domain
+open Overwurd.Domain.Users
+open Overwurd.Domain.Users.Entities
 open Overwurd.Domain.Jwt
-open Overwurd.Domain.User
+open Overwurd.Domain.Jwt.Entities
 open Overwurd.Infrastructure
 open Overwurd.Infrastructure.Tests.Domain
 open Overwurd.Infrastructure.Tests.Common
 open Overwurd.Infrastructure.Tests.Domain.Building
 open Overwurd.Infrastructure.Tests.Common.Utils
+open Overwurd.Infrastructure.JwtStorage
 
 let unwrap (userId: UserId option): UserId =
     match userId with
@@ -30,7 +32,7 @@ let ``Getting User tokens when User has no tokens`` () =
         let snapshot = DomainSnapshot.create () |> DomainSnapshot.appendUser user
         do! DomainPersister.persistSnapshotAsync snapshot |> withConnectionAsync
 
-        let! tokens = JwtRefreshTokenStore.getUserRefreshTokensAsync (unwrap user.Id) CancellationToken.None |> withConnectionAsync
+        let! tokens = getUserRefreshTokensAsync (unwrap user.Id) |> withConnectionAsync
         tokens |> should be Empty
     }
 
@@ -46,7 +48,7 @@ let ``Getting User tokens when token does not have refresh date`` () =
         let snapshot = DomainSnapshot.create () |> DomainSnapshot.appendUser user
         do! DomainPersister.persistSnapshotAsync snapshot |> withConnectionAsync
 
-        let! tokens = JwtRefreshTokenStore.getUserRefreshTokensAsync (unwrap user.Id) CancellationToken.None |> withConnectionAsync
+        let! tokens = getUserRefreshTokensAsync (unwrap user.Id) |> withConnectionAsync
 
         let expected: JwtRefreshToken list =
             [ { Id = token.Id.Value
@@ -81,7 +83,7 @@ let ``Getting User tokens when token has a refresh date`` () =
         let snapshot = DomainSnapshot.create () |> DomainSnapshot.appendUser user
         do! DomainPersister.persistSnapshotAsync snapshot |> withConnectionAsync
 
-        let! tokens = JwtRefreshTokenStore.getUserRefreshTokensAsync (unwrap user.Id) CancellationToken.None |> withConnectionAsync
+        let! tokens = getUserRefreshTokensAsync (unwrap user.Id) |> withConnectionAsync
 
         let expected: JwtRefreshToken list =
             [ { Id = token.Id.Value
@@ -112,7 +114,7 @@ let ``Getting User tokens should filter by User`` () =
         let snapshot = DomainSnapshot.create () |> DomainSnapshot.appendUsers [user1; user2]
         do! DomainPersister.persistSnapshotAsync snapshot |> withConnectionAsync
 
-        let! tokens = JwtRefreshTokenStore.getUserRefreshTokensAsync (unwrap user2.Id) CancellationToken.None |> withConnectionAsync
+        let! tokens = getUserRefreshTokensAsync (unwrap user2.Id) |> withConnectionAsync
 
         let expected: JwtRefreshToken list =
             [ { Id = token2.Id.Value
@@ -138,7 +140,7 @@ let ``Token by User and Access Token is not found`` () =
         let snapshot = DomainSnapshot.create () |> DomainSnapshot.appendUser user
         do! DomainPersister.persistSnapshotAsync snapshot |> withConnectionAsync
         
-        let! result = JwtRefreshTokenStore.getRefreshTokenByUserAndAccessTokenAsync (unwrap user.Id) (Guid.NewGuid() |> JwtAccessTokenId) CancellationToken.None |> withConnectionAsync
+        let! result = getRefreshTokenByUserAndAccessTokenAsync (unwrap user.Id) (Guid.NewGuid() |> JwtAccessTokenId) |> withConnectionAsync
         
         result |> should equal None
     }
@@ -165,7 +167,7 @@ let ``Token by User and Access Token is found`` () =
                    ExpiresAt = token.ExpiresAt
                    IsRevoked = token.IsRevoked }
         
-        let! actual = JwtRefreshTokenStore.getRefreshTokenByUserAndAccessTokenAsync (unwrap user.Id) token.AccessTokenId CancellationToken.None |> withConnectionAsync
+        let! actual = getRefreshTokenByUserAndAccessTokenAsync (unwrap user.Id) token.AccessTokenId |> withConnectionAsync
         
         actual |> should equal expected
     }
@@ -187,7 +189,7 @@ let ``Update Refresh Token`` () =
             { AccessTokenId = Guid.NewGuid() |> JwtAccessTokenId
               RefreshedAt = UtcDateTime.create refreshDate }
         
-        do! JwtRefreshTokenStore.updateRefreshTokenAsync token.Id.Value updateParameters CancellationToken.None |> withConnectionAsync
+        do! updateRefreshTokenAsync token.Id.Value updateParameters |> withConnectionAsync
         
         let expectedTokens: JwtRefreshTokenPersistentModel list =
             [ { Id = JwtRefreshTokenId.unwrap token.Id.Value

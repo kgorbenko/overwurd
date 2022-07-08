@@ -2,41 +2,25 @@
 
 open System.Threading.Tasks
 
-open Overwurd.Domain
-open Overwurd.Domain.User
+open Overwurd.Domain.Common.Persistence
+open Overwurd.Domain.Jwt
+open Overwurd.Domain.Users
 open Overwurd.Infrastructure.Tests.Common
 open Overwurd.Infrastructure.Tests.Domain
-open Overwurd.Infrastructure.Database
 
 let private ensureTransient =
     function
     | Some id -> failwith $"Entity should be transient, but had an id: {id}"
     | _ -> ()
 
-let private persistCourseAsync (course: CourseSnapshot)
-                               (userId: UserId)
-                               (session: Session)
-                               : unit Task =
-    task {
-        ensureTransient course.Id
-
-        let courseCreationParameters =
-            { CreatedAt = course.CreatedAt
-              Name = course.Name
-              Description = course.Description }
-
-        let! courseId = Database.createCourseAsync courseCreationParameters (UserId.unwrap userId) session
-        course.Id <- Some courseId
-    }
-
 let private persistRefreshTokenAsync (token: JwtRefreshTokenSnapshot)
                                      (userId: UserId)
-                                     (session: Session)
+                                     (session: DbSession)
                                      : unit Task =
     task {
         ensureTransient token.Id
 
-        let tokenCreationParameters: JwtRefreshTokenCreationParametersForPersistence =
+        let tokenCreationParameters: JwtRefreshTokenCreationParameters =
             { AccessTokenId = token.AccessTokenId
               Value = token.Value
               UserId = userId
@@ -50,7 +34,7 @@ let private persistRefreshTokenAsync (token: JwtRefreshTokenSnapshot)
     }
 
 let private persistUserAsync (user: UserSnapshot)
-                             (session: Session)
+                             (session: DbSession)
                              : unit Task =
     task {
         ensureTransient user.Id
@@ -65,15 +49,12 @@ let private persistUserAsync (user: UserSnapshot)
         let! userId = Database.createUserAsync userCreationParameters session
         user.Id <- Some userId
 
-        for course in user.Courses do
-            do! persistCourseAsync course userId session
-
         for token in user.JwtRefreshTokens do
             do! persistRefreshTokenAsync token userId session
     }
 
 let persistSnapshotAsync (snapshot: DomainSnapshot)
-                         (session: Session)
+                         (session: DbSession)
                          : unit Task =
     task {
         for user in snapshot.Users do

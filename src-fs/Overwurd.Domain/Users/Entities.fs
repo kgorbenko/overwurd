@@ -2,6 +2,7 @@
 
 open System
 open System.Security.Cryptography
+open System.Text
 open System.Threading.Tasks
 open Konscious.Security.Cryptography
 
@@ -17,6 +18,11 @@ module UserId =
         userId
         |> tryParseInt
         |> Option.map UserId
+    
+    let parse (userId: string): UserId =
+        match tryParseInt userId with
+        | Some id -> UserId id
+        | None -> raise (InvalidOperationException $"Cannot parse User Id from string '{userId}'")
 
 module Login =
 
@@ -97,7 +103,7 @@ module internal PasswordHash =
 
     let private hashAsync (password: string) (saltBytes: byte array) (hashLength: int): string Task =
         task {
-            let passwordBytes = password |> toByteArray
+            let passwordBytes = Encoding.UTF8.GetBytes password
 
             use argon2 = new Argon2id(passwordBytes)
             argon2.Salt <- saltBytes
@@ -113,12 +119,12 @@ module internal PasswordHash =
         task {
             let generateSalt saltLength =
                 RandomNumberGenerator.GetBytes(saltLength)
-            
+
             let saltBytes = generateSalt saltLength
             let! hash = hashAsync (Password.unwrap password) saltBytes hashLength
             
             let salt = Convert.ToBase64String saltBytes
-            
+
             return
                 { Hash = hash
                   Salt = salt }
@@ -126,8 +132,8 @@ module internal PasswordHash =
 
     let verifyAsync (password: string) (currentHash: PasswordHashAndSalt): bool Task =
         task {
-            let saltBytes = currentHash.Salt |> toByteArray
+            let saltBytes = Convert.FromBase64String currentHash.Salt
             let! hash = hashAsync password saltBytes hashLength
-            
+
             return currentHash.Hash = hash
         }

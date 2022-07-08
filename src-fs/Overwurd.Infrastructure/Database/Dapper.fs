@@ -3,8 +3,8 @@
 open Dapper
 open System
 open System.Data
-open System.Threading
 open System.Threading.Tasks
+open Overwurd.Domain.Common.Persistence
 
 type OptionHandler<'T>() =
     inherit SqlMapper.TypeHandler<option<'T>>()
@@ -28,25 +28,23 @@ let registerTypeHandlers () =
     ()
 
 let makeSqlCommand (sql: string)
-                   (transaction: IDbTransaction)
-                   (cancellationToken: CancellationToken)
+                   (session: DbSession)
                    : CommandDefinition =
     CommandDefinition (
         commandText = sql,
-            transaction = transaction,
-                cancellationToken = cancellationToken
+            transaction = session.Transaction,
+                cancellationToken = session.CancellationToken
     )
 
 let makeSqlCommandWithParameters (sql: string)
                                  (parameters: Object)
-                                 (transaction: IDbTransaction)
-                                 (cancellationToken: CancellationToken)
+                                 (session: DbSession)
                                  : CommandDefinition =
     CommandDefinition (
         commandText = sql,
             parameters = parameters,
-                transaction = transaction,
-                    cancellationToken = cancellationToken
+                transaction = session.Transaction,
+                    cancellationToken = session.CancellationToken
     )
 
 let executeAsync (command: CommandDefinition) (connection: IDbConnection): unit Task =

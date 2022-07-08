@@ -1,10 +1,13 @@
 ﻿module Overwurd.Infrastructure.Tests.Common.Utils
 
+open System.Threading
 open Microsoft.Extensions.Configuration
 open NUnit.Framework
-open System.Threading.Tasks
+open Npgsql
 
 open Overwurd.Infrastructure.Database
+open System.Threading.Tasks
+open Overwurd.Domain.Common.Persistence
 open Overwurd.Infrastructure.Tests.Common.Database
 
 let private getConnectionString () =
@@ -17,14 +20,27 @@ let private getConnectionString () =
 
     configuration.GetConnectionString("Default")
 
-let withConnectionAsync (queryAsync: Session -> 'a Task): 'a Task =
+let withConnectionAsync (queryAsync: DbSession -> 'a Task): 'a Task =
     task {
         let connectionString = getConnectionString ()
-        return! Connection.withConnectionAsync connectionString queryAsync
+        use connection = new NpgsqlConnection(connectionString)
+        do! connection.OpenAsync()
+
+        use! transaction = connection.BeginTransactionAsync()
+        let session =
+            { Connection = connection
+              Transaction = transaction
+              CancellationToken = CancellationToken.None }
+
+        let! result = queryAsync session
+        do! transaction.CommitAsync()
+
+        return result
     }
 
-let prepareDatabaseAsync (session: Session): unit Task =
+let prepareDatabaseAsync (session: DbSession): unit Task =
     task {
+        do Dapper.registerTypeHandlers()
         do! clearAsync session
         ()
     }

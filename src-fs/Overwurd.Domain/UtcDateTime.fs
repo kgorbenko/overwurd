@@ -8,6 +8,10 @@ type UtcDateTime =
 
 module UtcDateTime =
 
+    let now (): UtcDateTime =
+        DateTime.UtcNow
+        |> UtcDateTime
+
     let create (date: DateTime): UtcDateTime =
         date |> ensureUtc |> UtcDateTime
 

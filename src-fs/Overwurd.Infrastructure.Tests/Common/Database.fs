@@ -4,13 +4,15 @@ open Dapper
 open System.Threading.Tasks
 
 open Overwurd.Domain
+open Overwurd.Domain.Common.Persistence
 open Overwurd.Domain.Jwt
-open Overwurd.Domain.User
-open Overwurd.Domain.Course
-open Overwurd.Infrastructure
-open Overwurd.Infrastructure.Database
+open Overwurd.Domain.Users
+open Overwurd.Domain.Users.Entities
+open Overwurd.Domain.Jwt.Entities
+open Overwurd.Infrastructure.UserStorage
+open Overwurd.Infrastructure.JwtStorage
 
-let clearAsync (session: Session): unit Task =
+let clearAsync (session: DbSession): unit Task =
     task {
         let sql = """
 truncate "overwurd"."Users" restart identity cascade;
@@ -22,7 +24,7 @@ truncate "overwurd"."Users" restart identity cascade;
         ()
     }
 
-let getAllUsersAsync (session: Session): UserPersistentModel list Task =
+let getAllUsersAsync (session: DbSession): UserPersistentModel list Task =
     task {
         let sql = """
 select
@@ -42,7 +44,7 @@ from "overwurd"."Users"
             |> List.ofSeq
     }
 
-let getAllRefreshTokensAsync (session: Session): JwtRefreshTokenPersistentModel list Task =
+let getAllRefreshTokensAsync (session: DbSession): JwtRefreshTokenPersistentModel list Task =
     task {
         let sql = """
 select
@@ -65,7 +67,7 @@ select
     }
 
 let createUserAsync (creationParameters: UserCreationParametersForPersistence)
-                    (session: Session)
+                    (session: DbSession)
                     : UserId Task =
     task {
         let sql = """
@@ -96,39 +98,8 @@ insert into "overwurd"."Users" (
         return (UserId id)
     }
 
-let createCourseAsync (creationParameters: CourseCreationParametersForPersistence)
-                      (userId: int)
-                      (session: Session)
-                      : CourseId Task =
-    task {
-        let sql = """
-insert into "overwurd"."Courses" (
-    "CreatedAt",
-    "UserId",
-    "Name",
-    "Description"
-) values (
-    @CreatedAt,
-    @UserId,
-    @Name,
-    @Description
-) returning "Id"
-"""
-
-        let parameters =
-            {| CreatedAt = UtcDateTime.unwrap creationParameters.CreatedAt
-               UserId = userId
-               Name = CourseName.unwrap creationParameters.Name
-               Description = creationParameters.Description |> Option.map CourseDescription.unwrap |}
-
-        let command = CommandDefinition(commandText = sql, parameters = parameters, transaction = session.Transaction)
-        let! id = session.Connection.QuerySingleAsync<int> command
-
-        return (CourseId id)
-    }
-
-let createRefreshTokenAsync (creationParameters: JwtRefreshTokenCreationParametersForPersistence)
-                            (session: Session)
+let createRefreshTokenAsync (creationParameters: JwtRefreshTokenCreationParameters)
+                            (session: DbSession)
                             : JwtRefreshTokenId Task =
     task {
         let sql = """

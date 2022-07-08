@@ -1,16 +1,18 @@
 ﻿module Overwurd.Domain.Features.Authentication.Workflows
 
 open System
+open System.Data
 open System.Security.Claims
+open System.Threading
 open System.Threading.Tasks
 
 open Overwurd.Domain
 open Overwurd.Domain.Jwt
 open Overwurd.Domain.Jwt.Actions
 open Overwurd.Domain.Users
+open Overwurd.Domain.Common
 open Overwurd.Domain.Users.Actions
 open Overwurd.Domain.Users.Entities
-open Overwurd.Domain.Common.Utils
 open Overwurd.Domain.Common.Validation
 open Overwurd.Domain.Common.Persistence
 open Overwurd.Domain.Features.Authentication
@@ -19,7 +21,7 @@ type AuthDependencies =
     { GenerateGuid: GenerateGuid
       JwtConfiguration: JwtConfiguration
       UserStorage: UserStorage
-      RefreshTokensPersister: JwtStorage }
+      JwtStorage: JwtStorage }
 
 let private makeUserActionsDependencies
     (authDependencies: AuthDependencies)
@@ -31,7 +33,7 @@ let private makeJwtDependencies
     : Dependencies =
         { GenerateGuid = authDependencies.GenerateGuid
           JwtConfiguration = authDependencies.JwtConfiguration
-          RefreshTokensPersister = authDependencies.RefreshTokensPersister }
+          JwtStorage = authDependencies.JwtStorage }
 
 let private validate (loginRaw: string)
                      (passwordRaw: string)
@@ -188,12 +190,12 @@ let private verifyPasswordAsync (dependencies: AuthDependencies)
             else Error InvalidPassword
     }
 
-let private signUpAsync (dependencies: AuthDependencies)
-                        (now: UtcDateTime)
-                        (loginRaw: string)
-                        (passwordRaw: string)
-                        (session: DbSession)
-                        : Result<SuccessfulAuthenticationData, SignUpError> Task =
+let private signUpAsyncInternal (dependencies: AuthDependencies)
+                                (now: UtcDateTime)
+                                (loginRaw: string)
+                                (passwordRaw: string)
+                                (session: DbSession)
+                                : Result<SuccessfulAuthenticationData, SignUpError> Task =
     task {
         return!
             validate loginRaw passwordRaw
@@ -202,30 +204,61 @@ let private signUpAsync (dependencies: AuthDependencies)
             |> AsyncResult.asynchronouslyBindTask (generateTokensAsync dependencies now session)
     }
 
-let private refreshAsync (dependencies: AuthDependencies)
-                         (tokenValuesPair: JwtTokensPair)
-                         (now: UtcDateTime)
-                         (session: DbSession)
-                         : Result<SuccessfulAuthenticationData, RefreshError> Task =
+let private refreshAsyncInternal (dependencies: AuthDependencies)
+                                 (tokenValuesPair: JwtTokensPair)
+                                 (now: UtcDateTime)
+                                 (session: DbSession)
+                                 : Result<SuccessfulAuthenticationData, RefreshError> Task =
     task {
         let refreshDependencies =
             { GenerateGuid = dependencies.GenerateGuid
               JwtConfiguration = dependencies.JwtConfiguration
-              RefreshTokensPersister = dependencies.RefreshTokensPersister }
+              JwtStorage = dependencies.JwtStorage }
 
         return!
             refreshAccessTokenAsync refreshDependencies tokenValuesPair now session
             |> AsyncResult.asynchronouslyBindTask (getUserByTokensAsync dependencies session)
     }
 
-let private signInAsync (dependencies: AuthDependencies)
-                        (credentials: Credentials)
-                        (now: UtcDateTime)
-                        (session: DbSession)
-                        : Result<SuccessfulAuthenticationData, SignInError> Task =
+let private signInAsyncInternal (dependencies: AuthDependencies)
+                                (credentials: Credentials)
+                                (now: UtcDateTime)
+                                (session: DbSession)
+                                : Result<SuccessfulAuthenticationData, SignInError> Task =
     task {
         return!
             findUserByLogin dependencies credentials session
             |> AsyncResult.asynchronouslyBindTask (verifyPasswordAsync dependencies credentials session)
             |> AsyncResult.asynchronouslyBindTask (generateTokensAsync dependencies now session)
+    }
+
+let signUpAsync (dependencies: AuthDependencies)
+                (now: UtcDateTime)
+                (loginRaw: string)
+                (passwordRaw: string)
+                (connection: IDbConnection)
+                (cancellationToken: CancellationToken)
+                : Result<SuccessfulAuthenticationData, SignUpError> Task =
+    task {
+        return! signUpAsyncInternal dependencies now loginRaw passwordRaw |> inTransactionAsync connection cancellationToken
+    }
+
+let refreshAsync (dependencies: AuthDependencies)
+                 (tokenValuesPair: JwtTokensPair)
+                 (now: UtcDateTime)
+                 (connection: IDbConnection)
+                 (cancellationToken: CancellationToken)
+                 : Result<SuccessfulAuthenticationData, RefreshError> Task =
+    task {
+        return! refreshAsyncInternal dependencies tokenValuesPair now |> inTransactionAsync connection cancellationToken
+    }
+
+let signInAsync (dependencies: AuthDependencies)
+                (credentials: Credentials)
+                (now: UtcDateTime)
+                (connection: IDbConnection)
+                (cancellationToken: CancellationToken)
+                : Result<SuccessfulAuthenticationData, SignInError> Task =
+    task {
+        return! signInAsyncInternal dependencies credentials now |> inTransactionAsync connection cancellationToken
     }

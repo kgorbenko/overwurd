@@ -4,30 +4,22 @@ open System.Data
 open System.Threading.Tasks
 open Npgsql
 
-type Session =
-    { Connection: IDbConnection
-      Transaction: IDbTransaction }
-
 module Connection =
 
-    let private makeConnectionAsync (queryAsync: Session -> 'a Task)
+    let private makeConnectionAsync (queryAsync: IDbConnection -> 'a Task)
                                     (connectionString: string)
                                     : 'a Task =
         task {
             use connection = new NpgsqlConnection(connectionString)
             do! connection.OpenAsync()
 
-            use transaction = connection.BeginTransaction()
-            let session = { Connection = connection; Transaction = transaction; }
-
-            let! result = queryAsync session
-            transaction.Commit()
+            let! result = queryAsync connection
 
             return result
         }
 
     let withConnectionAsync (connectionString: string)
-                            (queryAsync: Session -> 'a Task)
+                            (queryAsync: IDbConnection -> 'a Task)
                             : 'a Task =
         task {
             return! makeConnectionAsync queryAsync connectionString

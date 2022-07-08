@@ -9,10 +9,10 @@ open Microsoft.IdentityModel.Tokens
 
 open Overwurd.Domain
 open Overwurd.Domain.Jwt
-open Overwurd.Domain.Jwt.Entities
 open Overwurd.Domain.Users
+open Overwurd.Domain.Common
+open Overwurd.Domain.Jwt.Entities
 open Overwurd.Domain.Users.Entities
-open Overwurd.Domain.Common.Utils
 open Overwurd.Domain.Common.Persistence
 
 type GenerateGuid =
@@ -21,10 +21,10 @@ type GenerateGuid =
 type Dependencies =
     { GenerateGuid: GenerateGuid
       JwtConfiguration: JwtConfiguration
-      RefreshTokensPersister: JwtStorage }
+      JwtStorage: JwtStorage }
 
 let getBytesFromSigningKey (key: string) =
-    Encoding.ASCII.GetBytes(key)
+    Encoding.UTF8.GetBytes key
 
 let private createAccessToken (jwtConfiguration: JwtConfiguration)
                               (tokenId: Guid)
@@ -133,7 +133,7 @@ let private getActualRefreshTokenAsync (dependencies: Dependencies)
         let! refreshToken =
             let getTokenByUserAndAccessToken =
                 dependencies
-                    .RefreshTokensPersister
+                    .JwtStorage
                     .GetRefreshTokenByUserAndAccessTokenAsync
             getTokenByUserAndAccessToken parsedIds.UserId parsedIds.AccessTokenId session
 
@@ -221,7 +221,7 @@ let private updateTokensAsync (dependencies: Dependencies)
         do!
             let updateRefreshTokenAsync =
                 dependencies
-                    .RefreshTokensPersister
+                    .JwtStorage
                     .UpdateRefreshTokenAsync
             updateRefreshTokenAsync refreshToken.Id refreshTokenUpdateParameters session
 
@@ -257,7 +257,7 @@ let generateTokensPairAsync (dependencies: Dependencies)
         let! userRefreshTokens =
             let getUserRefreshTokensAsync =
                 dependencies
-                    .RefreshTokensPersister
+                    .JwtStorage
                     .GetUserRefreshTokensAsync
             getUserRefreshTokensAsync userId session
         let tokenIdsToRemove = getTokenIdsToRemove tokensConfiguration.MaxTokensPerUser nowUnwrapped userRefreshTokens
@@ -266,7 +266,7 @@ let generateTokensPairAsync (dependencies: Dependencies)
             do!
                 let removeRefreshTokensAsync =
                     dependencies
-                        .RefreshTokensPersister
+                        .JwtStorage
                         .RemoveRefreshTokensAsync
                 removeRefreshTokensAsync (tokenIdsToRemove |> Set.toList) session
 
@@ -284,7 +284,7 @@ let generateTokensPairAsync (dependencies: Dependencies)
         let! _ =
             let createRefreshTokensAsync =
                 dependencies
-                    .RefreshTokensPersister
+                    .JwtStorage
                     .CreateRefreshTokenAsync
             createRefreshTokensAsync refreshTokenCreationParameters session
 

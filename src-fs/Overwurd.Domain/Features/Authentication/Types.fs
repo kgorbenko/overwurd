@@ -22,4 +22,3 @@ type SignUpError =
 type SignInError =
     | UserDoesNotExist
     | InvalidPassword
-

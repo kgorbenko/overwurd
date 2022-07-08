@@ -1,8 +1,6 @@
 ﻿module internal Overwurd.Domain.Common.Utils
 
 open System
-open System.Text
-open System.Threading.Tasks
 
 let ensureUtc (dateTime: DateTime): DateTime =
     match dateTime.Kind with
@@ -13,40 +11,11 @@ let tryParseInt (value: string): int Option =
     match Int32.TryParse value with
     | true, value -> Some value
     | false, _ -> None
-    
+
+let parseInt (value: string): int =
+    match tryParseInt value with
+    | Some parsed -> parsed
+    | None -> raise (InvalidOperationException $"Cannot parse '{value}' to integer")
+
 let toUpperCase (value: string): string =
     value.ToUpperInvariant()
-
-let toByteArray (value: string): byte array =
-    Encoding.UTF8.GetBytes value
-
-module AsyncResult =
-
-    let asynchronouslyBind (binder: 'T -> Task<Result<'U, 'TError>>)
-                           (result: Result<'T, 'TError>)
-                           : Task<Result<'U, 'TError>> =
-        task {
-            match result with
-            | Ok r -> return! binder r
-            | Error e -> return Error e
-        }
-
-    let asynchronouslyBindTask (binder: 'T -> Task<Result<'U, 'TError>>)
-                               (resultTask: Task<Result<'T, 'TError>>)
-                               : Task<Result<'U, 'TError>> =
-        task {
-            let! result = resultTask
-            match result with
-            | Ok r -> return! binder r
-            | Error e -> return Error e
-        }
-
-    let synchronouslyBindTask (binder: 'T -> Result<'U, 'TError>)
-                              (resultTask: Task<Result<'T, 'TError>>)
-                              : Task<Result<'U, 'TError>> =
-        task {
-            let! result = resultTask
-            match result with
-            | Ok r -> return binder r
-            | Error e -> return Error e
-        }

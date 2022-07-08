@@ -5,13 +5,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FsConfig" Version="3.1.0" />
     <PackageReference Include="Giraffe" Version="6.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.6" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="Common\Configuration.fs" />
     <Compile Include="Common\Utils.fs" />
+    <Compile Include="Common\HttpContextExtensions.fs" />
+    <Compile Include="DomainIntegration\Common.fs" />
+    <Compile Include="DomainIntegration\Status.fs" />
+    <Compile Include="DomainIntegration\Authentication.fs" />
+    <Compile Include="Handlers\Common.fs" />
     <Compile Include="Handlers\Status.fs" />
+    <Compile Include="Handlers\Authentication.fs" />
     <Compile Include="WebApp.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

@@ -11,10 +11,9 @@
     <Content Include="Migrations\V1_0_0_1__JwtRefreshTokenTable.sql" />
     <Compile Include="Database\Dapper.fs" />
     <Compile Include="Database\Database.fs" />
-    <Compile Include="StatusStore.fs" />
-    <Compile Include="UserStore.fs" />
-    <Compile Include="CourseStore.fs" />
-    <Compile Include="JwtRefreshTokenStore.fs" />
+    <Compile Include="StatusStorage.fs" />
+    <Compile Include="UserStorage.fs" />
+    <Compile Include="JwtStorage.fs" />
   </ItemGroup>
 
   <ItemGroup>

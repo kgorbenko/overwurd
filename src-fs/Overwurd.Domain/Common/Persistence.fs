@@ -9,9 +9,9 @@ type DbSession =
       Transaction: IDbTransaction
       CancellationToken: CancellationToken }
 
-let inTransactionAsync (queryAsync: DbSession -> 'a Task)
+let inTransactionAsync (connection: IDbConnection)
                        (cancellationToken: CancellationToken)
-                       (connection: IDbConnection): 'a Task =
+                       (queryAsync: DbSession -> 'a Task): 'a Task =
     task {
         use transaction = connection.BeginTransaction()
         let session =
