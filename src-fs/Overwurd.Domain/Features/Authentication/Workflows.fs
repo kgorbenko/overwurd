@@ -35,15 +35,15 @@ let private makeJwtDependencies
           JwtConfiguration = authDependencies.JwtConfiguration
           JwtStorage = authDependencies.JwtStorage }
 
-let private validate (loginRaw: string)
-                     (passwordRaw: string)
-                     : Result<Login * Password, SignUpError> =
-    let loginValidationResult = Login.validate loginRaw
-    let passwordValidationResult = Password.validate passwordRaw
+let private validate (credentials: RawCredentials)
+                     : Result<Credentials, SignUpError> =
+    let loginValidationResult = Login.validate credentials.Login
+    let passwordValidationResult = Password.validate credentials.Password
 
     match loginValidationResult, passwordValidationResult with
     | Success, Success ->
-        (Login.create loginRaw, Password.create passwordRaw)
+        { Login = Login.create credentials.Login
+          Password = Password.create credentials.Password }
         |> Ok
     | result1, result2 ->
         [ result1; result2 ]
@@ -58,19 +58,15 @@ let private validate (loginRaw: string)
 let private createUserAsync (dependencies: AuthDependencies)
                             (now: UtcDateTime)
                             (session: DbSession)
-                            (credentials: Login * Password)
+                            (credentials: Credentials)
                             : Result<UserId, SignUpError> Task =
     task {
-        let login, password = credentials
-
-
-            
         let! creationResult =
             let userActionsDependencies = makeUserActionsDependencies dependencies
             let creationParameters: UserCreationParameters =
                 { CreatedAt = now
-                  Login = login
-                  Password = password }
+                  Login = credentials.Login
+                  Password = credentials.Password }
             createUserAsync userActionsDependencies creationParameters session
 
         match creationResult with
@@ -152,7 +148,7 @@ let private getUserByTokensAsync (dependencies: AuthDependencies)
     }
 
 let private findUserByLogin (dependencies: AuthDependencies)
-                            (credentials: Credentials)
+                            (credentials: RawCredentials)
                             (session: DbSession)
                             : Result<User, SignInError> Task =
     task {
@@ -176,7 +172,7 @@ let private findUserByLogin (dependencies: AuthDependencies)
     }
 
 let private verifyPasswordAsync (dependencies: AuthDependencies)
-                                (credentials: Credentials)
+                                (credentials: RawCredentials)
                                 (session: DbSession)
                                 (user: User)
                                 : Result<User, SignInError> Task =
@@ -192,13 +188,12 @@ let private verifyPasswordAsync (dependencies: AuthDependencies)
 
 let private signUpAsyncInternal (dependencies: AuthDependencies)
                                 (now: UtcDateTime)
-                                (loginRaw: string)
-                                (passwordRaw: string)
+                                (credentials: RawCredentials)
                                 (session: DbSession)
                                 : Result<SuccessfulAuthenticationData, SignUpError> Task =
     task {
         return!
-            validate loginRaw passwordRaw
+            validate credentials
             |> AsyncResult.asynchronouslyBind (createUserAsync dependencies now session)
             |> AsyncResult.asynchronouslyBindTask (getUserById dependencies session)
             |> AsyncResult.asynchronouslyBindTask (generateTokensAsync dependencies now session)
@@ -221,7 +216,7 @@ let private refreshAsyncInternal (dependencies: AuthDependencies)
     }
 
 let private signInAsyncInternal (dependencies: AuthDependencies)
-                                (credentials: Credentials)
+                                (credentials: RawCredentials)
                                 (now: UtcDateTime)
                                 (session: DbSession)
                                 : Result<SuccessfulAuthenticationData, SignInError> Task =
@@ -234,13 +229,12 @@ let private signInAsyncInternal (dependencies: AuthDependencies)
 
 let signUpAsync (dependencies: AuthDependencies)
                 (now: UtcDateTime)
-                (loginRaw: string)
-                (passwordRaw: string)
+                (credentials: RawCredentials)
                 (connection: IDbConnection)
                 (cancellationToken: CancellationToken)
                 : Result<SuccessfulAuthenticationData, SignUpError> Task =
     task {
-        return! signUpAsyncInternal dependencies now loginRaw passwordRaw |> inTransactionAsync connection cancellationToken
+        return! signUpAsyncInternal dependencies now credentials |> inTransactionAsync connection cancellationToken
     }
 
 let refreshAsync (dependencies: AuthDependencies)
@@ -254,7 +248,7 @@ let refreshAsync (dependencies: AuthDependencies)
     }
 
 let signInAsync (dependencies: AuthDependencies)
-                (credentials: Credentials)
+                (credentials: RawCredentials)
                 (now: UtcDateTime)
                 (connection: IDbConnection)
                 (cancellationToken: CancellationToken)

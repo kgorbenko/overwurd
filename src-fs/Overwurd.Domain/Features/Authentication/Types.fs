@@ -5,9 +5,13 @@ open Overwurd.Domain.Jwt
 open Overwurd.Domain.Users
 open Overwurd.Domain.Common.Validation
 
-type Credentials =
+type RawCredentials =
     { Login: string
       Password: string }
+
+type Credentials =
+    { Login: Login
+      Password: Password }
 
 type SuccessfulAuthenticationData =
     { User: User

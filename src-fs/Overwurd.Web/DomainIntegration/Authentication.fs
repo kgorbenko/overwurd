@@ -11,14 +11,13 @@ open Overwurd.Domain.Features.Authentication.Workflows
 
 let signUpAsync
     (now: UtcDateTime)
-    (loginRaw: string)
-    (passwordRaw: string)
+    (credentials: RawCredentials)
     (ctx: HttpContext)
     (cancellationToken: CancellationToken)
     (connection: IDbConnection) =
         task {
             let dependencies = getAuthDependencies ctx
-            return! signUpAsync dependencies now loginRaw passwordRaw connection cancellationToken
+            return! signUpAsync dependencies now credentials connection cancellationToken
         }
 
 let refreshAsync
@@ -33,7 +32,7 @@ let refreshAsync
         }
 
 let signInAsync
-    (credentials: Credentials)
+    (credentials: RawCredentials)
     (now: UtcDateTime)
     (ctx: HttpContext)
     (cancellationToken: CancellationToken)

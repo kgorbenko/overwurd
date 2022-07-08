@@ -48,8 +48,11 @@ let signUp: HttpHandler =
             let! parameters = ctx.BindJsonAsync<SignUpParameters>()
             let now = UtcDateTime.now ()
 
+            let credentials: RawCredentials =
+                { Login = parameters.Login
+                  Password = parameters.Password }
             let! signUpResult =
-                signUpAsync now parameters.Login parameters.Password ctx
+                signUpAsync now credentials ctx
                 |> withConnectionAsync ctx
 
             match signUpResult with
@@ -74,7 +77,7 @@ let signIn: HttpHandler =
             let! parameters = ctx.BindJsonAsync<SignInParameters>()
             let now = UtcDateTime.now ()
 
-            let credentials: Credentials =
+            let credentials: RawCredentials =
                 { Login = parameters.Login
                   Password = parameters.Password }
             
