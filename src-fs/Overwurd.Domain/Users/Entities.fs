@@ -68,7 +68,7 @@ module NormalizedLogin =
         match login with
         | NormalizedLogin value -> value
 
-module Password =
+module PasswordValue =
 
     open Overwurd.Domain.Common.Validation
 
@@ -82,19 +82,19 @@ module Password =
 
         validate rules password
 
-    let create (password: string): Password =
+    let create (password: string): PasswordValue =
         password
         |> validate
         |> function
-            | Success -> Password password
+            | Success -> PasswordValue password
             | Fail messages -> raise (ValidationException messages)
 
-    let internal createBypassingValidation (password: string): Password =
-        Password password
+    let internal createBypassingValidation (password: string): PasswordValue =
+        PasswordValue password
 
-    let unwrap (password: Password): string =
+    let unwrap (password: PasswordValue): string =
         match password with
-        | Password value -> value
+        | PasswordValue value -> value
 
 module internal PasswordHash =
 
@@ -115,13 +115,13 @@ module internal PasswordHash =
             return Convert.ToBase64String hashBytes
         }
 
-    let generateAsync (password: Password): PasswordHashAndSalt Task =
+    let generateAsync (password: PasswordValue): Password Task =
         task {
             let generateSalt saltLength =
                 RandomNumberGenerator.GetBytes(saltLength)
 
             let saltBytes = generateSalt saltLength
-            let! hash = hashAsync (Password.unwrap password) saltBytes hashLength
+            let! hash = hashAsync (PasswordValue.unwrap password) saltBytes hashLength
             
             let salt = Convert.ToBase64String saltBytes
 
@@ -130,7 +130,7 @@ module internal PasswordHash =
                   Salt = salt }
         }
 
-    let verifyAsync (password: string) (currentHash: PasswordHashAndSalt): bool Task =
+    let verifyAsync (password: string) (currentHash: Password): bool Task =
         task {
             let saltBytes = Convert.FromBase64String currentHash.Salt
             let! hash = hashAsync password saltBytes hashLength

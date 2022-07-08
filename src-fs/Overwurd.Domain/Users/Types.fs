@@ -11,14 +11,14 @@ type Login =
 type NormalizedLogin =
     private NormalizedLogin of string
 
-type Password =
-    private Password of string
+type PasswordValue =
+    private PasswordValue of string
 
 type PasswordHash = string
 
 type PasswordSalt = string
 
-type PasswordHashAndSalt =
+type Password =
     { Hash: PasswordHash
       Salt: PasswordSalt }
 
@@ -26,5 +26,4 @@ type User =
     { Id: UserId
       CreatedAt: UtcDateTime
       Login: Login
-      PasswordHash: PasswordHash
-      PasswordSalt: PasswordSalt }
+      Password: Password }

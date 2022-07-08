@@ -24,10 +24,11 @@ let private toDomainUser (model: UserPersistentModel): User =
     { Id = UserId model.Id
       CreatedAt = UtcDateTime.create model.CreatedAt
       Login = Login.create model.Login
-      PasswordHash = model.PasswordHash
-      PasswordSalt = model.PasswordSalt }
+      Password =
+          { Hash = model.PasswordHash
+            Salt = model.PasswordSalt } }
 
-let private toDomainHashAndSalt (model: PasswordPersistentModel): PasswordHashAndSalt =
+let private toDomainHashAndSalt (model: PasswordPersistentModel): Password =
     { Hash = model.Hash
       Salt = model.Salt }
 

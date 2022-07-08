@@ -8,7 +8,7 @@ open Overwurd.Domain.Common.Persistence
 type UserCreationParameters =
     { CreatedAt: UtcDateTime
       Login: Login
-      Password: Password }
+      Password: PasswordValue }
 
 type UserCreationParametersForPersistence =
     { CreatedAt: UtcDateTime
@@ -27,7 +27,7 @@ type CreateUserAsync =
     UserCreationParametersForPersistence -> DbSession -> UserId Task
 
 type FindUserPasswordHashAndSalt =
-    UserId -> DbSession -> PasswordHashAndSalt option Task
+    UserId -> DbSession -> Password option Task
 
 type UserStorage =
     { FindUserByIdAsync: FindUserByIdAsync

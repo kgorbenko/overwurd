@@ -46,8 +46,9 @@ let ``Finds single User by Id`` () =
             Some { Id = user.Id.Value
                    CreatedAt = user.CreatedAt
                    Login = user.Login
-                   PasswordHash = user.PasswordHash
-                   PasswordSalt = user.PasswordSalt }
+                   Password =
+                       { Hash = user.PasswordHash
+                         Salt = user.PasswordSalt } }
 
         actual |> should equal expected
     }
@@ -85,8 +86,9 @@ let ``Finds single User by Login`` () =
             Some { Id = user.Id.Value
                    CreatedAt = user.CreatedAt
                    Login = user.Login
-                   PasswordHash = user.PasswordHash
-                   PasswordSalt = user.PasswordSalt }
+                   Password =
+                       { Hash = user.PasswordHash
+                         Salt = user.PasswordSalt } }
 
         actual |> should equal expected
     }

@@ -11,7 +11,7 @@ type RawCredentials =
 
 type Credentials =
     { Login: Login
-      Password: Password }
+      Password: PasswordValue }
 
 type SuccessfulAuthenticationData =
     { User: User

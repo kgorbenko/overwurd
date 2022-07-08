@@ -38,12 +38,12 @@ let private makeJwtDependencies
 let private validate (credentials: RawCredentials)
                      : Result<Credentials, SignUpError> =
     let loginValidationResult = Login.validate credentials.Login
-    let passwordValidationResult = Password.validate credentials.Password
+    let passwordValidationResult = PasswordValue.validate credentials.Password
 
     match loginValidationResult, passwordValidationResult with
     | Success, Success ->
         { Login = Login.create credentials.Login
-          Password = Password.create credentials.Password }
+          Password = PasswordValue.create credentials.Password }
         |> Ok
     | result1, result2 ->
         [ result1; result2 ]
