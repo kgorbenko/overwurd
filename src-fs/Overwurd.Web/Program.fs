@@ -1,6 +1,8 @@
 module Overwurd.Web.App
 
 open System
+open System.Text.Json
+open System.Text.Json.Serialization
 open Giraffe
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
@@ -26,10 +28,20 @@ let configureApp (app : IApplicationBuilder) =
         .UseStaticFiles()
         .UseGiraffe(webApp)
 
-let configureServices (services : IServiceCollection) =
+let getValidationParameters (services: IServiceCollection) =
     let provider = services.BuildServiceProvider()
     let configuration = provider.GetService<IConfiguration>()
-    let validationParameters = getValidationParameters configuration
+    getValidationParameters configuration
+
+let getJsonOptions () =
+    let jsonOptions = JsonSerializerOptions()
+    jsonOptions.PropertyNamingPolicy <- JsonNamingPolicy.CamelCase
+    jsonOptions.Converters.Add(JsonFSharpConverter())
+    jsonOptions
+
+let configureServices (services : IServiceCollection) =
+    services.AddSingleton(getJsonOptions ()) |> ignore
+    services.AddSingleton<Json.ISerializer, SystemTextJson.Serializer>() |> ignore
 
     services
         .AddAuthentication(fun options ->
@@ -37,7 +49,7 @@ let configureServices (services : IServiceCollection) =
             options.DefaultChallengeScheme <- JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(fun options ->
             options.SaveToken <- true
-            options.TokenValidationParameters <- validationParameters)
+            options.TokenValidationParameters <- getValidationParameters services)
         |> ignore
 
     services.AddGiraffe()

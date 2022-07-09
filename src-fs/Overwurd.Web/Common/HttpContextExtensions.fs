@@ -1,6 +1,6 @@
 ﻿namespace Overwurd.Web.Common
 
-open System
+open System.Threading.Tasks
 open Giraffe
 open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.Configuration
@@ -39,5 +39,13 @@ type HttpContextExtensions() =
             | None -> failwith $"Provided by user token does not contain '{claimsOptions.UserIdClaimType}'"
 
     [<Extension>]
-    static member GetLogger(ctx: HttpContext): ILogger =
-        ctx.GetService<ILogger>()
+    static member TryBindJsonAsync<'a>(ctx: HttpContext): 'a option Task =
+        task {
+            let serializer = ctx.GetJsonSerializer()
+            try
+                let! deserialized = serializer.DeserializeAsync<'a> ctx.Request.Body
+                return Some deserialized
+            with
+            | :? System.Text.Json.JsonException ->
+                return None
+        }
