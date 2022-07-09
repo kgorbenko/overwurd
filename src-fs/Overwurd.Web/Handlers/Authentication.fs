@@ -68,7 +68,7 @@ let private signUp (parameters: SignUpParameters): HttpHandler =
                 return! RequestErrors.badRequest (json {| Errors = messages |}) earlyReturn ctx
             | Error LoginIsOccupied ->
                 logger.LogInformation("Unsuccessful attempt to sign up with login '{Login}': login is occupied", credentials.Login)
-                return! setStatusCode StatusCodes.Status400BadRequest earlyReturn ctx
+                return! RequestErrors.badRequest (json {| Errors = [ "Login is occupied." ] |}) earlyReturn ctx
         }
 
 let private signIn (parameters: SignInParameters): HttpHandler =
@@ -91,10 +91,10 @@ let private signIn (parameters: SignInParameters): HttpHandler =
                 return! json (makeResponseData data) earlyReturn ctx
             | Error UserDoesNotExist ->
                 logger.LogInformation("Unsuccessful attempt to sign in by login '{Login}': user with such login does not exist", credentials.Login)
-                return! setStatusCode StatusCodes.Status400BadRequest earlyReturn ctx
+                return! RequestErrors.badRequest (json {| Errors = [ "Invalid login or password." ] |}) earlyReturn ctx
             | Error InvalidPassword ->
                 logger.LogInformation("Unsuccessful attempt to sign in by login '{Login}': password is invalid", credentials.Login)
-                return! setStatusCode StatusCodes.Status400BadRequest earlyReturn ctx
+                return! RequestErrors.badRequest (json {| Errors = [ "Invalid login or password." ] |}) earlyReturn ctx
         }
 
 let private refresh (parameters: RefreshParameters): HttpHandler =
