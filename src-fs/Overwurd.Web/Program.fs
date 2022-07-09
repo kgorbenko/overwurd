@@ -11,6 +11,7 @@ open Microsoft.Extensions.Hosting
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.AspNetCore.Authentication.JwtBearer
+open Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 
 open Overwurd.Infrastructure.Database
 open Overwurd.Web.Common.Configuration
@@ -20,39 +21,56 @@ let errorHandler (ex: Exception) (logger: ILogger) =
     logger.LogError(ex, "An unhandled exception has occurred while executing the request.")
     clearResponse >=> setStatusCode 500
 
-let configureApp (app : IApplicationBuilder) =
-    do Dapper.registerTypeHandlers ()
+let configureApp (app : WebApplication) (env: IWebHostEnvironment) =
     app.UseGiraffeErrorHandler(errorHandler)
         .UseAuthentication()
         .UseHsts()
         .UseStaticFiles()
         .UseGiraffe(webApp)
 
-let getValidationParameters (services: IServiceCollection) =
-    let provider = services.BuildServiceProvider()
-    let configuration = provider.GetService<IConfiguration>()
-    getValidationParameters configuration
+    app.UseSpaStaticFiles()
+    app.UseSpa(
+        fun spa ->
+            spa.Options.SourcePath <- "ClientApp"
+        
+            if env.IsDevelopment() then
+                spa.UseReactDevelopmentServer(npmScript = "start")
+        )
 
-let getJsonOptions () =
-    let jsonOptions = JsonSerializerOptions()
-    jsonOptions.PropertyNamingPolicy <- JsonNamingPolicy.CamelCase
-    jsonOptions.Converters.Add(JsonFSharpConverter())
-    jsonOptions
+let configureBuilder (builder : WebApplicationBuilder) =
+    let getValidationParameters (services: IServiceCollection) =
+        let provider = services.BuildServiceProvider()
+        let configuration = provider.GetService<IConfiguration>()
+        getValidationParameters configuration
 
-let configureServices (services : IServiceCollection) =
-    services.AddSingleton(getJsonOptions ()) |> ignore
-    services.AddSingleton<Json.ISerializer, SystemTextJson.Serializer>() |> ignore
+    let getJsonOptions () =
+        let jsonOptions = JsonSerializerOptions()
+        jsonOptions.PropertyNamingPolicy <- JsonNamingPolicy.CamelCase
+        jsonOptions.Converters.Add(JsonFSharpConverter())
+        jsonOptions
 
-    services
-        .AddAuthentication(fun options ->
-            options.DefaultAuthenticateScheme <- JwtBearerDefaults.AuthenticationScheme
-            options.DefaultChallengeScheme <- JwtBearerDefaults.AuthenticationScheme)
-        .AddJwtBearer(fun options ->
-            options.SaveToken <- true
-            options.TokenValidationParameters <- getValidationParameters services)
+    let port = Environment.GetEnvironmentVariable("PORT")
+    builder.WebHost.UseUrls($"http://*:{port}") |> ignore
+
+    builder.Services.AddSingleton(getJsonOptions ()) |> ignore
+    builder.Services.AddSingleton<Json.ISerializer, SystemTextJson.Serializer>() |> ignore
+
+    builder.Services.AddSpaStaticFiles(
+        fun options ->
+            options.RootPath <- "ClientApp/build")
+
+    builder.Services
+        .AddAuthentication(
+            fun options ->
+                options.DefaultAuthenticateScheme <- JwtBearerDefaults.AuthenticationScheme
+                options.DefaultChallengeScheme <- JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(
+            fun options ->
+                options.SaveToken <- true
+                options.TokenValidationParameters <- getValidationParameters builder.Services)
         |> ignore
 
-    services.AddGiraffe()
+    builder.Services.AddGiraffe()
         |> ignore
 
 let configureLogging (builder : ILoggingBuilder) =
@@ -61,14 +79,14 @@ let configureLogging (builder : ILoggingBuilder) =
 
 [<EntryPoint>]
 let main args =
-    Host.CreateDefaultBuilder(args)
-        .ConfigureWebHostDefaults(
-            fun webHostBuilder ->
-                webHostBuilder
-                    .Configure(configureApp)
-                    .ConfigureServices(configureServices)
-                    .ConfigureLogging(configureLogging)
-                    |> ignore)
-        .Build()
-        .Run()
+    do Dapper.registerTypeHandlers ()
+    
+    let builder = WebApplication.CreateBuilder(args)
+    configureBuilder builder
+    configureLogging builder.Logging
+
+    let app = builder.Build()
+    configureApp app builder.Environment
+    app.Run()
+    
     0

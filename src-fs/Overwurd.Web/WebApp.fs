@@ -12,5 +12,4 @@ let webApp: HttpHandler =
     choose [
         Status.handle
         Authentication.handle
-        setStatusCode 404 >=> text "Not Found"
     ]
