@@ -7,7 +7,7 @@ import { AuthFormProcessor } from '../components/AuthFormProcessor';
 import { AuthRegionRoutes } from '../AuthRegion';
 
 interface ISignInData {
-    userName: string;
+    login: string;
     password: string;
 }
 
@@ -23,7 +23,7 @@ export const SignInPage: React.FunctionComponent<ISignInProps> =
         const from = location.state?.from?.pathname ?? props.defaultRedirectPath;
 
         const getDataFromForm = (formData: FormData): ISignInData => ({
-            userName: formData.get('userName') as string,
+            login: formData.get('login') as string,
             password: formData.get('password') as string
         });
 
@@ -35,9 +35,9 @@ export const SignInPage: React.FunctionComponent<ISignInProps> =
             <AuthFormProcessor title="Sign In" onSubmit={onSubmit} getDataFromForm={getDataFromForm} from={from}>
                 <TextField
                     required
-                    label="User name"
-                    id="userName"
-                    name="userName"
+                    label="Login"
+                    id="login"
+                    name="login"
                     autoComplete="username"
                     variant="filled"
                     margin="dense"

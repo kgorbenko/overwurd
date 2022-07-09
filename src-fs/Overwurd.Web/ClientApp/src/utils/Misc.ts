@@ -1,8 +1,3 @@
-export function getModelErrors(modelState: object): string[] {
-    const results = Object.keys(modelState);
-    return results.map(x => modelState[x as keyof object]).flat();
-}
-
 export async function withLoadingAsync(setLoading: (value: boolean) => void, actionAsync: () => Promise<void>) {
     await withEnableAsync(setLoading, actionAsync);
 }

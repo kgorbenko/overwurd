@@ -67,7 +67,7 @@ export function useAuth(now: Dayjs) {
         context.setUserData({
             ...context.userData!,
             accessToken: result.accessToken,
-            accessTokenExpiresAt: result.expiresAt
+            accessTokenExpiresAt: result.accessTokenExpiresAt
         });
 
         return true;
@@ -93,9 +93,7 @@ export function useAuth(now: Dayjs) {
         const userData = result.signInResult!;
         context.setUserData({
             id: userData.id,
-            userName: userData.userName,
-            firstName: userData.firstName,
-            lastName: userData.lastName,
+            login: userData.login,
             accessToken: userData.accessToken,
             refreshToken: userData.refreshToken,
             accessTokenExpiresAt: userData.accessTokenExpiresAt

@@ -1,42 +1,19 @@
 import dayjs, { Dayjs } from 'dayjs';
-import { getModelErrors } from '../utils/Misc';
 
 export interface ISignInResult {
     isSuccess: boolean;
-    signInResult: ISignInData | undefined;
+    signInResult: IAuthData | undefined;
     signInErrors: string[] | undefined;
 }
 
 export interface ISignInParameters {
-    userName: string;
+    login: string;
     password: string;
-}
-
-interface ISignInData {
-    id: number;
-    userName: string;
-    firstName: string;
-    lastName: string;
-    accessToken: string;
-    refreshToken: string;
-    accessTokenExpiresAt: Dayjs;
-}
-
-interface ISignInDataRaw {
-    id: number;
-    userName: string;
-    firstName: string;
-    lastName: string;
-    accessToken: string;
-    refreshToken: string;
-    accessTokenExpiresAt: string;
 }
 
 export interface ISignUpParameters {
-    userName: string;
+    login: string;
     password: string;
-    firstName: string;
-    lastName: string;
 }
 
 export interface IRefreshAccessTokenParameters {
@@ -44,14 +21,20 @@ export interface IRefreshAccessTokenParameters {
     refreshToken: string;
 }
 
-interface IRefreshAccessTokenResultRaw {
+interface IAuthData {
+    id: number;
+    login: string;
     accessToken: string;
-    expiresAt: string;
+    refreshToken: string;
+    accessTokenExpiresAt: Dayjs;
 }
 
-export interface IRefreshAccessTokenResult {
+interface IAuthDataRaw {
+    id: number;
+    login: string;
     accessToken: string;
-    expiresAt: Dayjs;
+    refreshToken: string;
+    accessTokenExpiresAt: string;
 }
 
 const signUpUrl = '/api/auth/signup';
@@ -95,14 +78,14 @@ async function processSignInAsync(url: string, body: object): Promise<ISignInRes
         return {
             isSuccess: false,
             signInResult: undefined,
-            signInErrors: getModelErrors(await response.json())
+            signInErrors: (await response.json() as any).errors
         }
     }
 
     return undefined;
 }
 
-export async function refreshAccessTokenAsync(parameters: IRefreshAccessTokenParameters): Promise<IRefreshAccessTokenResult | undefined> {
+export async function refreshAccessTokenAsync(parameters: IRefreshAccessTokenParameters): Promise<IAuthData | undefined> {
     try {
         const response = await fetch(refreshUrl, {
             method: 'POST',
@@ -113,28 +96,19 @@ export async function refreshAccessTokenAsync(parameters: IRefreshAccessTokenPar
         });
 
         return response.ok
-            ? mapRawRefreshAccessTokenResult(await response.json())
+            ? mapRawSignInData(await response.json())
             : undefined;
     } catch {
         return undefined;
     }
 }
 
-function mapRawSignInData(resultRaw: ISignInDataRaw): ISignInData {
+function mapRawSignInData(rawData: IAuthDataRaw): IAuthData {
     return {
-        id: resultRaw.id,
-        userName: resultRaw.userName,
-        firstName: resultRaw.firstName,
-        lastName: resultRaw.lastName,
-        accessToken: resultRaw.accessToken,
-        refreshToken: resultRaw.refreshToken,
-        accessTokenExpiresAt: dayjs(resultRaw.accessTokenExpiresAt)
-    };
-}
-
-function mapRawRefreshAccessTokenResult({ accessToken, expiresAt }: IRefreshAccessTokenResultRaw): IRefreshAccessTokenResult {
-    return {
-        accessToken: accessToken,
-        expiresAt: dayjs(expiresAt)
+        id: rawData.id,
+        login: rawData.login,
+        refreshToken: rawData.refreshToken,
+        accessToken: rawData.accessToken,
+        accessTokenExpiresAt: dayjs(rawData.accessTokenExpiresAt)
     };
 }

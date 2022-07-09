@@ -4,9 +4,7 @@ import dayjs, { Dayjs } from 'dayjs';
 
 interface IUserData {
     id: number;
-    userName: string;
-    firstName: string;
-    lastName: string;
+    login: string;
     accessToken: string;
     refreshToken: string;
     accessTokenExpiresAt: Dayjs;
@@ -14,9 +12,7 @@ interface IUserData {
 
 interface IUserDataRaw {
     id: number;
-    userName: string;
-    firstName: string;
-    lastName: string;
+    login: string;
     accessToken: string;
     refreshToken: string;
     accessTokenExpiresAt: string;
@@ -51,9 +47,7 @@ export const AppContextProvider: React.FunctionComponent = ({ children }: React.
             userData: isUserDataPresent
                 ? {
                     id: raw.userData!.id,
-                    userName: raw.userData!.userName,
-                    firstName: raw.userData!.firstName,
-                    lastName: raw.userData!.lastName,
+                    login: raw.userData!.login,
                     accessToken: raw.userData!.accessToken,
                     refreshToken: raw.userData!.refreshToken,
                     accessTokenExpiresAt: expiresAt!
