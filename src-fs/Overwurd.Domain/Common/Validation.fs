@@ -49,3 +49,11 @@ let validate ruleMessages value =
     |> function
         | [] -> Success
         | messages -> Fail messages
+
+let shrinkErrors (results: ValidationResult list): ValidationErrorMessage list =
+    results
+    |> List.choose (fun x ->
+        match x with
+        | Success -> None
+        | Fail messages -> Some messages)
+    |> List.concat

@@ -3,6 +3,7 @@
 open Giraffe.Core
 open Microsoft.AspNetCore.Http
 
+open Giraffe.Routing
 open Overwurd.Web.Handlers.Common
 open Overwurd.Web.Common.Utils
 open Overwurd.Web.DomainIntegration.Status
@@ -11,7 +12,7 @@ type ApplicationStatus =
     { ApplicationVersion: string
       DatabaseVersion: string }
 
-let status: HttpHandler =
+let private status: HttpHandler =
     fun (next: HttpFunc) (ctx: HttpContext) ->
         task {
             let! status =
@@ -22,5 +23,10 @@ let status: HttpHandler =
                 { ApplicationVersion = status.ApplicationVersion.ToString()
                   DatabaseVersion = status.DatabaseVersion.ToString() }
             
-            return! json jsonStatus finish ctx
+            return! json jsonStatus earlyReturn ctx
         }
+
+let handle: HttpHandler =
+    choose [
+        GET >=> route "" >=> status
+    ]
