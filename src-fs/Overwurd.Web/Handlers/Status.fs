@@ -28,5 +28,5 @@ let private status: HttpHandler =
 
 let handle: HttpHandler =
     choose [
-        GET >=> route "" >=> status
+        GET >=> route "/api/status" >=> status
     ]
