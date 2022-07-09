@@ -18,6 +18,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Don't publish the SPA source files, but do show them in the project files list -->
+    <Content Remove="$(SpaRoot)**" />
+    <None Remove="$(SpaRoot)**" />
+    <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="Common\Configuration.fs" />
     <Compile Include="Common\Utils.fs" />
     <Compile Include="Common\HttpContextExtensions.fs" />
@@ -34,13 +41,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Overwurd.Domain\Overwurd.Domain.fsproj" />
     <ProjectReference Include="..\Overwurd.Infrastructure\Overwurd.Infrastructure.fsproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <!-- Don't publish the SPA source files, but do show them in the project files list -->
-    <Content Remove="$(SpaRoot)**" />
-    <None Remove="$(SpaRoot)**" />
-    <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
