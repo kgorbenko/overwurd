@@ -7,10 +7,11 @@ RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - \
 WORKDIR /src
 COPY *.props .
 COPY *.sln .
-COPY Overwurd.Web/Overwurd.Web.csproj Overwurd.Web/
-COPY Overwurd.Web.Tests/Overwurd.Web.Tests.csproj Overwurd.Web.Tests/
-COPY Overwurd.Model/Overwurd.Model.csproj Overwurd.Model/
-COPY Overwurd.Model.Tests/Overwurd.Model.Tests.csproj Overwurd.Model.Tests/
+COPY Overwurd.Domain/Overwurd.Domain.fsproj Overwurd.Domain/
+COPY Overwurd.Domain.Tests/Overwurd.Domain.Tests.fsproj Overwurd.Domain.Tests/
+COPY Overwurd.Infrastructure/Overwurd.Infrastructure.fsproj Overwurd.Infrastructure/
+COPY Overwurd.Infrastructure.Tests/Overwurd.Infrastructure.Tests.fsproj Overwurd.Infrastructure.Tests/
+COPY Overwurd.Web/Overwurd.Web.fsproj Overwurd.Web/
 RUN dotnet restore
 
 COPY . .
