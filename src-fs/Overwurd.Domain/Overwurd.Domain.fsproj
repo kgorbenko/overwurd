@@ -5,8 +5,30 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Common\AsyncResult.fs" />
+    <Compile Include="Common\Utils.fs" />
     <Compile Include="Common\Validation.fs" />
-    <Compile Include="Course.fs" />
+    <Compile Include="Common\Persistence.fs" />
+    <Compile Include="UtcDateTime.fs" />
+    <Compile Include="Users\Types.fs" />
+    <Compile Include="Users\Storage.fs" />
+    <Compile Include="Users\Entities.fs" />
+    <Compile Include="Users\Actions.fs" />
+    <Compile Include="Courses\Types.fs" />
+    <Compile Include="Courses\Entities.fs" />
+    <Compile Include="Jwt\Types.fs" />
+    <Compile Include="Jwt\Storage.fs" />
+    <Compile Include="Jwt\Entities.fs" />
+    <Compile Include="Jwt\Actions.fs" />
+    <Compile Include="Features\Status\Types.fs" />
+    <Compile Include="Features\Status\Workflows.fs" />
+    <Compile Include="Features\Authentication\Types.fs" />
+    <Compile Include="Features\Authentication\Workflows.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Konscious.Security.Cryptography.Argon2" Version="1.3.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.18.0" />
   </ItemGroup>
 
 </Project>

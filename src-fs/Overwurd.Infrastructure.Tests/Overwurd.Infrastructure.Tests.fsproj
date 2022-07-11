@@ -7,10 +7,12 @@
 
   <ItemGroup>
     <Content Include="appsettings.tests.json" CopyToOutputDirectory="Always" />
-    <Compile Include="Utils.fs" />
-    <Compile Include="Database.fs" />
-    <Compile Include="Common.fs" />
-    <Compile Include="Course.fs" />
+    <Compile Include="Common\Database.fs" />
+    <Compile Include="Common\Utils.fs" />
+    <Compile Include="Domain\Snapshot.fs" />
+    <Compile Include="Domain\DomainPersister.fs" />
+    <Compile Include="UserStorage.fs" />
+    <Compile Include="JwtRefreshTokenStorage.fs" />
   </ItemGroup>
 
   <ItemGroup>
