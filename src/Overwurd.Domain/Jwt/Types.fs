@@ -55,3 +55,6 @@ type RefreshError =
     | UserIdOrAccessTokenIdClaimsAreMissing
     | RefreshTokenNotFound
     | RefreshTokenNotValid
+
+type GenerateGuid =
+    unit -> Guid

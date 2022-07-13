@@ -1,7 +1,6 @@
-﻿module Overwurd.Domain.Jwt.Actions
+﻿module internal Overwurd.Domain.Jwt.Actions
 
 open System
-open System.Text
 open System.Security.Claims
 open System.Threading.Tasks
 open System.IdentityModel.Tokens.Jwt
@@ -10,20 +9,15 @@ open Microsoft.IdentityModel.Tokens
 open Overwurd.Domain.Jwt
 open Overwurd.Domain.Users
 open Overwurd.Domain.Common
+open Overwurd.Domain.Common.Utils
 open Overwurd.Domain.Jwt.Entities
 open Overwurd.Domain.Users.Entities
 open Overwurd.Domain.Common.Persistence
-
-type GenerateGuid =
-    unit -> Guid
 
 type Dependencies =
     { GenerateGuid: GenerateGuid
       JwtConfiguration: JwtConfiguration
       JwtStorage: JwtStorage }
-
-let getBytesFromSigningKey (key: string) =
-    Encoding.UTF8.GetBytes key
 
 let private createAccessToken (jwtConfiguration: JwtConfiguration)
                               (tokenId: Guid)
@@ -41,7 +35,7 @@ let private createAccessToken (jwtConfiguration: JwtConfiguration)
         claims = defaultClaims @ claims,
         expires = now.AddMinutes jwtConfiguration.TokensConfiguration.AccessTokenExpirationInMinutes,
         signingCredentials = SigningCredentials(
-            key = SymmetricSecurityKey(getBytesFromSigningKey jwtConfiguration.TokensConfiguration.SigningKey),
+            key = SymmetricSecurityKey(toBytes jwtConfiguration.TokensConfiguration.SigningKey),
             algorithm = jwtConfiguration.TokensConfiguration.SecurityAlgorithmSignature
         )
     )
