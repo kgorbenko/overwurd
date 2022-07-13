@@ -2,11 +2,6 @@
 
 open System
 
-let ensureUtc (dateTime: DateTime): DateTime =
-    match dateTime.Kind with
-    | DateTimeKind.Utc -> dateTime
-    | _ -> raise (InvalidOperationException "Only UTC dates are allowed.")
-
 let tryParseInt (value: string): int Option =
     match Int32.TryParse value with
     | true, value -> Some value
