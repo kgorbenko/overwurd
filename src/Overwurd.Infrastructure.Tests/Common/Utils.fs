@@ -18,7 +18,7 @@ let private getConnectionString () =
             .AddEnvironmentVariables()
             .Build()
 
-    configuration.GetConnectionString("Default")
+    configuration.GetConnectionString("DefaultTest")
 
 let withConnectionAsync (queryAsync: DbSession -> 'a Task): 'a Task =
     task {
