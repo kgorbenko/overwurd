@@ -21,8 +21,4 @@
     <PackageReference Include="Npgsql" Version="6.0.4" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Overwurd.Domain\Overwurd.Domain.fsproj" />
-  </ItemGroup>
-
 </Project>

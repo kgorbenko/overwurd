@@ -40,7 +40,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Overwurd.Domain\Overwurd.Domain.fsproj" />
-    <ProjectReference Include="..\Overwurd.DataAccess\Overwurd.DataAccess.fsproj" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
