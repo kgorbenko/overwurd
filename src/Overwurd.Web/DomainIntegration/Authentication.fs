@@ -3,7 +3,7 @@
 open System.Data
 open System.Threading
 open Microsoft.AspNetCore.Http
-open Overwurd.Domain
+open Overwurd.Domain.Common
 open Overwurd.Domain.Features.Authentication
 open Overwurd.Domain.Jwt
 open Overwurd.Web.DomainIntegration.Common

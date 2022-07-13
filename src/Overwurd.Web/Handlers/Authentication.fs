@@ -5,7 +5,7 @@ open Giraffe
 open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.Logging
 
-open Overwurd.Domain
+open Overwurd.Domain.Common
 open Overwurd.Domain.Jwt
 open Overwurd.Domain.Users.Entities
 open Overwurd.Domain.Features.Authentication

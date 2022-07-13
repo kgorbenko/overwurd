@@ -7,7 +7,6 @@ open System.Threading.Tasks
 open System.IdentityModel.Tokens.Jwt
 open Microsoft.IdentityModel.Tokens
 
-open Overwurd.Domain
 open Overwurd.Domain.Jwt
 open Overwurd.Domain.Users
 open Overwurd.Domain.Common

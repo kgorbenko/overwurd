@@ -1,6 +1,6 @@
 ﻿namespace Overwurd.Domain.Users
 
-open Overwurd.Domain
+open Overwurd.Domain.Common
 
 type UserId =
     UserId of int

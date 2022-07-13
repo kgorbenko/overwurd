@@ -3,7 +3,7 @@
 open System
 open System.Threading.Tasks
 
-open Overwurd.Domain
+open Overwurd.Domain.Common
 open Overwurd.Domain.Users
 open Overwurd.Domain.Common.Persistence
 

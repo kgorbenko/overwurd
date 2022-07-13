@@ -4,7 +4,7 @@ open System
 open NUnit.Framework
 open FsUnit
 
-open Overwurd.Domain
+open Overwurd.Domain.Common
 open Overwurd.Domain.Users
 open Overwurd.Domain.Users.Entities
 open Overwurd.Infrastructure

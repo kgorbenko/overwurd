@@ -3,7 +3,7 @@
 open System
 open Microsoft.IdentityModel.Tokens
 
-open Overwurd.Domain
+open Overwurd.Domain.Common
 open Overwurd.Domain.Users
 
 type JwtRefreshTokenId =
