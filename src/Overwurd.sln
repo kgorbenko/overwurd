@@ -15,6 +15,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Root", "Root", "{D8BDA63D-8
 		.gitignore = .gitignore
 		Directory.Build.props = Directory.Build.props
 		dotnet-tools.json = dotnet-tools.json
+		.dockerignore = .dockerignore
+		Dockerfile = Dockerfile
+		global.json = global.json
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Github", "Github", "{4B2A90D2-DB37-436E-BA85-E5398BA8D30D}"
+	ProjectSection(SolutionItems) = preProject
+		..\.github\workflows\build-and-test-client-side.yml = ..\.github\workflows\build-and-test-client-side.yml
+		..\.github\workflows\build-and-test-dotnet.yml = ..\.github\workflows\build-and-test-dotnet.yml
+		..\.github\workflows\deploy.yml = ..\.github\workflows\deploy.yml
 	EndProjectSection
 EndProject
 Global
