@@ -1,4 +1,4 @@
-﻿module Overwurd.Domain.Jwt.Actions
+﻿module internal Overwurd.Domain.Jwt.Actions
 
 open System
 open System.Text

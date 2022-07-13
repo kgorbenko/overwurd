@@ -1,4 +1,4 @@
-﻿module Overwurd.Domain.Users.Actions
+﻿module internal Overwurd.Domain.Users.Actions
 
 open System
 open System.Threading.Tasks
