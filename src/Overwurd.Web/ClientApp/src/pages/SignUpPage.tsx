@@ -1,11 +1,12 @@
 import * as React from 'react';
 import dayjs from 'dayjs';
 import { Button, TextField, Link } from '@mui/material';
-import { Link as RouterLink, useLocation } from 'react-router-dom';
+import { Link as RouterLink } from 'react-router-dom';
 import { ISignInResult, useAuth } from '../hooks/UseAuth';
 import { AuthFormProcessor, IValidationResult } from '../components/AuthFormProcessor';
 import { ISignUpParameters } from '../services/AuthService';
 import { AuthRegionRoutes } from '../AuthRegion';
+import { useLocation } from '../hooks/UseLocation';
 
 interface ISignUpData {
     login: string;
@@ -14,7 +15,7 @@ interface ISignUpData {
 }
 
 interface ISignInProps {
-    defaultRedirectPath?: string;
+    defaultRedirectPath: string;
 }
 
 export const SignUpPage: React.FunctionComponent<ISignInProps> =
