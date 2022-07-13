@@ -14,9 +14,6 @@ open Overwurd.Domain.Jwt.Entities
 open Overwurd.Domain.Users.Entities
 open Overwurd.Domain.Common.Persistence
 
-type GenerateGuid =
-    unit -> Guid
-
 type Dependencies =
     { GenerateGuid: GenerateGuid
       JwtConfiguration: JwtConfiguration
