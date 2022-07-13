@@ -2,7 +2,7 @@
 
 open System.Threading.Tasks
 
-open Overwurd.Domain
+open Overwurd.Domain.Common
 open Overwurd.Domain.Common.Persistence
 
 type UserCreationParameters =

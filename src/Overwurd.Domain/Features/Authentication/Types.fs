@@ -1,6 +1,6 @@
 ﻿namespace Overwurd.Domain.Features.Authentication
 
-open Overwurd.Domain
+open Overwurd.Domain.Common
 open Overwurd.Domain.Jwt
 open Overwurd.Domain.Users
 open Overwurd.Domain.Common.Validation

@@ -1,6 +1,6 @@
 ﻿namespace Overwurd.Domain.Courses
 
-open Overwurd.Domain
+open Overwurd.Domain.Common
 open Overwurd.Domain.Users
 
 type CourseId =

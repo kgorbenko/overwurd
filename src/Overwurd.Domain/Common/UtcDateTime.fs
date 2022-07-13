@@ -1,4 +1,4 @@
-﻿namespace Overwurd.Domain
+﻿namespace Overwurd.Domain.Common
 
 open System
 open Overwurd.Domain.Common.Utils

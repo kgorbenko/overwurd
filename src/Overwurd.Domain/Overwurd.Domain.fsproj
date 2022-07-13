@@ -9,7 +9,7 @@
     <Compile Include="Common\Utils.fs" />
     <Compile Include="Common\Validation.fs" />
     <Compile Include="Common\Persistence.fs" />
-    <Compile Include="UtcDateTime.fs" />
+    <Compile Include="Common\UtcDateTime.fs" />
     <Compile Include="Users\Types.fs" />
     <Compile Include="Users\Storage.fs" />
     <Compile Include="Users\Entities.fs" />

@@ -2,7 +2,7 @@
 
 open System
 
-open Overwurd.Domain
+open Overwurd.Domain.Common
 open Overwurd.Domain.Common.Persistence
 open Overwurd.Domain.Users
 open Overwurd.Domain.Users.Entities
