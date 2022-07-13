@@ -1,4 +1,4 @@
-﻿module Overwurd.Infrastructure.Database.Dapper
+﻿module Overwurd.DataAccess.Database.Dapper
 
 open Dapper
 open System

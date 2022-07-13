@@ -7,7 +7,7 @@ open Giraffe
 open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.Configuration
 
-open Overwurd.Infrastructure.Database
+open Overwurd.DataAccess.Database
 
 let getConnectionString (ctx: HttpContext): string =
     let configuration = ctx.GetService<IConfiguration> ()

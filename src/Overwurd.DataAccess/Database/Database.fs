@@ -1,4 +1,4 @@
-﻿namespace Overwurd.Infrastructure.Database
+﻿namespace Overwurd.DataAccess.Database
 
 open System.Data
 open System.Threading.Tasks

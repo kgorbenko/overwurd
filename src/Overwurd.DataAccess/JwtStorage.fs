@@ -1,4 +1,4 @@
-﻿module Overwurd.Infrastructure.JwtStorage
+﻿module Overwurd.DataAccess.JwtStorage
 
 open System
 
@@ -8,7 +8,7 @@ open Overwurd.Domain.Users
 open Overwurd.Domain.Users.Entities
 open Overwurd.Domain.Jwt
 open Overwurd.Domain.Jwt.Entities
-open Overwurd.Infrastructure.Database.Dapper
+open Overwurd.DataAccess.Database.Dapper
 
 type internal JwtRefreshTokenPersistentModel =
     { Id: int

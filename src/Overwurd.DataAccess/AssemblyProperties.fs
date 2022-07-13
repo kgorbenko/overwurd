@@ -1,7 +1,7 @@
-﻿module Overwurd.Infrastructure.AssemblyProperties
+﻿module Overwurd.DataAccess.AssemblyProperties
 
 open System.Runtime.CompilerServices
 
-[<assembly: InternalsVisibleTo("Overwurd.Infrastructure.Tests")>]
+[<assembly: InternalsVisibleTo("Overwurd.DataAccess.Tests")>]
 
 ()

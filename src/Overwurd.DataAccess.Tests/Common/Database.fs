@@ -1,4 +1,4 @@
-﻿module internal Overwurd.Infrastructure.Tests.Common.Database
+﻿module internal Overwurd.DataAccess.Tests.Common.Database
 
 open Dapper
 open System.Threading.Tasks
@@ -9,8 +9,8 @@ open Overwurd.Domain.Jwt
 open Overwurd.Domain.Users
 open Overwurd.Domain.Users.Entities
 open Overwurd.Domain.Jwt.Entities
-open Overwurd.Infrastructure.UserStorage
-open Overwurd.Infrastructure.JwtStorage
+open Overwurd.DataAccess.UserStorage
+open Overwurd.DataAccess.JwtStorage
 
 let clearAsync (session: DbSession): unit Task =
     task {

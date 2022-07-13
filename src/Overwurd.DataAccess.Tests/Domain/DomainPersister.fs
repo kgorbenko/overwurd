@@ -1,12 +1,12 @@
-﻿module Overwurd.Infrastructure.Tests.Domain.DomainPersister
+﻿module Overwurd.DataAccess.Tests.Domain.DomainPersister
 
 open System.Threading.Tasks
 
 open Overwurd.Domain.Common.Persistence
 open Overwurd.Domain.Jwt
 open Overwurd.Domain.Users
-open Overwurd.Infrastructure.Tests.Common
-open Overwurd.Infrastructure.Tests.Domain
+open Overwurd.DataAccess.Tests.Common
+open Overwurd.DataAccess.Tests.Domain
 
 let private ensureTransient =
     function
