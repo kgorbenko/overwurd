@@ -5,7 +5,6 @@ open System
 open Microsoft.AspNetCore.Http
 
 open Overwurd.Domain.Jwt
-open Overwurd.Domain.Jwt.Actions
 open Overwurd.Domain.Users
 open Overwurd.Web.Common
 open Overwurd.Web.Common.Configuration
