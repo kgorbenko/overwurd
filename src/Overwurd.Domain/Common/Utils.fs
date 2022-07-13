@@ -1,6 +1,7 @@
-﻿module internal Overwurd.Domain.Common.Utils
+﻿module Overwurd.Domain.Common.Utils
 
 open System
+open System.Text
 
 let tryParseInt (value: string): int Option =
     match Int32.TryParse value with
@@ -14,3 +15,6 @@ let parseInt (value: string): int =
 
 let toUpperCase (value: string): string =
     value.ToUpperInvariant()
+
+let toBytes (key: string) =
+    Encoding.UTF8.GetBytes key

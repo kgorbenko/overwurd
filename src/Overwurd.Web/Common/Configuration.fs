@@ -6,7 +6,7 @@ open Microsoft.Extensions.Configuration
 open Microsoft.IdentityModel.Tokens
 
 open Overwurd.Domain.Jwt
-open Overwurd.Domain.Jwt.Actions
+open Overwurd.Domain.Common.Utils
 
 type AppConfig =
     { Jwt: TokensConfig }
@@ -55,7 +55,7 @@ let getValidationParameters (configuration: IConfiguration): TokenValidationPara
         ValidateIssuer = true,
         ValidIssuer = tokensConfiguration.Issuer,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = SymmetricSecurityKey(getBytesFromSigningKey tokensConfiguration.SigningKey),
+        IssuerSigningKey = SymmetricSecurityKey(toBytes tokensConfiguration.SigningKey),
         ValidateAudience = true,
         ValidAudience = tokensConfiguration.Audience,
         RequireExpirationTime = true,
