@@ -25,7 +25,7 @@ RUN dotnet test -c Release --no-build
 
 FROM test AS publish
 WORKDIR /src
-RUN dotnet publish Overwurd.Web/Overwurd.Web.csproj -c Release -o /publish --no-build
+RUN dotnet publish Overwurd.Web/Overwurd.Web.fsproj -c Release -o /publish --no-build
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS run
 WORKDIR /app
