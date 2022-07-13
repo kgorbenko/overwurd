@@ -8,8 +8,8 @@ open Overwurd.Domain.Jwt
 open Overwurd.Domain.Users
 open Overwurd.Web.Common
 open Overwurd.Web.Common.Configuration
-open Overwurd.Infrastructure.UserStorage
-open Overwurd.Infrastructure.JwtStorage
+open Overwurd.DataAccess.UserStorage
+open Overwurd.DataAccess.JwtStorage
 open Overwurd.Domain.Features.Authentication.Workflows
 
 let generateGuid: GenerateGuid =

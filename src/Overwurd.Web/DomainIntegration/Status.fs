@@ -5,7 +5,7 @@ open System.Threading
 open System.Threading.Tasks
 open Overwurd.Domain.Features.Status
 open Overwurd.Domain.Features.Status.Workflows
-open Overwurd.Infrastructure.Database
+open Overwurd.DataAccess.Database
 
 let getApplicationStatus
     (cancellationToken: CancellationToken)

@@ -1,4 +1,4 @@
-﻿module Overwurd.Infrastructure.Tests.JwtStorage
+﻿module Overwurd.DataAccess.Tests.JwtStorage
 
 open System
 open NUnit.Framework
@@ -9,12 +9,12 @@ open Overwurd.Domain.Users
 open Overwurd.Domain.Users.Entities
 open Overwurd.Domain.Jwt
 open Overwurd.Domain.Jwt.Entities
-open Overwurd.Infrastructure
-open Overwurd.Infrastructure.Tests.Domain
-open Overwurd.Infrastructure.Tests.Common
-open Overwurd.Infrastructure.Tests.Domain.Building
-open Overwurd.Infrastructure.Tests.Common.Utils
-open Overwurd.Infrastructure.JwtStorage
+open Overwurd.DataAccess
+open Overwurd.DataAccess.Tests.Domain
+open Overwurd.DataAccess.Tests.Common
+open Overwurd.DataAccess.Tests.Domain.Building
+open Overwurd.DataAccess.Tests.Common.Utils
+open Overwurd.DataAccess.JwtStorage
 
 let unwrap (userId: UserId option): UserId =
     match userId with

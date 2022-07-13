@@ -1,4 +1,4 @@
-﻿namespace Overwurd.Infrastructure.Tests.Domain
+﻿namespace Overwurd.DataAccess.Tests.Domain
 
 open System
 

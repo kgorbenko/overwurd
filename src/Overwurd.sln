@@ -2,11 +2,11 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Overwurd.Domain", "Overwurd.Domain\Overwurd.Domain.fsproj", "{75A56F18-A36A-4062-80ED-DA0F37B52F1B}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Overwurd.Infrastructure", "Overwurd.Infrastructure\Overwurd.Infrastructure.fsproj", "{D60DF2B2-3CAE-4590-87BC-FB045E245103}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Overwurd.DataAccess", "Overwurd.DataAccess\Overwurd.DataAccess.fsproj", "{D60DF2B2-3CAE-4590-87BC-FB045E245103}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Overwurd.Web", "Overwurd.Web\Overwurd.Web.fsproj", "{F0A6985F-3837-47B2-80A9-CA56CF476828}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Overwurd.Infrastructure.Tests", "Overwurd.Infrastructure.Tests\Overwurd.Infrastructure.Tests.fsproj", "{2CA64E5D-BA80-4846-8F23-EA7047564B37}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Overwurd.DataAccess.Tests", "Overwurd.DataAccess.Tests\Overwurd.DataAccess.Tests.fsproj", "{2CA64E5D-BA80-4846-8F23-EA7047564B37}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Overwurd.Domain.Tests", "Overwurd.Domain.Tests\Overwurd.Domain.Tests.fsproj", "{A81294D8-8D61-42AD-A85A-56C189E27EBC}"
 EndProject

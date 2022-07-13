@@ -13,7 +13,7 @@ open Microsoft.Extensions.DependencyInjection
 open Microsoft.AspNetCore.Authentication.JwtBearer
 open Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 
-open Overwurd.Infrastructure.Database
+open Overwurd.DataAccess.Database
 open Overwurd.Web.Common.Configuration
 open Overwurd.Web.WebApp
 

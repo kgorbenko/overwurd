@@ -1,14 +1,14 @@
-﻿module Overwurd.Infrastructure.Tests.Common.Utils
+﻿module Overwurd.DataAccess.Tests.Common.Utils
 
 open System.Threading
 open Microsoft.Extensions.Configuration
 open NUnit.Framework
 open Npgsql
 
-open Overwurd.Infrastructure.Database
+open Overwurd.DataAccess.Database
 open System.Threading.Tasks
 open Overwurd.Domain.Common.Persistence
-open Overwurd.Infrastructure.Tests.Common.Database
+open Overwurd.DataAccess.Tests.Common.Database
 
 let private getConnectionString () =
     let configuration =

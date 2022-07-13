@@ -1,4 +1,4 @@
-﻿module Overwurd.Infrastructure.Tests.UserStorage
+﻿module Overwurd.DataAccess.Tests.UserStorage
 
 open System
 open NUnit.Framework
@@ -7,12 +7,12 @@ open FsUnit
 open Overwurd.Domain.Common
 open Overwurd.Domain.Users
 open Overwurd.Domain.Users.Entities
-open Overwurd.Infrastructure
-open Overwurd.Infrastructure.Tests.Domain
-open Overwurd.Infrastructure.Tests.Domain.Building
-open Overwurd.Infrastructure.Tests.Common
-open Overwurd.Infrastructure.Tests.Common.Utils
-open Overwurd.Infrastructure.UserStorage
+open Overwurd.DataAccess
+open Overwurd.DataAccess.Tests.Domain
+open Overwurd.DataAccess.Tests.Domain.Building
+open Overwurd.DataAccess.Tests.Common
+open Overwurd.DataAccess.Tests.Common.Utils
+open Overwurd.DataAccess.UserStorage
 
 let unwrap (userId: UserId option): UserId =
     match userId with

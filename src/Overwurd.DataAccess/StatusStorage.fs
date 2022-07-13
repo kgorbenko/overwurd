@@ -1,10 +1,10 @@
-﻿module Overwurd.Infrastructure.Database.StatusStorage
+﻿module Overwurd.DataAccess.Database.StatusStorage
 
 open System
 
 open Overwurd.Domain.Common.Persistence
 open Overwurd.Domain.Features.Status.Workflows
-open Overwurd.Infrastructure.Database.Dapper
+open Overwurd.DataAccess.Database.Dapper
 
 let getDatabaseVersionAsync: GetDatabaseVersionAsync =
     fun (session: DbSession) ->

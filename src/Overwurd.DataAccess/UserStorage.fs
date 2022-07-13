@@ -1,11 +1,11 @@
-﻿module Overwurd.Infrastructure.UserStorage
+﻿module Overwurd.DataAccess.UserStorage
 
 open System
 
 open Overwurd.Domain.Common
 open Overwurd.Domain.Users
 open Overwurd.Domain.Users.Entities
-open Overwurd.Infrastructure.Database.Dapper
+open Overwurd.DataAccess.Database.Dapper
 open Overwurd.Domain.Common.Persistence
 
 type internal UserPersistentModel =
